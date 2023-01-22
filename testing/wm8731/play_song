@@ -1,0 +1,3 @@
+#!/bin/bash
+
+aplay -D plughw test.wav
