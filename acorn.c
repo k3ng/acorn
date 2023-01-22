@@ -193,7 +193,7 @@ int change_setting_int(char *name, int value){
 // ---------------------------------------------------------------------------------------
 
 
-int sbitx_process_lock(int action){
+int process_lock(int action){
 
   // if action is OPEN_LOCK
   //   0 is returned if there is a process already locking  
@@ -215,7 +215,7 @@ int sbitx_process_lock(int action){
 
     if (fd == -1){
       // we got some sort of problem, just return 1
-      fprintf(stderr,"sbitx_process_lock: Issue with lock file: Error:%d\r\n",errno);
+      fprintf(stderr,"process_lock: Issue with lock file: Error:%d\r\n",errno);
       return 1;
     }
 
@@ -244,7 +244,7 @@ int sbitx_process_lock(int action){
     return -1;
   }
 
-} //sbitx_process_lock()
+} //process_lock()
 
 
 // ---------------------------------------------------------------------------------------
@@ -313,7 +313,7 @@ int main(int argc, char* argv[]) {
 
 	puts(VERSION_STRING);
 
-	if (!sbitx_process_lock(OPEN_LOCK)){
+	if (!process_lock(OPEN_LOCK)){
 	  fprintf(stderr,"There is another sBitx running.  Exiting.\r\n");
 	  exit(1);
 	}
@@ -326,7 +326,7 @@ int main(int argc, char* argv[]) {
 
 
 
-	sbitx_process_lock(CLOSE_LOCK);
+	process_lock(CLOSE_LOCK);
   
   return 0;
 

@@ -1,8 +1,8 @@
 /* 
 
-This file is from the sBitx by VU2ESE
+This file is from the sBitx by VU2ESE and is modified to test the WM8731 audio codec.
 
-This ollows the tutorial at http://alsamodular.sourceforge.net/alsa_programming_howto.html
+This follows the tutorial at http://alsamodular.sourceforge.net/alsa_programming_howto.html
 
 
 	We are using 4 bytes per sample, 
@@ -202,21 +202,21 @@ int sound_start_play(char *device){
 	e = snd_pcm_hw_params_any(pcm_play_handle, hwparams);
 
 	if (e < 0) {
-		fprintf(stderr, "*Error getting hw playback params (%d)\n", e);
+		fprintf(stderr, "Error getting hw playback params (%d)\n", e);
 		return(-1);
 	}
 
 	// set the pcm access to interleaved
 	e = snd_pcm_hw_params_set_access(pcm_play_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting playback access.\n");
+		fprintf(stderr, "Error setting playback access.\n");
 		return(-1);
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(pcm_play_handle, hwparams, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting plyaback format.\n");
+		fprintf(stderr, "Error setting plyaback format.\n");
 		return(-1);
 	}
 
@@ -237,7 +237,7 @@ int sound_start_play(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(pcm_play_handle, hwparams, 2)) < 0) {
-		fprintf(stderr, "*Error setting playback channels.\n");
+		fprintf(stderr, "Error setting playback channels.\n");
 		return(-1);
 	}
 
@@ -246,7 +246,7 @@ int sound_start_play(char *device){
 	// period = frames transfered at a time (160 for voip, etc.)
 	// we use two periods per buffer.
 	if ((e = snd_pcm_hw_params_set_periods(pcm_play_handle, hwparams, n_periods_per_buffer, 0)) < 0) {
-		fprintf(stderr, "*Error setting playback periods.\n");
+		fprintf(stderr, "Error setting playback periods.\n");
 		return(-1);
 	}
 
@@ -256,12 +256,12 @@ int sound_start_play(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(pcm_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    fprintf(stderr, "*Error setting playback buffersize.\n");
+		    fprintf(stderr, "Error setting playback buffersize.\n");
 		    return(-1);
 	}
 
 	if (snd_pcm_hw_params(pcm_play_handle, hwparams) < 0) {
-		fprintf(stderr, "*Error setting playback HW params.\n");
+		fprintf(stderr, "Error setting playback HW params.\n");
 		return(-1);
 	}
 //	puts("All hw params set to play sound");
@@ -284,20 +284,20 @@ int sound_start_loopback_capture(char *device){
 	e = snd_pcm_hw_params_any(loopback_capture_handle, hloop_params);
 
 	if (e < 0) {
-		fprintf(stderr, "*Error setting capture access (%d)\n", e);
+		fprintf(stderr, "Error setting capture access (%d)\n", e);
 		return(-1);
 	}
 
 	e = snd_pcm_hw_params_set_access(loopback_capture_handle, hloop_params, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting capture access.\n");
+		fprintf(stderr, "Error setting capture access.\n");
 		return(-1);
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(loopback_capture_handle, hloop_params, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting loopback capture format.\n");
+		fprintf(stderr, "Error setting loopback capture format.\n");
 		return(-1);
 	}
 
@@ -307,7 +307,7 @@ int sound_start_loopback_capture(char *device){
 	//printf("Setting loopback capture rate to %d\n", exact_rate);
 	e = snd_pcm_hw_params_set_rate_near(loopback_capture_handle, hloop_params, &exact_rate, 0);
 	if ( e< 0) {
-		fprintf(stderr, "*Error setting loopback capture rate.\n");
+		fprintf(stderr, "Error setting loopback capture rate.\n");
 		return(-1);
 	}
 
@@ -316,14 +316,14 @@ int sound_start_loopback_capture(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(loopback_capture_handle, hloop_params, 2)) < 0) {
-		fprintf(stderr, "*Error setting loopback capture channels.\n");
+		fprintf(stderr, "Error setting loopback capture channels.\n");
 		return(-1);
 	}
 
 	//printf("%d: set the #channels\n", __LINE__, 2);
 	/* Set number of periods. Periods used to be called fragments. */ 
 	if ((e = snd_pcm_hw_params_set_periods(loopback_capture_handle, hloop_params, n_periods_per_buffer, 0)) < 0) {
-		fprintf(stderr, "*Error setting loopback capture periods.\n");
+		fprintf(stderr, "Error setting loopback capture periods.\n");
 		return(-1);
 	}
 
@@ -332,13 +332,13 @@ int sound_start_loopback_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(loopback_capture_handle, hloop_params, &n_frames);
 	if (e < 0) {
-		    fprintf(stderr, "*Error setting loopback capture buffersize.\n");
+		    fprintf(stderr, "Error setting loopback capture buffersize.\n");
 		    return(-1);
 	}
 
 	//printf("%d: set buffer to \n", __LINE__, n_frames);
 	if (snd_pcm_hw_params(loopback_capture_handle, hloop_params) < 0) {
-		fprintf(stderr, "*Error setting capture HW params.\n");
+		fprintf(stderr, "Error setting capture HW params.\n");
 		return(-1);
 	}
 
@@ -384,20 +384,20 @@ int sound_start_capture(char *device){
 	e = snd_pcm_hw_params_any(pcm_capture_handle, hwparams);
 
 	if (e < 0) {
-		fprintf(stderr, "*Error setting capture access (%d)\n", e);
+		fprintf(stderr, "Error setting capture access (%d)\n", e);
 		return(-1);
 	}
 
 	e = snd_pcm_hw_params_set_access(pcm_capture_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting capture access.\n");
+		fprintf(stderr, "Error setting capture access.\n");
 		return(-1);
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(pcm_capture_handle, hwparams, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting capture format.\n");
+		fprintf(stderr, "Error setting capture format.\n");
 		return(-1);
 	}
 
@@ -407,7 +407,7 @@ int sound_start_capture(char *device){
 	exact_rate = rate;
 	e = snd_pcm_hw_params_set_rate_near(pcm_capture_handle, hwparams, &exact_rate, 0);
 	if ( e< 0) {
-		fprintf(stderr, "*Error setting capture rate.\n");
+		fprintf(stderr, "Error setting capture rate.\n");
 		return(-1);
 	}
 
@@ -417,14 +417,14 @@ int sound_start_capture(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(pcm_capture_handle, hwparams, 2)) < 0) {
-		fprintf(stderr, "*Error setting capture channels.\n");
+		fprintf(stderr, "Error setting capture channels.\n");
 		return(-1);
 	}
 
 
 	/* Set number of periods. Periods used to be called fragments. */ 
 	if ((e = snd_pcm_hw_params_set_periods(pcm_capture_handle, hwparams, n_periods_per_buffer, 0)) < 0) {
-		fprintf(stderr, "*Error setting capture periods.\n");
+		fprintf(stderr, "Error setting capture periods.\n");
 		return(-1);
 	}
 
@@ -434,12 +434,12 @@ int sound_start_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(pcm_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    fprintf(stderr, "*Error setting capture buffersize.\n");
+		    fprintf(stderr, "Error setting capture buffersize.\n");
 		    return(-1);
 	}
 
 	if (snd_pcm_hw_params(pcm_capture_handle, hwparams) < 0) {
-		fprintf(stderr, "*Error setting capture HW params.\n");
+		fprintf(stderr, "Error setting capture HW params.\n");
 		return(-1);
 	}
 
@@ -462,20 +462,20 @@ int sound_start_loopback_play(char *device){
 	e = snd_pcm_hw_params_any(loopback_play_handle, hwparams);
 
 	if (e < 0) {
-		fprintf(stderr, "*Error getting loopback playback params (%d)\n", e);
+		fprintf(stderr, "Error getting loopback playback params (%d)\n", e);
 		return(-1);
 	}
 
 	e = snd_pcm_hw_params_set_access(loopback_play_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting loopback access.\n");
+		fprintf(stderr, "Error setting loopback access.\n");
 		return(-1);
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(loopback_play_handle, hwparams, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		fprintf(stderr, "*Error setting loopback format.\n");
+		fprintf(stderr, "Error setting loopback format.\n");
 		return(-1);
 	}
 
@@ -493,7 +493,7 @@ int sound_start_loopback_play(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(loopback_play_handle, hwparams, 2)) < 0) {
-		fprintf(stderr, "*Error setting playback channels.\n");
+		fprintf(stderr, "Error setting playback channels.\n");
 		return(-1);
 	}
 
@@ -502,7 +502,7 @@ int sound_start_loopback_play(char *device){
 	// period = frames transfered at a time (160 for voip, etc.)
 	// we use two periods per buffer.
 	if ((e = snd_pcm_hw_params_set_periods(loopback_play_handle, hwparams, 8, 0)) < 0) {
-		fprintf(stderr, "*Error setting playback periods.\n");
+		fprintf(stderr, "Error setting playback periods.\n");
 		return(-1);
 	}
 
@@ -514,14 +514,14 @@ int sound_start_loopback_play(char *device){
 	//printf("trying for loopback buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(loopback_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    fprintf(stderr, "*Error setting loopback playback buffersize.\n");
+		    fprintf(stderr, "Error setting loopback playback buffersize.\n");
 		    return(-1);
 	}
 
 	//printf("loopback playback buffer size is set to %d\n", n_frames);
 
 	if (snd_pcm_hw_params(loopback_play_handle, hwparams) < 0) {
-		fprintf(stderr, "*Error setting loopback playback HW params.\n");
+		fprintf(stderr, "Error setting loopback playback HW params.\n");
 		return(-1);
 	}
 
@@ -797,18 +797,18 @@ void *sound_thread_function(void *ptr){
 	pthread_setschedparam(sound_thread, SCHED_FIFO, &sch);
  	//printf("opening %s sound card\n", device);	
 	if (sound_start_play(device)){
-		fprintf(stderr, "*Error opening play device");
+		fprintf(stderr, "Error opening play device");
 		return NULL;
 	}
 
 	if (sound_start_capture(device)){
-		fprintf(stderr, "*Error opening capture device");
+		fprintf(stderr, "Error opening capture device");
 		return NULL;
 	}
 
 //  printf("opening loopback on plughw:1,0 sound card\n");	
 	if(sound_start_loopback_play(LOOPBACK_PLAY)){
-		fprintf(stderr, "*Error opening loopback play device");
+		fprintf(stderr, "Error opening loopback play device");
 		return NULL;
 	}
 	sound_thread_continue = 1;
@@ -826,7 +826,7 @@ void *loopback_thread_function(void *ptr){
 //  printf("opening loopback on plughw:1,0 sound card\n");	
 
 	if (sound_start_loopback_capture(LOOPBACK_CAPTURE)){
-		fprintf(stderr, "*Error opening loopback capture device");
+		fprintf(stderr, "Error opening loopback capture device");
 		return NULL;
 	}
 	sound_thread_continue = 1;
@@ -856,7 +856,7 @@ void sound_input(int loop){
 	}
 }
 
-//demo, uncomment it to test it out
+
 
 #if defined(TEST_STANDALONE_COMPILE)
 
