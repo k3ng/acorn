@@ -1,0 +1,4 @@
+#!/bin/bash
+
+make && sudo avrdude -c linuxgpio -p atmega328p -v -U flash:w:build-uno/acornarduino.hex:i
+
