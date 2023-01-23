@@ -5,6 +5,17 @@
   Based on works of Ashhar Farhan, VU2ESE and others
 
 
+
+  This is the core / backend of the system.  It provides a TCP listener on a port and takes commands from a GUI, human, etc.
+
+
+  command line parameters:
+
+  acorn
+
+    -d [#] : debug level 1-9; higher = more debugging messages
+
+
 */
 
 
@@ -18,9 +29,9 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <linux/limits.h>
+#include <complex.h>
+#include <fftw3.h>
 
-// #include <complex.h>
-// #include <fftw3.h>
 // #include <linux/fb.h>
 // #include <sys/types.h>
 // #include <stdint.h>
@@ -41,15 +52,13 @@
 
 #include "acorn.h"
 #include "ini.h"
+#include "sdr.h"
+#include "sound.h"
 
-// #include "sdr.h"
-// #include "sound.h"
-// #include "sdr_ui.h"
+
 // #include "hamlib.h"
 // #include "remote.h"
-// #include "remote.h"
 // #include "wsjtx.h"
-// #include "i2cbb.h"
 
 
 // ---------------------------------------------------------------------------------------
@@ -96,12 +105,27 @@ struct setting_struct setting[] =
 int debug_level = 0;
 char debug_text[64];
 
+// ---------------------------------------------------------------------------------------
+
+// used in modems.c
+
+char mycallsign[12];
+char mygrid[12];
+char current_macro[32];
+char contact_callsign[12];
+char contact_grid[10];
+char sent_rst[10];
+char received_rst[10];
+char sent_exchange[10];
+char received_exchange[10];
+int contest_serial = 0;
 
 
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
+
 
 
 int setting_change_handler_vfo(struct setting_struct *passed_setting, char *value){
@@ -302,6 +326,95 @@ void read_command_line_arguments(int argc, char* argv[]) {
 
 
 }
+
+// ---------------------------------------------------------------------------------------
+
+// these are dropped in to satisfy modems.c for the moment
+
+
+int get_tx_data_byte(char *c){
+  // //take out the first byte and return it to the modem
+  // struct field *f = get_field("#text_in");
+  // int length = strlen(f->value);
+
+  // if (f->value[0] == '\\' || !length)
+  //   return 0;
+  // if (length){
+  //   *c = f->value[0];
+  //   //now shift the buffer down, hopefully, this copies the trailing null too
+  //   for (int i = 0; i < length; i++)
+  //     f->value[i] = f->value[i+1];
+  // }
+  // return length;
+  // update_field(f);
+  // return *c;
+}
+
+int get_tx_data_length(){
+  // struct field *f = get_field("#text_in");
+
+  // if (strlen(f->value) == 0)
+  //   return 0;
+
+  // if (f->value[0] != COMMAND_ESCAPE)
+  //   return strlen(get_field("#text_in")->value);
+  // else
+  //   return 0;
+}
+
+int get_cw_delay(){
+ //return cw_delay;
+}
+
+int get_cw_input_method(){
+  //return cw_input_method;
+}
+
+int get_pitch(){
+  // struct field *f = get_field("#rx_pitch");
+  // return atoi(f->value);
+}
+
+int get_cw_tx_pitch(){
+  //return cw_tx_pitch;
+}
+
+int get_data_delay(){
+  //return data_delay;
+}
+
+int get_wpm(){
+  // struct field *f = get_field("#tx_wpm");
+  // return atoi(f->value);
+}
+
+int is_in_tx(){
+ // return in_tx;
+}
+
+int key_poll(){
+  // int key = 0;
+  
+  // if (digitalRead(PTT) == LOW)
+  //   key |= CW_DASH;
+  // if (digitalRead(DASH) == LOW)
+  //   key |= CW_DOT;
+
+  // //printf("key %d\n", key);
+  // return key;
+}
+
+void tx_on(){};
+void tx_off(){};
+
+time_t time_sbitx(){
+  // if (time_delta)
+  //   return  (millis()/1000l) + time_delta;
+  // else
+  //   return time(NULL);
+}
+
+
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -314,13 +427,22 @@ int main(int argc, char* argv[]) {
 	puts(VERSION_STRING);
 
 	if (!process_lock(OPEN_LOCK)){
-	  fprintf(stderr,"There is another sBitx running.  Exiting.\r\n");
+	  fprintf(stderr,"There is another Acorn running.  Exiting.\r\n");
 	  exit(1);
 	}
 
   read_ini_file_into_settings();
 
+/*  
 
+  // plan
+
+  initialize_hardware();
+
+  launch_telnet_server_thread();
+
+
+*/
 
 //change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
 

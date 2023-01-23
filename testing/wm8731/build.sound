@@ -1,3 +1,0 @@
-#!/bin/bash
-
-gcc -g -o sound sound.c queue.c -lasound -pthread

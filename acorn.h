@@ -1,5 +1,5 @@
 
-#if !defined(_sbitx_h_)
+#if !defined(_acorn_h_)
 
 #define _acorn_h_
 
@@ -18,5 +18,12 @@
 #define ACTION_UPDATE 0
 // #define ACTION_INCREMENT 1  // not implemented yet
 // #define ACTION_DECREMENT 2  // not implemented yet
+
+
+
+
+
+int is_in_tx();
+
 
 #endif //!defined(_acorn_h_)
