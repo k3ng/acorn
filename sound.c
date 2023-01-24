@@ -44,7 +44,19 @@ examples of using sound_mixer function:
 
 
 
+
+standalone test compilation (TEST_STANDALONE_COMPILE)
+
+(I couldn't get this to actually do anything on my test WM8731 setup or the sBitx - 2023-01-22 k3ng)
+
+compile with:
+
+gcc -g -o sound sound.c -lasound -pthread
+
+
 */
+
+//#define TEST_STANDALONE_COMPILE
 
 #include <stdio.h>
 #include <alsa/asoundlib.h>
@@ -56,15 +68,7 @@ examples of using sound_mixer function:
 #include "sound.h"
 
 
-/* standalone test compilation.  I couldn't get this to actually do anything on my test WM8731 setup or the sBitx - 2023-01-22 k3ng
 
-compile with:
-
-gcc -g -o sound sound.c queue.c -lasound -pthread
-
-#define TEST_STANDALONE_COMPILE
-
-*/
 
 #define LOOPBACK_CAPTURE "plughw:2,1"
 #define LOOPBACK_PLAY "plughw:1,0"
@@ -935,20 +939,20 @@ void sound_input(int loop){
 
 #if defined(TEST_STANDALONE_COMPILE)
 
-void sound_process(int32_t *input_i, int32_t *input_q, int32_t *output_i, int32_t *output_q, int n_samples){
- 
-	for (int i= 0; i < n_samples; i++){
-		output_i[i] = input_i[i];
-		output_q[i] = input_q[i];
-	}	
-}
+	void sound_process(int32_t *input_i, int32_t *input_q, int32_t *output_i, int32_t *output_q, int n_samples){
+	 
+		for (int i= 0; i < n_samples; i++){
+			output_i[i] = input_i[i];
+			output_q[i] = input_q[i];
+		}	
+	}
 
-void main(int argc, char **argv){
-	sound_thread_start(THREAD_START);
-	sleep(10);
-	sound_thread_stop();
-	sleep(10);
-}
+	void main(int argc, char **argv){
+		sound_thread_start(THREAD_START);
+		sleep(10);
+		sound_thread_stop();
+		sleep(10);
+	}
 
 #endif //defined(TEST_STANDALONE_COMPILE)
 

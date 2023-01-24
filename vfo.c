@@ -1,3 +1,20 @@
+
+/* 
+
+
+standalone test compilation (TEST_STANDALONE_COMPILE)
+
+compile with:
+
+gcc -g -o vfo vfo.c -lm
+
+
+
+*/
+
+//#define TEST_STANDALONE_COMPILE
+
+
 #include <math.h>
 #include <pthread.h>
 #include <time.h>
@@ -7,7 +24,20 @@
 #include <complex.h>
 #include <fftw3.h>
 #include <unistd.h>
-#include "sdr.h"
+
+#if defined(TEST_STANDALONE_COMPILE)
+  #define MAX_PHASE_COUNT (16385)
+
+  struct vfo {
+    int freq_hz;
+    int phase;
+    int phase_increment;
+  };
+
+  struct vfo v;
+#else
+  #include "sdr.h"
+#endif
 
 //we define one more than needed to cover the boundary of quadrature
 static int	phase_table[MAX_PHASE_COUNT];
@@ -44,16 +74,19 @@ int vfo_read(struct vfo *v){
 	return i;
 }
 
-/*
-void main(int argc, char **argv){
-	struct vfo v;
-	
-	vfo_init_phase_table();
+#if defined(TEST_STANDALONE_COMPILE)
 
-	vfo_start(&v, 1000, 0);
+  int main(int argc, char* argv[]) {
 
-	for (int i = 0; i < 100; i++)
-		printf("%d ", vfo_read(&v));
+  	
+  	vfo_init_phase_table();
 
-}
-*/
+  	vfo_start(&v, 1000, 0);
+
+  	for (int i = 0; i < 100; i++){
+  		printf("%d\r\n", vfo_read(&v));
+    }
+
+  }
+
+#endif //defined(TEST_STANDALONE_COMPILE)

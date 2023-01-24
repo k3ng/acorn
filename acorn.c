@@ -31,6 +31,8 @@
 #include <linux/limits.h>
 #include <complex.h>
 #include <fftw3.h>
+#include <wiringPi.h>
+#include <pthread.h>
 
 // #include <linux/fb.h>
 // #include <sys/types.h>
@@ -46,7 +48,6 @@
 // #include <netinet/in.h>
 // #include <arpa/inet.h>
 // #include <cairo.h>
-// #include <wiringPi.h>
 // #include <wiringSerial.h>
 // #include <sys/stat.h>
 
@@ -54,6 +55,7 @@
 #include "ini.h"
 #include "sdr.h"
 #include "sound.h"
+#include "tcpserver.h"
 
 
 // #include "hamlib.h"
@@ -105,6 +107,8 @@ struct setting_struct setting[] =
 int debug_level = 0;
 char debug_text[64];
 
+pthread_t tcpserver_thread;
+
 // ---------------------------------------------------------------------------------------
 
 // used in modems.c
@@ -126,6 +130,63 @@ int contest_serial = 0;
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 
+void initialize_hardware(){
+
+  // initialize the pins on the Pi
+
+  wiringPiSetup();
+
+  pinMode(PIN_PI_TX, OUTPUT);
+  digitalWrite(PIN_PI_TX, LOW);
+
+  pinMode(PIN_PI_BAND1, OUTPUT);
+  digitalWrite(PIN_PI_BAND1, LOW);
+  pinMode(PIN_PI_BAND2, OUTPUT);
+  digitalWrite(PIN_PI_BAND2, LOW);
+  pinMode(PIN_PI_BAND3, OUTPUT);
+  digitalWrite(PIN_PI_BAND3, LOW);
+  pinMode(PIN_PI_BAND4, OUTPUT);
+  digitalWrite(PIN_PI_BAND4, LOW);
+
+  pinMode(PIN_PI_PTT, INPUT);
+  pullUpDnControl (PIN_PI_PTT, PUD_UP);
+  
+  pinMode(PIN_PI_ENC1_A, INPUT);
+  pullUpDnControl (PIN_PI_ENC1_A, PUD_UP);
+  pinMode(PIN_PI_ENC1_B, INPUT);
+  pullUpDnControl (PIN_PI_ENC1_B, PUD_UP);
+  pinMode(PIN_PI_ENC1_SWITCH, INPUT);
+  pullUpDnControl (PIN_PI_ENC1_SWITCH, PUD_UP);
+
+  pinMode(PIN_PI_ENC2_A, INPUT);
+  pullUpDnControl (PIN_PI_ENC2_A, PUD_UP);
+  pinMode(PIN_PI_ENC2_B, INPUT);
+  pullUpDnControl (PIN_PI_ENC2_B, PUD_UP);
+  pinMode(PIN_PI_ENC2_SWITCH, INPUT); 
+  pullUpDnControl (PIN_PI_ENC2_SWITCH, PUD_UP);
+
+  wiringPiISR(PIN_PI_ENC1_A, INT_EDGE_BOTH, isr_enc1);
+  wiringPiISR(PIN_PI_ENC1_B, INT_EDGE_BOTH, isr_enc1);
+  wiringPiISR(PIN_PI_ENC2_A, INT_EDGE_BOTH, isr_enc2);
+  wiringPiISR(PIN_PI_ENC2_B, INT_EDGE_BOTH, isr_enc2);
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+void isr_enc1(){
+
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+void isr_enc2(){
+
+
+}
+
+// ---------------------------------------------------------------------------------------
 
 
 int setting_change_handler_vfo(struct setting_struct *passed_setting, char *value){
@@ -138,10 +199,10 @@ int setting_change_handler_vfo(struct setting_struct *passed_setting, char *valu
 // ---------------------------------------------------------------------------------------
 
 
-void debug(char *debug_text, int debug_text_level){
+void debug(char *debug_text_in, int debug_text_level){
 
   if (debug_text_level <= debug_level){
-  	printf(debug_text);
+  	printf(debug_text_in);
   	printf("\r\n");
   }
 
@@ -414,6 +475,54 @@ time_t time_sbitx(){
   //   return time(NULL);
 }
 
+// ---------------------------------------------------------------------------------------
+
+void start_things_up(int argc, char* argv[]){
+
+  read_command_line_arguments(argc, argv);
+
+  puts(VERSION_STRING);
+
+  if (!process_lock(OPEN_LOCK)){
+    fprintf(stderr,"There is another Acorn running.  Exiting.\r\n");
+    exit(1);
+  }
+
+
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void wind_things_down(){
+
+  process_lock(CLOSE_LOCK);
+
+}
+
+
+// ---------------------------------------------------------------------------------------
+
+
+void launch_telnet_server_thread(){
+
+  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, NULL)){
+    sprintf(debug_text,"launch_telnet_server_thread: could not create tcpserver_thread");
+    debug(debug_text,1);
+  }
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void main_loop(){
+
+
+  while(1){sleep (1);}
+
+}
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -422,33 +531,24 @@ time_t time_sbitx(){
 
 int main(int argc, char* argv[]) {
 
-  read_command_line_arguments(argc, argv);
 
-	puts(VERSION_STRING);
-
-	if (!process_lock(OPEN_LOCK)){
-	  fprintf(stderr,"There is another Acorn running.  Exiting.\r\n");
-	  exit(1);
-	}
+  start_things_up(argc, argv);
 
   read_ini_file_into_settings();
-
-/*  
-
-  // plan
 
   initialize_hardware();
 
   launch_telnet_server_thread();
 
 
-*/
+  
 
-//change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
+  //change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
 
 
+  main_loop();
 
-	process_lock(CLOSE_LOCK);
+	wind_things_down();
   
   return 0;
 
