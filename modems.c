@@ -921,8 +921,9 @@ void modem_init(){
 
 	//for now, launch fldigi in the background, if not already running
 	int e = system("pidof -x fldigi > /dev/null");
-	if (e == 256)
-		system("fldigi -i &");
+	if (e == 256){
+		//system("fldigi -i &"); // Goody - to do
+	}
 }
 
 void modem_abort(){

@@ -95,6 +95,8 @@ struct vfo {
 	int phase_increment;
 };
 
+struct vfo tone_a, tone_b;
+
 void vfo_init_phase_table();
 void vfo_start(struct vfo *v, int frequency_hz, int start_phase);
 int vfo_read(struct vfo *v);
@@ -172,6 +174,7 @@ struct rx {
 extern struct rx *rx_list;
 extern int freq_hdr;
 
+void setup_sdr();
 void set_lo(int frequency);
 void set_volume(double v);
 void sdr_request(char *request, char *response);
@@ -180,7 +183,7 @@ void sdr_modulation_update(int32_t *samples, int count, double scale_up);
 
 /* from modems.c */
 void modem_rx(int mode, int32_t *samples, int count);
-void	modem_set_pitch(int pitch);
+void modem_set_pitch(int pitch);
 void modem_init();
 int get_tx_data_byte(char *c);
 int	get_tx_data_length();
@@ -225,4 +228,12 @@ int telnet_write(char *text);
 void telnet_close();
 double agc2(struct rx *r);
 FILE *wav_start_writing(const char* path);
+
+void radio_tune_to(unsigned int f);
+
+void fft_init();
+void fft_reset_m_bins();
+int mag2db(double mag);
+
+
 

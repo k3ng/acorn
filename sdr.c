@@ -12,6 +12,7 @@
 #include <linux/limits.h>
 #include <stdint.h>
 #include <time.h>
+#include "acorn.h"
 #include "sdr.h"
 #include "sound.h"
 
@@ -87,7 +88,7 @@ int mod_display_index = 0;
 
 
 
-void radio_tune_to(u_int32_t f){
+void radio_tune_to(unsigned int f){
   //si5351bx_setfreq(2, f + bfo_freq - 24000 + TUNING_SHIFT);
 
   //printf("Setting radio to %d\n", f);
@@ -214,22 +215,22 @@ void set_volume(double v){
 	volume = v;	
 }
 
-FILE *wav_start_writing(const char* path)
-{
+FILE *wav_start_writing(const char* path){
+
     char subChunk1ID[4] = { 'f', 'm', 't', ' ' };
-    uint32_t subChunk1Size = 16; // 16 for PCM
+    unsigned int subChunk1Size = 16; // 16 for PCM
     uint16_t audioFormat = 1; // PCM = 1
     uint16_t numChannels = 1;
     uint16_t bitsPerSample = 16;
-    uint32_t sampleRate = 12000;
+    unsigned int sampleRate = 12000;
     uint16_t blockAlign = numChannels * bitsPerSample / 8;
-    uint32_t byteRate = sampleRate * blockAlign;
+    unsigned int byteRate = sampleRate * blockAlign;
 
     char subChunk2ID[4] = { 'd', 'a', 't', 'a' };
-    uint32_t subChunk2Size = 0Xffffffff; //num_samples * blockAlign;
+    unsigned int subChunk2Size = 0Xffffffff; //num_samples * blockAlign;
 
     char chunkID[4] = { 'R', 'I', 'F', 'F' };
-    uint32_t chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
+    unsigned int chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
     char format[4] = { 'W', 'A', 'V', 'E' };
 
     FILE* f = fopen(path, "w");
@@ -339,6 +340,9 @@ struct rx *add_rx(int frequency, short mode, int bpf_low, int bpf_high){
 	//we assume that there are 96000 samples / sec, giving us a 48khz slice
 	//the tuning can go up and down only by 22 KHz from the center_freq
 
+  sprintf(debug_text,"add_rx: called: frequency:%d mode:%d bpf_low:%d bpf_high: %d", frequency, mode, bpf_low, bpf_high);
+	debug(debug_text,1);
+
 	struct rx *r = malloc(sizeof(struct rx));
 	r->low_hz = bpf_low;
 	r->high_hz = bpf_high;
@@ -445,11 +449,12 @@ double agc2(struct rx *r){
 }
 
 void rx_process(int32_t *input_rx,  int32_t *input_mic, 
-	int32_t *output_speaker, int32_t *output_tx, int n_samples)
-{
+	int32_t *output_speaker, int32_t *output_tx, int n_samples){
+
 	int i, j = 0;
 	double i_sample, q_sample;
 
+  debug("rx_process: called",9);
 
 	if (mute_count){
 		memset(input_rx, 0, n_samples * sizeof(int32_t));
@@ -502,7 +507,7 @@ void rx_process(int32_t *input_rx,  int32_t *input_mic,
 	// ... back to the actual processing, after spectrum update  
 
 	// we may add another sub receiver within the pass band later,
-	// hence, the linkced list of receivers here
+	// hence, the linked list of receivers here
 	// at present, we handle just the first receiver
 	struct rx *r = rx_list;
 	
@@ -728,21 +733,6 @@ void loop(){
 	delay(10);
 }
 
-void setup_audio_codec(){
-	strcpy(audio_card, "hw:0");
-
-	//configure all the channels of the mixer
-	sound_mixer(audio_card, "Input Mux", 0);
-	sound_mixer(audio_card, "Line", 1);
-	sound_mixer(audio_card, "Mic", 0);
-	sound_mixer(audio_card, "Mic Boost", 0);
-	sound_mixer(audio_card, "Playback Deemphasis", 0);
- 
-	sound_mixer(audio_card, "Master", 10);
-	sound_mixer(audio_card, "Output Mixer HiFi", 1);
-	sound_mixer(audio_card, "Output Mixer Mic Sidetone", 0);
-
-}
 
 void setup_oscillators(){
   //initialize the SI5351
@@ -877,58 +867,8 @@ void tr_switch(int tx_on){
 }
 
 
-/* 
-This is the one-time initialization code 
-*/
-void setup(){
 
 
-	//setup the LPF and the gpio pins
-	pinMode(TX_LINE, OUTPUT);
-	pinMode(TX_POWER, OUTPUT);
-	pinMode(LPF_A, OUTPUT);
-	pinMode(LPF_B, OUTPUT);
-	pinMode(LPF_C, OUTPUT);
-	pinMode(LPF_D, OUTPUT);
-  digitalWrite(LPF_A, LOW);
-  digitalWrite(LPF_B, LOW);
-  digitalWrite(LPF_C, LOW);
-  digitalWrite(LPF_D, LOW);
-	digitalWrite(TX_LINE, LOW);
-	digitalWrite(TX_POWER, LOW);
-
-	fft_init();
-	vfo_init_phase_table();
-  setup_oscillators();
-
-	modem_init();
-
-	add_rx(7000000, MODE_LSB, -3000, -300);
-	add_tx(7000000, MODE_LSB, -3000, -300);
-	rx_list->tuned_bin = 512;
-  tx_list->tuned_bin = 512;
-	tx_init(7000000, MODE_LSB, -3000, -300);
-
-
-	setup_audio_codec();
-	sound_thread_start("plughw:0,0");
-
-	sleep(1); //why? to allow the aloop to initialize?
-
-	vfo_start(&tone_a, 700, 0);
-	vfo_start(&tone_b, 1900, 0);
-
-	fserial = serialOpen("/dev/ttyUSB0", 38400);
-	if (fserial == -1){
-		fserial = serialOpen("/dev/ttyUSB1", 38400);
-		if (!fserial){
-			puts("uBITX not connected");
-			exit(-1);
-		}
-	}
-	delay(2000);	
-
-}
 
 void sdr_request(char *request, char *response){
 	char cmd[100], value[1000];
@@ -1162,4 +1102,27 @@ void sdr_modulation_update(int32_t *samples, int count, double scale_up){
 	}
 }
 
+void setup_sdr(){
 
+	fft_init();
+	vfo_init_phase_table();
+  setup_oscillators();
+
+	modem_init();
+
+	add_rx(7000000, MODE_LSB, -3000, -300);
+	add_tx(7000000, MODE_LSB, -3000, -300);
+	rx_list->tuned_bin = 512;
+  tx_list->tuned_bin = 512;
+	tx_init(7000000, MODE_LSB, -3000, -300);
+
+
+	setup_audio_codec();
+	sound_thread_start("plughw:0,0");
+
+	sleep(1); //why? to allow the aloop to initialize?
+
+	vfo_start(&tone_a, 700, 0);
+	vfo_start(&tone_b, 1900, 0);
+
+}

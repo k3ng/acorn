@@ -18,6 +18,7 @@
 
 */
 
+#define HARDCODE_DEBUG_LEVEL 8
 
 
 #include <unistd.h>
@@ -33,6 +34,7 @@
 #include <fftw3.h>
 #include <wiringPi.h>
 #include <pthread.h>
+#include <signal.h>
 
 // #include <linux/fb.h>
 // #include <sys/types.h>
@@ -105,7 +107,7 @@ struct setting_struct setting[] =
 
 
 int debug_level = 0;
-char debug_text[64];
+
 
 pthread_t tcpserver_thread;
 
@@ -189,6 +191,24 @@ void isr_enc2(){
 // ---------------------------------------------------------------------------------------
 
 
+void  signal_handler(int sig){
+
+     char c;
+
+     signal(sig, SIG_IGN);
+     printf("OUCH, did you hit Ctrl-C?\n"
+            "Do you really want to quit? [y/n] ");
+     c = getchar();
+     if (c == 'y' || c == 'Y')
+          exit(0);
+     else
+          signal(SIGINT, signal_handler);
+     getchar(); // Get new line character
+}
+
+// ---------------------------------------------------------------------------------------
+
+
 int setting_change_handler_vfo(struct setting_struct *passed_setting, char *value){
 
 
@@ -201,9 +221,14 @@ int setting_change_handler_vfo(struct setting_struct *passed_setting, char *valu
 
 void debug(char *debug_text_in, int debug_text_level){
 
-  if (debug_text_level <= debug_level){
-  	printf(debug_text_in);
-  	printf("\r\n");
+  if (debug_text_level > 254){ // this debug text is to go out STDERR
+    fprintf(stderr, debug_text_in);
+    fprintf(stderr, "\r\n");
+  } else {
+    if (debug_text_level <= debug_level){
+    	printf(debug_text_in);
+    	printf("\r\n");
+    }
   }
 
 }
@@ -372,18 +397,29 @@ int read_ini_file_into_settings(){
 
 void read_command_line_arguments(int argc, char* argv[]) {
 
+  #if !defined(HARDCODE_DEBUG_LEVEL)
 
-  int x = 0;
-  while (argc--){
-    if (!strcmp(argv[x], "-d")){
-      if (argc){
-        debug_level = atoi(argv[x+1]);
-        sprintf(debug_text,"read_command_line_arguments: debug_level: %d\r\n", debug_level);
-        debug(debug_text,3);
+    int x = 0;
+
+    while (argc--){
+      if (!strcmp(argv[x], "-d")){
+        if (argc){
+          
+            debug_level = atoi(argv[x+1]);
+            sprintf(debug_text,"read_command_line_arguments: debug_level: %d", debug_level);
+            debug(debug_text,3);
+        }
       }
+      x++;
     }
-    x++;
-  }
+
+  #else
+
+    debug_level = HARDCODE_DEBUG_LEVEL;
+    sprintf(debug_text,"read_command_line_arguments: debug_level hardcoded to: %d", debug_level);
+    debug(debug_text,0);     
+         
+  #endif
 
 
 }
@@ -488,7 +524,7 @@ void start_things_up(int argc, char* argv[]){
     exit(1);
   }
 
-
+  signal(SIGINT, signal_handler);
 
 }
 
@@ -540,8 +576,7 @@ int main(int argc, char* argv[]) {
 
   launch_telnet_server_thread();
 
-
-  
+  setup_sdr();
 
   //change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
 
