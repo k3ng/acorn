@@ -24,6 +24,11 @@ sound_mixer(). search for this function to know how to work this.
 
 */
 
+
+#if !defined(_sound_h_)
+
+#define _sound_h_
+
 int sound_thread_start(char *device);
 void sound_process(
 	int32_t *input_rx, int32_t *input_mic, 
@@ -34,3 +39,5 @@ void sound_volume(char *card_name, char *element, int volume);
 void sound_mixer(char *card_name, char *element, int make_on);
 void sound_input(int loop);
 void setup_audio_codec();
+
+#endif //!defined(_sound_h_)

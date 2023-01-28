@@ -7,7 +7,6 @@
 #include <fftw3.h>
 #include <unistd.h>
 #include <wiringPi.h>
-#include <wiringSerial.h>
 #include <linux/types.h>
 #include <linux/limits.h>
 #include <stdint.h>
@@ -21,9 +20,6 @@ char audio_card[32];
 static int tx_shift = 512;
 
 FILE *pf_debug = NULL;
-
-//this is for processing FT8 decodes 
-//unsigned int	wallclock = 0;
 
 #define TX_LINE 4
 #define TX_POWER 27
@@ -86,18 +82,54 @@ int mod_display[MOD_MAX];
 int mod_display_index = 0;
 
 
+struct power_settings {
+	int f_start;
+	int f_stop;
+	int	max_watts;
+	double scale;
+};
+
+struct power_settings band_power[] ={
+	{ 3500000,  4000000, 40, 0.0025},
+	{ 7000000,  7300000, 40, 0.02},
+	{10000000, 10200000, 30, 0.008},
+	{14000000, 14300000, 30, 0.022},
+	{18000000, 18200000, 25, 0.03},
+	{21000000, 21450000, 20, 0.05},
+	{24800000, 25000000, 10, 0.1},
+	{28000000, 29700000,  10, 0.1}  
+};
+
+int32_t in_i[MAX_BINS];
+int32_t in_q[MAX_BINS];
+int32_t	out_i[MAX_BINS];
+int32_t out_q[MAX_BINS];
+short is_ready = 0;
+
+int count = 0;
+
+// ---------------------------------------------------------------------------------------
 
 
 void radio_tune_to(unsigned int f){
+
   //si5351bx_setfreq(2, f + bfo_freq - 24000 + TUNING_SHIFT);
 
-  //printf("Setting radio to %d\n", f);
+  sprintf(debug_text,"radio_tune_to: setting radio to freq:%d", f);
+  debug(debug_text,1);
+
 }
 
+// ---------------------------------------------------------------------------------------
+
+
+
 void fft_init(){
+
 	int mem_needed;
 
-	//printf("initializing the fft\n");
+	debug("fft_init: called",1);
+
 	fflush(stdout);
 
 	mem_needed = sizeof(fftw_complex) * MAX_BINS;
@@ -124,17 +156,25 @@ void fft_init(){
 	make_hann_window(spectrum_window, MAX_BINS);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void fft_reset_m_bins(){
+
 	//zero up the previous 'M' bins
 	memset(fft_in, 0, sizeof(fftw_complex) * MAX_BINS);
 	memset(fft_out, 0, sizeof(fftw_complex) * MAX_BINS);
 	memset(fft_m, 0, sizeof(fftw_complex) * MAX_BINS/2);
 	memset(fft_spectrum, 0, sizeof(fftw_complex) * MAX_BINS);
-//	for (int i= 0; i < MAX_BINS/2; i++){
-//		__real__ fft_m[i]  = 0.0;
-//		__imag__ fft_m[i]  = 0.0;
-//	}
+	//	for (int i= 0; i < MAX_BINS/2; i++){
+	//		__real__ fft_m[i]  = 0.0;
+	//		__imag__ fft_m[i]  = 0.0;
+	//	}
+
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 int mag2db(double mag){
 	int m = abs(mag) * 10000000;
@@ -150,16 +190,25 @@ int mag2db(double mag){
 	return c;
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void set_spectrum_speed(int speed){
 	spectrum_speed = speed;
 	for (int i = 0; i < MAX_BINS; i++)
 		fft_bins[i] = 0;
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void spectrum_reset(){
 	for (int i = 0; i < MAX_BINS; i++)
 		fft_bins[i] = 0;
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 void spectrum_update(){
 	//we are only using the lower half of the bins, so this copies twice as many bins, 
@@ -173,7 +222,11 @@ void spectrum_update(){
  // redraw();
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void set_lpf_40mhz(int frequency){
+
 	static int prev_lpf = -1;
 	int lpf = 0;
 
@@ -204,6 +257,8 @@ void set_lpf_40mhz(int frequency){
 	prev_lpf = lpf;
 }
 
+// ---------------------------------------------------------------------------------------
+
 
 void set_rx1(int frequency){
 	radio_tune_to(frequency);
@@ -211,9 +266,15 @@ void set_rx1(int frequency){
 	set_lpf_40mhz(frequency);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void set_volume(double v){
 	volume = v;	
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 FILE *wav_start_writing(const char* path){
 
@@ -255,6 +316,9 @@ FILE *wav_start_writing(const char* path){
 		return f;
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void wav_record(int32_t *samples, int count){
 	int16_t *w;
 	int32_t *s;
@@ -274,26 +338,28 @@ void wav_record(int32_t *samples, int count){
 	fwrite(record_buffer, j, sizeof(int16_t), pf_record);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 /*
 The sound process is called by the duplex sound system for each block of samples
 In this demo, we read and equivalent block from the file instead of processing from
 the input I and Q signals.
 */
 
-int32_t in_i[MAX_BINS];
-int32_t in_q[MAX_BINS];
-int32_t	out_i[MAX_BINS];
-int32_t out_q[MAX_BINS];
-short is_ready = 0;
+
 
 void tx_init(int frequency, short mode, int bpf_low, int bpf_high){
 
-	//we assume that there are 96000 samples / sec, giving us a 48khz slice
-	//the tuning can go up and down only by 22 KHz from the center_freq
+	// we assume that there are 96000 samples / sec, giving us a 48khz slice
+	// the tuning can go up and down only by 22 KHz from the center_freq
 
 	tx_filter = filter_new(1024, 1025);
 	filter_tune(tx_filter, (1.0 * bpf_low)/96000.0, (1.0 * bpf_high)/96000.0 , 5);
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 struct rx *add_tx(int frequency, short mode, int bpf_low, int bpf_high){
 
@@ -334,6 +400,9 @@ struct rx *add_tx(int frequency, short mode, int bpf_low, int bpf_high){
   r->next = tx_list;
   tx_list = r;
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 struct rx *add_rx(int frequency, short mode, int bpf_low, int bpf_high){
 
@@ -382,11 +451,11 @@ struct rx *add_rx(int frequency, short mode, int bpf_low, int bpf_high){
 
 }
 
+// ---------------------------------------------------------------------------------------
 
-
-int count = 0;
 
 double agc2(struct rx *r){
+
 	int i;
   double signal_strength, agc_gain_should_be;
 
@@ -447,6 +516,9 @@ double agc2(struct rx *r){
 	//printf("%d:s meter: %d %d %d \n", count++, (int)r->agc_gain, (int)r->signal_strength, r->agc_loop);
   return 100000000000 / r->agc_gain;  
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 void rx_process(int32_t *input_rx,  int32_t *input_mic, 
 	int32_t *output_speaker, int32_t *output_tx, int n_samples){
@@ -568,12 +640,12 @@ void rx_process(int32_t *input_rx,  int32_t *input_mic,
 	modem_rx(rx_list->mode, output_speaker, MAX_BINS/2);
 }
 
+// ---------------------------------------------------------------------------------------
 
-void tx_process(
-	int32_t *input_rx, int32_t *input_mic, 
-	int32_t *output_speaker, int32_t *output_tx, 
-	int n_samples)
-{
+
+void tx_process(int32_t *input_rx, int32_t *input_mic, int32_t *output_speaker, int32_t *output_tx, 
+	int n_samples){
+
 	int i;
 	double i_sample, q_sample;
 
@@ -692,6 +764,9 @@ void tx_process(
 	sdr_modulation_update(output_tx, MAX_BINS/2, tx_amp);	
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 /*
 	This is called each time there is a block of signal samples ready 
 	either from the mic or from the rx IF 
@@ -711,6 +786,8 @@ void sound_process(
 		wav_record(in_tx == 0 ? output_speaker : input_mic, n_samples);
 }
 
+// ---------------------------------------------------------------------------------------
+
 
 void set_rx_filter(){
 	if(rx_list->mode == MODE_LSB || rx_list->mode == MODE_CWR)
@@ -725,13 +802,8 @@ void set_rx_filter(){
       5);
 }
 
-/* 
-Write code that mus repeatedly so things, it is called during the idle time 
-of the event loop 
-*/
-void loop(){
-	delay(10);
-}
+
+// ---------------------------------------------------------------------------------------
 
 
 void setup_oscillators(){
@@ -748,47 +820,18 @@ void setup_oscillators(){
   // si5351_reset();
 }
 
-struct power_settings {
-	int f_start;
-	int f_stop;
-	int	max_watts;
-	double scale;
-};
+// ---------------------------------------------------------------------------------------
 
 
-struct power_settings band_power[] ={
-	{ 3500000,  4000000, 40, 0.0025},
-//	{ 7000000,  7300000, 40, 0.006},
-	{ 7000000,  7300000, 40, 0.02},
-	{10000000, 10200000, 30, 0.008},
-	{14000000, 14300000, 30, 0.022},
-	{18000000, 18200000, 25, 0.03},
-	{21000000, 21450000, 20, 0.05},
-	{24800000, 25000000, 10, 0.1},
-	{28000000, 29700000,  10, 0.1}  
-};
-
-/*
-struct power_settings band_power[] ={
-	{ 3500000,  4000000, 40, 0.0025},
-	{ 7000000,  7300000, 40, 0.0025},
-	{10000000, 10200000, 30, 0.004},
-	{14000000, 14300000, 30, 0.01},
-	{18000000, 18200000, 25, 0.01},
-	{21000000, 21450000, 20, 0.01},
-	{24800000, 25000000, 10, 0.02},
-	{28000000, 29700000,  10, 0.03}  
-};
-*/
-
-
-
-
-/*
-	 the PA gain varies across the band from 3.5 MHz to 30 MHz
- 	here we adjust the drive levels to keep it up, almost level
-*/
 void set_tx_power_levels(){
+
+
+	/*
+		 the PA gain varies across the band from 3.5 MHz to 30 MHz
+	 	here we adjust the drive levels to keep it up, almost level
+
+	*/
+
  // printf("Setting tx_power to %d, gain to %d\n", tx_power_watts, tx_gain);
 	int tx_power_gain = 0;
 
@@ -807,6 +850,9 @@ void set_tx_power_levels(){
 	sound_mixer(audio_card, "Master", 95);
 	sound_mixer(audio_card, "Capture", tx_gain);
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 void tr_switch(int tx_on){
 		if (tx_on){
@@ -868,17 +914,80 @@ void tr_switch(int tx_on){
 
 
 
+// ---------------------------------------------------------------------------------------
+
+
+void sdr_modulation_update(int32_t *samples, int count, double scale_up){
+
+	double min=0, max=0;
+
+	for (int i = 0; i < count; i++){
+		if (i % 48 == 0){
+			if (mod_display_index >= MOD_MAX)
+				mod_display_index = 0;
+			mod_display[mod_display_index++] = (min / 40000000.0) / scale_up;
+			mod_display[mod_display_index++] = (max / 40000000.0) / scale_up;
+			min = 0x7fffffff;
+			max = -0x7fffffff;
+		}
+		if (*samples < min)
+			min = *samples;
+		if (*samples > max)
+			max = *samples;
+		samples++;
+	}
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void setup_sdr(){
+
+	debug("setup_sdr: called",1);
+
+	fft_init();
+	vfo_init_phase_table();
+  setup_oscillators();
+
+	modem_init();
+
+	add_rx(7000000, MODE_LSB, -3000, -300);
+	add_tx(7000000, MODE_LSB, -3000, -300);
+	rx_list->tuned_bin = 512;
+  tx_list->tuned_bin = 512;
+	tx_init(7000000, MODE_LSB, -3000, -300);
+
+
+	setup_audio_codec();
+	sound_thread_start("plughw:0,0");
+
+	sleep(1); //why? to allow the aloop to initialize?
+
+	vfo_start(&tone_a, 700, 0);
+	vfo_start(&tone_b, 1900, 0);
+
+	debug("setup_sdr: complete",1);
+
+}
+
+// ---------------------------------------------------------------------------------------
+
 
 
 void sdr_request(char *request, char *response){
+
+
 	char cmd[100], value[1000];
 
-//	printf("[%s]\n", request);
+  sprintf(debug_text,"sdr_request: request:%s", request);
+  debug(debug_text,2);
 
 	char *p = strchr(request, '=');
 	int n = p - request;
-	if (!p)
+	if (!p){
+		strcpy(response, "error");
 		return;
+	}
 	strncpy(cmd, request, n);
 	cmd[n] = 0;
 	strcpy(value, request+n+1);
@@ -892,7 +1001,8 @@ void sdr_request(char *request, char *response){
 	else if (!strcmp(cmd, "r1:freq")){
 		int d = atoi(value);
 		set_rx1(d);
-		//printf("Frequency set to %d\n", freq_hdr);
+	  sprintf(debug_text,"sdr_request: rx freq set to:%s", freq_hdr);
+	  debug(debug_text,2);		
 		strcpy(response, "ok");	
 	} 
 	else if (!strcmp(cmd, "r1:mode")){
@@ -955,12 +1065,12 @@ void sdr_request(char *request, char *response){
 				(1.0 * 3000)/96000.0 , 
 				5);
 		}
-		
-		//printf("mode set to %d\n", rx_list->mode);
+		sprintf(debug_text,"sdr_request: mode set to: %d", rx_list->mode);
+	  debug(debug_text,2);		
 		strcpy(response, "ok");
 	}
 	else if (!strcmp(cmd, "txmode")){
-		puts("\n\n\n\n###### tx filter #######");
+		//puts("\n\n\n\n###### tx filter #######");
 		if (!strcmp(value, "LSB") || !strcmp(value, "CWR"))
 			filter_tune(tx_filter, (1.0*-3000)/96000.0, (1.0 * -300)/96000.0, 5);
 		else
@@ -1076,53 +1186,12 @@ void sdr_request(char *request, char *response){
     else if (!strcmp(value, "LINE"))
       tx_use_line = 1;
   }
-	else if (!strcmp(cmd, "tx_compress"))
+	else if (!strcmp(cmd, "tx_compress")){
 		tx_compress = atoi(value); 
-  /* else
-		printf("*Error request[%s] not accepted\n", request); */
-}
-
-void sdr_modulation_update(int32_t *samples, int count, double scale_up){
-	double min=0, max=0;
-
-	for (int i = 0; i < count; i++){
-		if (i % 48 == 0){
-			if (mod_display_index >= MOD_MAX)
-				mod_display_index = 0;
-			mod_display[mod_display_index++] = (min / 40000000.0) / scale_up;
-			mod_display[mod_display_index++] = (max / 40000000.0) / scale_up;
-			min = 0x7fffffff;
-			max = -0x7fffffff;
-		}
-		if (*samples < min)
-			min = *samples;
-		if (*samples > max)
-			max = *samples;
-		samples++;
 	}
-}
-
-void setup_sdr(){
-
-	fft_init();
-	vfo_init_phase_table();
-  setup_oscillators();
-
-	modem_init();
-
-	add_rx(7000000, MODE_LSB, -3000, -300);
-	add_tx(7000000, MODE_LSB, -3000, -300);
-	rx_list->tuned_bin = 512;
-  tx_list->tuned_bin = 512;
-	tx_init(7000000, MODE_LSB, -3000, -300);
-
-
-	setup_audio_codec();
-	sound_thread_start("plughw:0,0");
-
-	sleep(1); //why? to allow the aloop to initialize?
-
-	vfo_start(&tone_a, 700, 0);
-	vfo_start(&tone_b, 1900, 0);
-
+	else {
+  	strcpy(response, "error");
+		sprintf(debug_text,"sdr_request: request error: %s", request);
+	  debug(debug_text,255);		
+  }
 }

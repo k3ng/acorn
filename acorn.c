@@ -111,6 +111,8 @@ int debug_level = 0;
 
 pthread_t tcpserver_thread;
 
+static long time_delta = 0;
+
 // ---------------------------------------------------------------------------------------
 
 // used in modems.c
@@ -191,7 +193,7 @@ void isr_enc2(){
 // ---------------------------------------------------------------------------------------
 
 
-void  signal_handler(int sig){
+void signal_handler(int sig){
 
      char c;
 
@@ -504,11 +506,11 @@ int key_poll(){
 void tx_on(){};
 void tx_off(){};
 
-time_t time_sbitx(){
-  // if (time_delta)
-  //   return  (millis()/1000l) + time_delta;
-  // else
-  //   return time(NULL);
+time_t time_system(){
+  if (time_delta)
+    return  (millis()/1000l) + time_delta;
+  else
+    return time(NULL);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -524,7 +526,7 @@ void start_things_up(int argc, char* argv[]){
     exit(1);
   }
 
-  signal(SIGINT, signal_handler);
+  //signal(SIGINT, signal_handler);
 
 }
 

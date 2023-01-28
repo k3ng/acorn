@@ -24,6 +24,8 @@ gcc -g -o tcpserver tcpserver.c -pthread
 #include<unistd.h>
 #include<pthread.h>
 
+
+
 // ---------------------------------------------------------------------------------------
 
 
@@ -38,7 +40,11 @@ gcc -g -o tcpserver tcpserver.c -pthread
 
 #else
 
+  #include <fftw3.h>
+  #include <complex.h>
   #include "acorn.h"
+  #include "sdr.h"
+  #include "sound.h"
 
 #endif //TEST_STANDALONE_COMPILE
 
@@ -62,12 +68,11 @@ void *tcp_connection_handler(void *socket_desc){
 	//Get the socket descriptor
 	int sock = *(int*)socket_desc;
 	int read_size;
-	char *message, client_message[32], client_command[32];
+	char *message, client_message[32], sdr_response[32];
 
   sprintf(debug_text,"tcp_connection_handler: sock: %d", sock);
   debug(debug_text,1);
 	
-	//Send some messages to the client
 	message = "acorn ready!\n";
 	write(sock, message, strlen(message));
 
@@ -75,54 +80,39 @@ void *tcp_connection_handler(void *socket_desc){
   while(connection_active){
     read_size = recv(sock, client_message, 32, 0);
     if (read_size > 0){
-      sprintf(client_command,"%s",client_message);
       //echo the message back to client
       sprintf(debug_text,"tcp_connection_handler: sock: %d msg: %s strlen: %d read_size: %d", sock, client_message, strlen(client_message), read_size);
       debug(debug_text,3);
       write(sock, client_message, read_size);
 
       if (read_size > 1){
-        client_command[read_size - 2] = 0;  // yank off the carriage return and whatever
+        client_message[read_size - 2] = 0;  // yank off the carriage return and whatever
       }
 
-      if (!strcmp(client_command,"quit")){
+
+      // handle some telnet commands right here
+      if (!strcmp(client_message,"quit")){  
         sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client quit sock: %d", sock);
         debug(debug_text,1); 
         close(sock);    
         free(socket_desc);
         return 0;  
+      } else {  
+        // other commands go to SDR
+        #if !defined(TEST_STANDALONE_COMPILE)
+          sdr_request(client_message, sdr_response); 
+          sprintf(client_message,"%s\r\n",sdr_response);
+          write(sock, client_message, strlen(client_message));
+        #endif
       }
       
-      strcpy(client_command,"");
+
       strcpy(client_message,"");
     } else {
       connection_active = 0;
     }
   }
 
-	
-	//Receive a message from client
-	// while( (read_size = recv(sock, client_message, 32, 0)) > 0 ){
-	// 	//echo the message back to client
-  //   sprintf(debug_text,"tcp_connection_handler: sock: %d msg: %s strlen: %d read_size: %d", sock, client_message, strlen(client_message), read_size);
-  //   debug(debug_text,1);
-  //   strncpy(client_command,client_message,read_size - 2);
-	// 	write(sock, client_message, read_size /*strlen(client_message)*/);
-
-  //   strncpy(client_command,client_message,read_size - 2);
-
-  //   if (!strcmp(client_command,"quit")){
-  //     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client quit sock: %d", sock);
-  //     debug(debug_text,1); 
-  //     close(sock);    
-  //     free(socket_desc);
-  //     return 0;  
-  //   }
-    
-  //   strcpy(client_command,"");
-  //   strcpy(client_message,"");
-   
-	// }
 	
 	if(read_size == 0){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client disconnected sock: %d", sock);

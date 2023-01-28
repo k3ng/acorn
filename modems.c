@@ -241,7 +241,7 @@ void ft8_tx(char *message, int freq){
 		message[i] = toupper(message[i]);
 
 	//timestamp the packets for display log
-	time_t	rawtime = time_sbitx();
+	time_t	rawtime = time_system();
 	struct tm *t = gmtime(&rawtime);
 
   sprintf(buff, "%02d%02d%02d           %04d ~  %s\n", t->tm_hour, t->tm_min, t->tm_sec, get_pitch(), message);
@@ -293,7 +293,7 @@ void ft8_rx(int32_t *samples, int count){
 		//ft8_rx_buff[ft8_rx_buff_index++] = samples[i];
 		ft8_rx_buffer[ft8_rx_buff_index++] = samples[i] / 200000000.0f;
 
-	int now = time_sbitx();
+	int now = time_system();
 	if (now != wallclock)	
 		wallclock = now;
 	else 
@@ -964,7 +964,7 @@ void modem_poll(int mode){
 
 	switch(mode){
 	case MODE_FT8:
-		t = time_sbitx();
+		t = time_system();
 		if ((t % 15) == 0){
 			if(ft8_tx_nsamples > 0 && !tx_is_on){
 				tx_on();	

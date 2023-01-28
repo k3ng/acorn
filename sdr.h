@@ -81,14 +81,17 @@ for the transmission. The data required is the same!
 
 */
 
+#if !defined(_sdr_h_)
+
+#define _sdr_h_
+
 #define MAX_BINS 2048
 
 extern float fft_bins[];
 extern struct filter *ssb;
 
-//vfo definitions
-
 #define MAX_PHASE_COUNT (16385)
+
 struct vfo {
 	int freq_hz;
 	int phase;
@@ -102,7 +105,7 @@ void vfo_start(struct vfo *v, int frequency_hz, int start_phase);
 int vfo_read(struct vfo *v);
 
 
-//the filter definitions
+
 struct filter {
 	complex float *fir_coeff;
 	complex float *overlap;
@@ -158,6 +161,7 @@ struct rx {
     * agc_loop tracks how many more ticks to go before the decay
     * agc_decay rate sets the slope for agc decay.
   */
+
   int agc_speed;
 	int agc_threshold;
 	int agc_loop;
@@ -200,7 +204,7 @@ void tx_off();
 long get_freq();
 int get_pitch();
 void do_cmd(char *cmd);
-time_t time_sbitx();
+time_t time_system();
 
 //cw defines
 #define CW_DASH (1)
@@ -223,9 +227,6 @@ int	get_wpm();
 #define FT8_MANUAL 0
 void ft8_setmode(int config);
 
-void telnet_open(char *server);
-int telnet_write(char *text);
-void telnet_close();
 double agc2(struct rx *r);
 FILE *wav_start_writing(const char* path);
 
@@ -234,6 +235,8 @@ void radio_tune_to(unsigned int f);
 void fft_init();
 void fft_reset_m_bins();
 int mag2db(double mag);
+
+#endif //!defined(_sdr_h_)
 
 
 

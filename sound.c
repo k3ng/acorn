@@ -4,7 +4,6 @@ This file is from the sBitx by VU2ESE and is modified to test the WM8731 audio c
 
 This follows the tutorial at http://alsamodular.sourceforge.net/alsa_programming_howto.html
 
-
 	We are using 4 bytes per sample, 
 	each frame is consists of two channels of audio, hence 8 bytes 
   We are shooting for 1024x2 = 2048 samples per period. that is 8K
@@ -77,6 +76,7 @@ gcc -g -o sound sound.c -lasound -pthread
 
 char audio_card[32];
 
+
 #if defined(TEST_STANDALONE_COMPILE)
 
 	int debug_level = 0;
@@ -92,13 +92,11 @@ char audio_card[32];
 	    	printf("\r\n");
 	    }
 	  }
-
 	}
 
 #endif
 
-struct queue
-{
+struct queue{
   int id;
   int head;
   int tail;
@@ -108,6 +106,39 @@ struct queue
 	unsigned int overflow;
 	unsigned int max_q;
 };
+
+static struct queue qloop;
+
+int rate = 96000; /* Sample rate */
+static snd_pcm_uframes_t buff_size = 8192; /* Periodsize (bytes) */
+static int n_periods_per_buffer = 2;       /* Number of periods */
+//static int n_periods_per_buffer = 1024;       /* Number of periods */
+
+static snd_pcm_t *pcm_play_handle=0;   	//handle for the pcm device
+static snd_pcm_t *pcm_capture_handle=0;   	//handle for the pcm device
+static snd_pcm_t *loopback_play_handle=0;   	//handle for the pcm device
+static snd_pcm_t *loopback_capture_handle=0;   	//handle for the pcm device
+
+static snd_pcm_stream_t play_stream = SND_PCM_STREAM_PLAYBACK;	//playback stream
+static snd_pcm_stream_t capture_stream = SND_PCM_STREAM_CAPTURE;	//playback stream
+
+static char	*pcm_play_name, *pcm_capture_name;
+static snd_pcm_hw_params_t *hwparams;
+static snd_pcm_sw_params_t *swparams;
+static snd_pcm_hw_params_t *hloop_params;
+static snd_pcm_sw_params_t *sloop_params;
+static int exact_rate;   /* Sample rate returned by */
+static int	sound_thread_continue = 0;
+pthread_t sound_thread, loopback_thread;
+
+#define LOOPBACK_LEVEL_DIVISOR 8				// Constant used to reduce audio level to the loopback channel (FLDIGI)
+static int play_write_error = 0;				// count play channel write errors
+static int loopback_write_error = 0;			// count loopback channel write errors
+
+int use_virtual_cable = 0;
+
+
+
 
 void q_empty(struct queue *p){
   
@@ -120,7 +151,7 @@ void q_empty(struct queue *p){
 
 void q_init(struct queue *p, int length){
 
-	sprintf(debug_text,"q_init: queue:%d length:%d", p, length);
+	sprintf(debug_text,"q_init: queue:0x%08x length:%d", p, length);
 	debug(debug_text,6);
 
 	p->max_q = length;
@@ -140,8 +171,9 @@ int q_length(struct queue *p){
 
 int q_write(struct queue *p, int32_t w){
 
-  if ( (p->head + 1 == p->tail) || ((p->tail == 0) && (p->head == p->max_q-1)) /*|| (p->head > p->max_q)*/ ) {
-    p->overflow++;
+
+  if ( (p->head + 1 == p->tail) || ((p->tail == 0) && (p->head == p->max_q-1)) ) {
+    p->overflow++; 
     return -1;
   }
 
@@ -212,8 +244,8 @@ void sound_volume(char *card_name, char *element, int volume)
     snd_mixer_close(handle);
 }
 
-void sound_mixer(char *card_name, char *element, int make_on)
-{
+void sound_mixer(char *card_name, char *element, int make_on){
+
     long min, max;
     snd_mixer_t *handle;
     snd_mixer_selem_id_t *sid;
@@ -262,36 +294,7 @@ void sound_mixer(char *card_name, char *element, int make_on)
     snd_mixer_close(handle);
 }
 
-int rate = 96000; /* Sample rate */
-static snd_pcm_uframes_t buff_size = 8192; /* Periodsize (bytes) */
-static int n_periods_per_buffer = 2;       /* Number of periods */
-//static int n_periods_per_buffer = 1024;       /* Number of periods */
 
-static snd_pcm_t *pcm_play_handle=0;   	//handle for the pcm device
-static snd_pcm_t *pcm_capture_handle=0;   	//handle for the pcm device
-static snd_pcm_t *loopback_play_handle=0;   	//handle for the pcm device
-static snd_pcm_t *loopback_capture_handle=0;   	//handle for the pcm device
-
-static snd_pcm_stream_t play_stream = SND_PCM_STREAM_PLAYBACK;	//playback stream
-static snd_pcm_stream_t capture_stream = SND_PCM_STREAM_CAPTURE;	//playback stream
-
-static char	*pcm_play_name, *pcm_capture_name;
-static snd_pcm_hw_params_t *hwparams;
-static snd_pcm_sw_params_t *swparams;
-static snd_pcm_hw_params_t *hloop_params;
-static snd_pcm_sw_params_t *sloop_params;
-static int exact_rate;   /* Sample rate returned by */
-static int	sound_thread_continue = 0;
-pthread_t sound_thread, loopback_thread;
-
-#define LOOPBACK_LEVEL_DIVISOR 8				// Constant used to reduce audio level to the loopback channel (FLDIGI)
-static int play_write_error = 0;				// count play channel write errors
-static int loopback_write_error = 0;			// count loopback channel write errors
-// Note: Error messages appear when the sbitx program is started from the command line
-
-int use_virtual_cable = 0;
-
-struct queue qloop;
 
 /* 
 
@@ -311,6 +314,7 @@ The sound is playback is carried on in a non-blocking way
 */
 
 int sound_start_play(char *device){
+
 	//found out the correct device through aplay -L (for pcm devices)
 
 	snd_pcm_hw_params_alloca(&hwparams);	//more alloc
@@ -591,26 +595,29 @@ int sound_start_loopback_play(char *device){
 
 	snd_pcm_hw_params_alloca(&hwparams);	//more alloc
 
-	sprintf(debug_text,"sound_start_loopback_play: opening audio rx stream to %s\n", device); 
+	sprintf(debug_text,"sound_start_loopback_play: opening audio rx stream to %s", device); 
 	debug(debug_text,1);
 
 	int e = snd_pcm_open(&loopback_play_handle, device, play_stream, SND_PCM_NONBLOCK);
 	
 	if (e < 0) {
-		fprintf(stderr, "sound_start_loopback_play: error opening loopback playback device %s: %s\n", device, snd_strerror(e));
+		sprintf(debug_text,"sound_start_loopback_play: error opening loopback playback device %s: %s", device, snd_strerror(e));
+		debug(debug_text,255);
 		return -1;
 	}
 
 	e = snd_pcm_hw_params_any(loopback_play_handle, hwparams);
 
 	if (e < 0) {
-		fprintf(stderr, "sound_start_loopback_play: error getting loopback playback params (%d)\n", e);
+		sprintf(debug_text,"sound_start_loopback_play: error getting loopback playback params (%d)", e);
+		debug(debug_text,255);
 		return(-1);
 	}
 
 	e = snd_pcm_hw_params_set_access(loopback_play_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		fprintf(stderr, "sound_start_loopback_play: error setting loopback access.\n");
+		sprintf(debug_text,"sound_start_loopback_play: error setting loopback access.\n");
+		debug(debug_text,255);
 		return(-1);
 	}
 
@@ -818,7 +825,7 @@ int sound_loop(){
 		if((pcmreturn < 0) && (pcmreturn != -11)){	// also ignore "temporarily unavailable" errors
 			// Handle an error condition from the snd_pcm_writei function
 			sprintf(debug_text,"sound_loop: play PCM write error:%s count:%d\n",snd_strerror(pcmreturn), play_write_error++);
-			debug(debug_text,255);
+			debug(debug_text,11);
 			snd_pcm_prepare(pcm_play_handle);		
 		}
 		
