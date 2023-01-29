@@ -16,8 +16,6 @@
 #define TYPE_INTEGER 2
 
 #define ACTION_UPDATE 0
-// #define ACTION_INCREMENT 1  // not implemented yet
-// #define ACTION_DECREMENT 2  // not implemented yet
 
 #define PIN_PI_TX 27      // physical pin 36 / GPIO16
 #define PIN_PI_PTT 0      // physical pin 11 / GPIO17
@@ -34,19 +32,21 @@
 #define PIN_PI_BAND3 11   // physical pin 26 / GPIO7
 #define PIN_PI_BAND4 10   // physical pin 24 / GPIO8
 
+#define PIN_PI_BAND_HF 26 // physical pin 32 / GPIO12
+
 /*
 
 
+HF BANDS (PIN_PI_BAND_HF = HIGH)
+PIN_PI_BAND1: 1.0 -  5.5 MHz 
+PIN_PI_BAND2: 5.5 - 10.5 MHz 
+PIN_PI_BAND3: 10.5 - 18.5 MHz 
+PIN_PI_BAND4: 18.5 - 30.0 MHz 
 
-    BAND         PIN_PI_BAND4  PIN_PI_BAND3 PIN_PI_BAND2 PIN_PI_BAND1
- 1.0 -  5.5 MHz       0             0            0           1
- 5.5 - 10.5 MHz       0             0            1           0
-10.5 - 18.5 MHz       0             0            1           1
-18.5 - 30.0 MHz       0             1            0           0
-
-6m                    1             0            0           1
-2m                    1             0            1           0
-70 cm                 1             1            0           0
+VHF/UHF BANDS (PIN_PI_BAND_HF = LOW)
+PIN_PI_BAND1: 6m              
+PIN_PI_BAND2: 2m              
+PIN_PI_BAND3: 70 cm           
 
 
 */

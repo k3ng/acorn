@@ -21,14 +21,6 @@ static int tx_shift = 512;
 
 FILE *pf_debug = NULL;
 
-#define TX_LINE 4
-#define TX_POWER 27
-#define BAND_SELECT 5
-#define LPF_A 5
-#define LPF_B 6
-#define LPF_C 10
-#define LPF_D 11
-
 float fft_bins[MAX_BINS]; // spectrum ampltiudes  
 fftw_complex *fft_spectrum;
 fftw_plan plan_spectrum;
@@ -50,7 +42,6 @@ static int tx_gain = 100;
 static int tx_compress = 0;
 static double spectrum_speed = 0.1;
 static int in_tx = 0;
-static int rx_tx_ramp = 0;
 static int sidetone = 2000000000;
 struct vfo tone_a, tone_b; //these are audio tone generators
 static int tx_use_line = 0;
@@ -58,7 +49,6 @@ struct rx *rx_list = NULL;
 struct rx *tx_list = NULL;
 struct filter *tx_filter;	//convolution filter
 static double tx_amp = 0.0;
-static int tr_relay = 0;
 
 #define MUTE_MAX 6 
 static int mute_count = 50;
@@ -225,45 +215,52 @@ void spectrum_update(){
 // ---------------------------------------------------------------------------------------
 
 
-void set_lpf_40mhz(int frequency){
+void set_hardware_filters(long int frequency){
 
-	static int prev_lpf = -1;
-	int lpf = 0;
+	sprintf(debug_text,"set_hardware_filters: freq: %d", frequency);
+	debug(debug_text,2);
 
-	if (frequency < 5500000)
-		lpf = LPF_D;
-	else if (frequency < 10500000)		
-		lpf = LPF_C;
-	else if (frequency < 18500000)		
-		lpf = LPF_B;
-	else if (frequency < 30000000)
-		lpf = LPF_A; 
+  if (frequency < 30000000){
+  	digitalWrite(PIN_PI_BAND_HF, HIGH);
+  } else {
+  	digitalWrite(PIN_PI_BAND_HF, LOW);
+  }
 
-	if (lpf == prev_lpf){
-		//puts("LPF not changed");
-		return;
+	if (frequency < 5500000){
+	  digitalWrite(PIN_PI_BAND1, HIGH);
+	  digitalWrite(PIN_PI_BAND2, LOW);
+	  digitalWrite(PIN_PI_BAND3, LOW);
+	  digitalWrite(PIN_PI_BAND4, LOW);		
+	}
+	else if (frequency < 10500000){
+	  digitalWrite(PIN_PI_BAND1, LOW);
+	  digitalWrite(PIN_PI_BAND2, HIGH);
+	  digitalWrite(PIN_PI_BAND3, LOW);
+	  digitalWrite(PIN_PI_BAND4, LOW);			
+	}		
+	else if (frequency < 18500000){
+	  digitalWrite(PIN_PI_BAND1, LOW);
+	  digitalWrite(PIN_PI_BAND2, LOW);
+	  digitalWrite(PIN_PI_BAND3, HIGH);
+	  digitalWrite(PIN_PI_BAND4, LOW);			
+	}		
+
+	else if (frequency < 30000000){
+		digitalWrite(PIN_PI_BAND1, LOW);
+	  digitalWrite(PIN_PI_BAND2, LOW);
+	  digitalWrite(PIN_PI_BAND3, LOW);
+	  digitalWrite(PIN_PI_BAND4, HIGH);	
 	}
 
-	//printf("##################Setting LPF to %d\n", lpf);
-
-  digitalWrite(LPF_A, LOW);
-  digitalWrite(LPF_B, LOW);
-  digitalWrite(LPF_C, LOW);
-  digitalWrite(LPF_D, LOW);
-
-  //printf("################ setting %d high\n", lpf);
-  digitalWrite(lpf, HIGH); 
-  //digitalWrite(LPF_B, HIGH); 
-	prev_lpf = lpf;
 }
 
 // ---------------------------------------------------------------------------------------
 
 
-void set_rx1(int frequency){
+void set_rx1(long int frequency){
 	radio_tune_to(frequency);
 	freq_hdr = frequency;
-	set_lpf_40mhz(frequency);
+	set_hardware_filters(frequency);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -278,42 +275,45 @@ void set_volume(double v){
 
 FILE *wav_start_writing(const char* path){
 
-    char subChunk1ID[4] = { 'f', 'm', 't', ' ' };
-    unsigned int subChunk1Size = 16; // 16 for PCM
-    uint16_t audioFormat = 1; // PCM = 1
-    uint16_t numChannels = 1;
-    uint16_t bitsPerSample = 16;
-    unsigned int sampleRate = 12000;
-    uint16_t blockAlign = numChannels * bitsPerSample / 8;
-    unsigned int byteRate = sampleRate * blockAlign;
+	sprintf(debug_text,"wav_start_writing: path:%s", path);
+	debug(debug_text,2);
 
-    char subChunk2ID[4] = { 'd', 'a', 't', 'a' };
-    unsigned int subChunk2Size = 0Xffffffff; //num_samples * blockAlign;
+  char subChunk1ID[4] = { 'f', 'm', 't', ' ' };
+  unsigned int subChunk1Size = 16; // 16 for PCM
+  uint16_t audioFormat = 1; // PCM = 1
+  uint16_t numChannels = 1;
+  uint16_t bitsPerSample = 16;
+  unsigned int sampleRate = 12000;
+  uint16_t blockAlign = numChannels * bitsPerSample / 8;
+  unsigned int byteRate = sampleRate * blockAlign;
 
-    char chunkID[4] = { 'R', 'I', 'F', 'F' };
-    unsigned int chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
-    char format[4] = { 'W', 'A', 'V', 'E' };
+  char subChunk2ID[4] = { 'd', 'a', 't', 'a' };
+  unsigned int subChunk2Size = 0Xffffffff; //num_samples * blockAlign;
 
-    FILE* f = fopen(path, "w");
+  char chunkID[4] = { 'R', 'I', 'F', 'F' };
+  unsigned int chunkSize = 4 + (8 + subChunk1Size) + (8 + subChunk2Size);
+  char format[4] = { 'W', 'A', 'V', 'E' };
 
-    // NOTE: works only on little-endian architecture
-    fwrite(chunkID, sizeof(chunkID), 1, f);
-    fwrite(&chunkSize, sizeof(chunkSize), 1, f);
-    fwrite(format, sizeof(format), 1, f);
+  FILE* f = fopen(path, "w");
 
-    fwrite(subChunk1ID, sizeof(subChunk1ID), 1, f);
-    fwrite(&subChunk1Size, sizeof(subChunk1Size), 1, f);
-    fwrite(&audioFormat, sizeof(audioFormat), 1, f);
-    fwrite(&numChannels, sizeof(numChannels), 1, f);
-    fwrite(&sampleRate, sizeof(sampleRate), 1, f);
-    fwrite(&byteRate, sizeof(byteRate), 1, f);
-    fwrite(&blockAlign, sizeof(blockAlign), 1, f);
-    fwrite(&bitsPerSample, sizeof(bitsPerSample), 1, f);
+  // NOTE: works only on little-endian architecture
+  fwrite(chunkID, sizeof(chunkID), 1, f);
+  fwrite(&chunkSize, sizeof(chunkSize), 1, f);
+  fwrite(format, sizeof(format), 1, f);
 
-    fwrite(subChunk2ID, sizeof(subChunk2ID), 1, f);
-    fwrite(&subChunk2Size, sizeof(subChunk2Size), 1, f);
-		
-		return f;
+  fwrite(subChunk1ID, sizeof(subChunk1ID), 1, f);
+  fwrite(&subChunk1Size, sizeof(subChunk1Size), 1, f);
+  fwrite(&audioFormat, sizeof(audioFormat), 1, f);
+  fwrite(&numChannels, sizeof(numChannels), 1, f);
+  fwrite(&sampleRate, sizeof(sampleRate), 1, f);
+  fwrite(&byteRate, sizeof(byteRate), 1, f);
+  fwrite(&blockAlign, sizeof(blockAlign), 1, f);
+  fwrite(&bitsPerSample, sizeof(bitsPerSample), 1, f);
+
+  fwrite(subChunk2ID, sizeof(subChunk2ID), 1, f);
+  fwrite(&subChunk2Size, sizeof(subChunk2Size), 1, f);
+	
+	return f;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -353,6 +353,9 @@ void tx_init(int frequency, short mode, int bpf_low, int bpf_high){
 
 	// we assume that there are 96000 samples / sec, giving us a 48khz slice
 	// the tuning can go up and down only by 22 KHz from the center_freq
+
+	sprintf(debug_text,"tx_init: frequency: %d mode:%d bpf_low:%d bpf_high:%d", frequency, mode, bpf_low, bpf_high);
+	debug(debug_text,3);
 
 	tx_filter = filter_new(1024, 1025);
 	filter_tune(tx_filter, (1.0 * bpf_low)/96000.0, (1.0 * bpf_high)/96000.0 , 5);
@@ -777,6 +780,10 @@ void sound_process(
 	int n_samples)
 {
 
+	sprintf(debug_text,"sound_process: n_samples: %d", n_samples);
+	debug(debug_text,13);
+
+
 	if (in_tx)
 		tx_process(input_rx, input_mic, output_speaker, output_tx, n_samples);
 	else
@@ -790,16 +797,20 @@ void sound_process(
 
 
 void set_rx_filter(){
-	if(rx_list->mode == MODE_LSB || rx_list->mode == MODE_CWR)
+
+  debug("set_rx_filter: called",2);
+
+	if(rx_list->mode == MODE_LSB || rx_list->mode == MODE_CWR){
     filter_tune(rx_list->filter, 
       (1.0 * -rx_list->high_hz)/96000.0, 
       (1.0 * -rx_list->low_hz)/96000.0 , 
       5);
-	else
+	} else {
     filter_tune(rx_list->filter, 
       (1.0 * rx_list->low_hz)/96000.0, 
       (1.0 * rx_list->high_hz)/96000.0 , 
       5);
+	}
 }
 
 
@@ -807,6 +818,9 @@ void set_rx_filter(){
 
 
 void setup_oscillators(){
+
+	debug("setup_oscillators: called",2);
+
   //initialize the SI5351
 
   // delay(200);
@@ -832,8 +846,8 @@ void set_tx_power_levels(){
 
 	*/
 
- // printf("Setting tx_power to %d, gain to %d\n", tx_power_watts, tx_gain);
-	int tx_power_gain = 0;
+
+	//int tx_power_gain = 0;
 
 	//search for power in the approved bands
 	for (int i = 0; i < sizeof(band_power)/sizeof(struct power_settings); i++){
@@ -849,67 +863,72 @@ void set_tx_power_levels(){
 	//we keep the audio card output 'volume' constant'
 	sound_mixer(audio_card, "Master", 95);
 	sound_mixer(audio_card, "Capture", tx_gain);
+	sprintf(debug_text,"set_tx_power_levels: tx_drive: %dtx_amp:%d tx_gain:%d", tx_drive, tx_amp, tx_gain);
+	debug(debug_text,2);
 }
 
 // ---------------------------------------------------------------------------------------
 
 
 void tr_switch(int tx_on){
-		if (tx_on){
-			in_tx = 1;
-			//mute it all and hang on for a millisecond
-			sound_mixer(audio_card, "Master", 0);
-			sound_mixer(audio_card, "Capture", 0);
-			delay(1);
 
-			//now switch of the signal back
-			//now ramp up after 5 msecs
-			digitalWrite(TX_LINE, HIGH);
-			mute_count = 20;
-      fft_reset_m_bins();
-			//give time for the reed relay to switch
-      delay(2);
-			set_tx_power_levels();
-			//finally ramp up the power 
-			if (tr_relay){
-				set_lpf_40mhz(freq_hdr);
-				delay(10); //debounce the lpf relays
-			}
-			digitalWrite(TX_POWER, HIGH);
-			//strcpy(response, "ok");
-			spectrum_reset();
-		//	rx_tx_ramp = 1;
-		}
-		else {
-			in_tx = 0;
-			//mute it all and hang on
-			sound_mixer(audio_card, "Master", 0);
-			sound_mixer(audio_card, "Capture", 0);
-			delay(1);
-      fft_reset_m_bins();
-			mute_count = MUTE_MAX;
 
-			//power down the PA chain to null any gain
-			digitalWrite(TX_POWER, LOW);
-			delay(2);
+  // TODO: get rid of all these delay()s / make this a service routine that is re-entrant (not the right term)
+  //            to handle whatever delays are needed
 
-			if (tr_relay){
-  			digitalWrite(LPF_A, LOW);
-  			digitalWrite(LPF_B, LOW);
- 	 			digitalWrite(LPF_C, LOW);
-  			digitalWrite(LPF_D, LOW);
-			}
-			delay(10);
+  // original sbitx pin definitions:
 
-			//drive the tx line low, switching the signal path 
-			digitalWrite(TX_LINE, LOW);
-			delay(5); 
-			//audio codec is back on
-			sound_mixer(audio_card, "Master", rx_vol);
-			sound_mixer(audio_card, "Capture", rx_gain);
-			spectrum_reset();
-			//rx_tx_ramp = 10;
-		}
+  //#define TX_LINE 4     // physical pin 16  "R-TR" Digital Board J2:pin 27-->Main Board J1:pin 27 "TX"
+  //#define TX_POWER 27  // physical pin 36  "R-F"
+
+
+  sprintf(debug_text,"tr_switch: tx_on: %d",tx_on);
+  debug(debug_text,2);
+
+	if (tx_on){
+
+		in_tx = 1;
+		//mute it all and hang on for a millisecond
+		sound_mixer(audio_card, "Master", 0);
+		sound_mixer(audio_card, "Capture", 0);
+		delay(1);
+
+		//now switch of the signal back
+		//now ramp up after 5 msecs
+		//digitalWrite(TX_LINE, HIGH);
+		mute_count = 20;
+    fft_reset_m_bins();
+		//give time for the reed relay to switch
+    delay(2);
+		set_tx_power_levels();
+		//finally ramp up the power 
+		//digitalWrite(TX_POWER, HIGH);
+		spectrum_reset();
+
+	} else {
+
+		in_tx = 0;
+		//mute it all and hang on
+		sound_mixer(audio_card, "Master", 0);
+		sound_mixer(audio_card, "Capture", 0);
+		delay(1);
+    fft_reset_m_bins();
+		mute_count = MUTE_MAX;
+
+		//power down the PA chain to null any gain
+		//digitalWrite(TX_POWER, LOW);
+		delay(2);
+		//drive the tx line low, switching the signal path 
+		//digitalWrite(TX_LINE, LOW);
+		delay(5); 
+
+		//audio codec is back on
+		sound_mixer(audio_card, "Master", rx_vol);
+		sound_mixer(audio_card, "Capture", rx_gain);
+		spectrum_reset();
+		//rx_tx_ramp = 10;
+
+	}
 }
 
 
