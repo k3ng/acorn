@@ -40,11 +40,31 @@ int serial_port_set_interface_attribs (int fd, int speed, int parity, int should
   tty.c_cflag &= ~CSTOPB;
   tty.c_cflag &= ~CRTSCTS;
 
-  if (tcsetattr (fd, TCSANOW, &tty) != 0){
-    fprintf(stdout,"error %d from tcsetattr", errno);
-    return -1;
-  }
+  // if (tcsetattr (fd, TCSANOW, &tty) != 0){
+  //   fprintf(stdout,"error %d from tcsetattr", errno);
+  //   return -1;
+  // }
 
+
+  // tty.c_cc[VMIN]  = should_block ? 1 : 0;
+  // tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+  // if (tcsetattr (fd, TCSANOW, &tty) != 0){
+  //   fprintf(stdout,"error %d setting term attributes", errno);
+  // }
+
+
+  return 0;
+}
+
+void serial_port_set_blocking (int fd, int should_block){
+
+  struct termios tty;
+  memset (&tty, 0, sizeof tty);
+  if (tcgetattr (fd, &tty) != 0){
+    fprintf(stdout,"error %d from tggetattr", errno);
+    return;
+  }
 
   tty.c_cc[VMIN]  = should_block ? 1 : 0;
   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
@@ -53,27 +73,7 @@ int serial_port_set_interface_attribs (int fd, int speed, int parity, int should
     fprintf(stdout,"error %d setting term attributes", errno);
   }
 
-
-  return 0;
 }
-
-// void serial_port_set_blocking (int fd, int should_block){
-
-//   struct termios tty;
-//   memset (&tty, 0, sizeof tty);
-//   if (tcgetattr (fd, &tty) != 0){
-//     fprintf(stdout,"error %d from tggetattr", errno);
-//     return;
-//   }
-
-//   tty.c_cc[VMIN]  = should_block ? 1 : 0;
-//   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
-
-//   if (tcsetattr (fd, TCSANOW, &tty) != 0){
-//     fprintf(stdout,"error %d setting term attributes", errno);
-//   }
-
-// }
 
 
 void main(){
@@ -87,20 +87,21 @@ void main(){
   }
 
   serial_port_set_interface_attribs (fd, B115200, 0, 0);  // set speed to 115,200 bps, 8n1 (no parity)
-  //serial_port_set_blocking (fd, 0);                // set no blocking
+  serial_port_set_blocking (fd, 0);                // set no blocking
 
-  // write (fd, "\r\nv\r\n", 5);           // send 7 character greeting
+  //write (fd, "\rhi\r", 4);          
 
-  // usleep ((5 + 25) * 100);             // sleep enough to transmit the 7 plus
+  //usleep ((4 + 25) * 100);             // sleep enough to transmit the 7 plus
   //                                      // receive 25:  approx 100 uS per char transmit
   char buf [100];
 
   while(1){
-    fgets(str, 50, stdin);
-    strcat(str,"\r\n");
+    //fgets(str, 50, stdin);
+    //strcat(str,"v\r");
+    strcpy(str,"v\r");
     write (fd, str, strlen(str));
     usleep ((strlen(str) + 25) * 100);
-    int n = read (fd, buf, sizeof buf);  // read up to 100 characters if ready to read
+    int n = read (fd, buf, sizeof(buf));  // read up to 100 characters if ready to read
     if (n){
       puts(buf);
     }
