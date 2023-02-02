@@ -74,6 +74,7 @@ void debug(char *debug_text, int debug_text_level);
 
 // Variables ------------------------------------------------------------------------------
 
+int shutdown_flag = 0;
 
 struct setting_struct {
 	char	   *name;
@@ -195,17 +196,13 @@ void isr_enc2(){
 
 void signal_handler(int sig){
 
-     char c;
 
-     signal(sig, SIG_IGN);
-     printf("OUCH, did you hit Ctrl-C?\n"
-            "Do you really want to quit? [y/n] ");
-     c = getchar();
-     if (c == 'y' || c == 'Y')
-          exit(0);
-     else
-          signal(SIGINT, signal_handler);
-     getchar(); // Get new line character
+  signal(sig, SIG_IGN);
+  shutdown_flag = 1;
+  signal(SIGINT, signal_handler);
+
+  debug("\r\n\r\n\r\n\r\nsignal_handler: caught signal, shutting down",255);
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -226,10 +223,12 @@ void debug(char *debug_text_in, int debug_text_level){
   if (debug_text_level > 254){ // this debug text is to go out STDERR
     fprintf(stderr, debug_text_in);
     fprintf(stderr, "\r\n");
+    fflush(stderr);
   } else {
     if (debug_text_level <= debug_level){
     	printf(debug_text_in);
     	printf("\r\n");
+      fflush(stdout);
     }
   }
 
@@ -526,7 +525,7 @@ void start_things_up(int argc, char* argv[]){
     exit(1);
   }
 
-  //signal(SIGINT, signal_handler);
+  signal(SIGINT, signal_handler);
 
 }
 
@@ -535,6 +534,7 @@ void start_things_up(int argc, char* argv[]){
 
 void wind_things_down(){
 
+  debug("wind_things_down: called",1);
   process_lock(CLOSE_LOCK);
 
 }
@@ -558,7 +558,9 @@ void launch_telnet_server_thread(){
 void main_loop(){
 
 
-  while(1){sleep (1);}
+  while(!shutdown_flag){
+    usleep (100000);
+  }
 
 }
 

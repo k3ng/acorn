@@ -58,4 +58,6 @@ void debug(char *debug_text, int debug_text_level);
 
 char debug_text[64];
 
+int shutdown_flag;
+
 #endif //!defined(_acorn_h_)

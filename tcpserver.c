@@ -69,6 +69,7 @@ void *tcp_connection_handler(void *socket_desc){
 	int sock = *(int*)socket_desc;
 	int read_size;
 	char *message, client_message[32], sdr_response[32];
+  char debug_text[100];
 
   sprintf(debug_text,"tcp_connection_handler: sock: %d", sock);
   debug(debug_text,1);
@@ -77,7 +78,7 @@ void *tcp_connection_handler(void *socket_desc){
 	write(sock, message, strlen(message));
 
 
-  while(connection_active){
+  while(connection_active && !shutdown_flag){
     read_size = recv(sock, client_message, 32, 0);
     if (read_size > 0){
       //echo the message back to client
@@ -90,7 +91,7 @@ void *tcp_connection_handler(void *socket_desc){
       }
 
 
-      // handle some telnet commands right here
+      // handle some telnet commands right here  TODO: tie in a command handler
       if (!strcmp(client_message,"quit")){  
         sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client quit sock: %d", sock);
         debug(debug_text,1); 
@@ -120,9 +121,13 @@ void *tcp_connection_handler(void *socket_desc){
 		//fflush(stdout);
 	} else if(read_size == -1){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: recv failed sock: %d", sock);
-    debug(debug_text,1);       
+    debug(debug_text,255);       
 	}
 		
+
+  sprintf(debug_text,"tcp_connection_handler: sock: %d exiting", sock);
+  debug(debug_text,1);
+
 	//Free the socket pointer
 	free(socket_desc);
 	
@@ -137,13 +142,14 @@ void *tcpserver_main_thread(){
 	struct sockaddr_in server, client;
   char ipAddress[INET_ADDRSTRLEN];
   int bind_successful = 0;
+  char debug_text[100];
 	
   while (!bind_successful){
   	// create socket
   	socket_desc = socket(AF_INET, SOCK_STREAM, 0);
   	if (socket_desc == -1){
       sprintf(debug_text,"tcpserver_main_thread: could not create socket");
-      debug(debug_text,1);     
+      debug(debug_text,255);     
       exit;   
   	}
     sprintf(debug_text,"tcpserver_main_thread: socket created: %d", socket_desc);
@@ -158,7 +164,7 @@ void *tcpserver_main_thread(){
   	if (bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0){
   		//print the error message
       sprintf(debug_text,"tcpserver_main_thread: bind failed, retrying");
-      debug(debug_text,1);
+      debug(debug_text,255);
       sleep(5);
       close(socket_desc);     	
   	} else { 
@@ -186,20 +192,22 @@ void *tcpserver_main_thread(){
 		new_sock = malloc(1);
 		*new_sock = client_sock;
 		
-		if (pthread_create( &sniffer_thread, NULL, tcp_connection_handler, (void*) new_sock) < 0){
+		if (pthread_create( &sniffer_thread, NULL, tcp_connection_handler, (void*) new_sock) < 0) {
       sprintf(debug_text,"tcpserver_main_thread: could not create thread");
-      debug(debug_text,1);       
+      debug(debug_text,255);       
 			return 0;
 		}
 		
-		//Now join the thread , so that we dont terminate before the thread
-		// pthread_join( sniffer_thread , NULL);
-		// puts("tcpserver_main_thread: handler assigned");
+		// TODO: is this needed?
+		//pthread_join(sniffer_thread, NULL);
+
+    sprintf(debug_text,"tcpserver_main_thread: handler assigned");
+    debug(debug_text,2);     
 	}
 	
 	if (client_sock < 0){
     sprintf(debug_text,"tcpserver_main_thread: accept failed");
-    debug(debug_text,1);           
+    debug(debug_text,255);           
 		return 0;
 	}
 	
@@ -215,7 +223,7 @@ void *tcpserver_main_thread(){
     pthread_t main_thread;
 
     if (pthread_create(&main_thread, NULL, tcpserver_main_thread, NULL)){
-      perror("main: could not create main thread");
+      debug("main: could not create tcpserver_main_thread",255);
       return 1;
     }
 
