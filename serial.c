@@ -23,6 +23,11 @@
     send_out_serial_port() and get_from_serial_incoming_buffer().
 
 
+  standalone compile with:
+
+  gcc -g -o serial serial.c -pthread
+
+
 */
 
 
@@ -37,7 +42,9 @@
 #include <pthread.h>
 
 
-#define TEST_STANDALONE_COMPILE   // compile with: gcc -g -o serial serial.c -pthread
+// ---------------------------------------------------------------------------------------
+
+
 
 struct serial_buffer_struct{
   int fd;                                           // serial port file descriptor
@@ -53,7 +60,7 @@ struct serial_buffer_struct *serial_buffer_first = NULL; //may have to declare e
 // ---------------------------------------------------------------------------------------
 
 
-#if defined(TEST_STANDALONE_COMPILE)
+#if !defined(COMPILING_EVERYTHING)
 
   
   int shutdown_flag = 0;
@@ -71,7 +78,7 @@ struct serial_buffer_struct *serial_buffer_first = NULL; //may have to declare e
 
   #include "acorn.h"
 
-#endif //TEST_STANDALONE_COMPILE
+#endif //COMPILING_EVERYTHING
 
 // ---------------------------------------------------------------------------------------
 int send_out_serial_port(char *whichone,char *stuff_to_send){
@@ -306,7 +313,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 // ---------------------------------------------------------------------------------------
 
 
-#if defined(TEST_STANDALONE_COMPILE)
+#if !defined(COMPILING_EVERYTHING)
 
 
   void main(){

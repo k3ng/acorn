@@ -19,4 +19,4 @@ else
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
 fi
 
-gcc -g -o $F ini.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
+gcc -D COMPILING_EVERYTHING -g -o $F ini.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 

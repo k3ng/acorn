@@ -632,13 +632,14 @@ void rx_process(int32_t *input_rx,  int32_t *input_mic,
 			output_tx[i] = 0;
 		}
 
-/*
-	if (rx_tx_ramp){
-		memset(output_speaker, 0, sizeof(int32_t) * MAX_BINS/2);
-		printf("Rx muted %d\n", rx_tx_ramp);
-		rx_tx_ramp--;
-	}
-*/
+	/*
+		if (rx_tx_ramp){
+			memset(output_speaker, 0, sizeof(int32_t) * MAX_BINS/2);
+			printf("Rx muted %d\n", rx_tx_ramp);
+			rx_tx_ramp--;
+		}
+	*/
+		
 	//push the data to any potential modem 
 	modem_rx(rx_list->mode, output_speaker, MAX_BINS/2);
 }

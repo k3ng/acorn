@@ -5,6 +5,8 @@
 
 #define VERSION_STRING "acorn 0.1"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
+
+
 #define MAX_SETTING_LENGTH 32
 
 
@@ -34,6 +36,8 @@
 
 #define PIN_PI_BAND_HF 26 // physical pin 32 / GPIO12
 
+#define TCP_SERVER_RIG_COMMAND 8888
+
 /*
 
 
@@ -59,5 +63,19 @@ void debug(char *debug_text, int debug_text_level);
 char debug_text[64];
 
 int shutdown_flag;
+
+struct command_handler_struct{
+
+  char *request;
+  char *response;
+
+};
+
+struct tcpserver_struct{
+
+  int tcpport;
+  int (*command_handler)(struct command_handler_struct *passed_request_and_response);
+
+};
 
 #endif //!defined(_acorn_h_)

@@ -1,6 +1,6 @@
 /* 
 
-This file is from the sBitx by VU2ESE and is modified to test the WM8731 audio codec.
+This file is from the sBitx by VU2ESE, and others, and is modified to test the WM8731 audio codec.
 
 This follows the tutorial at http://alsamodular.sourceforge.net/alsa_programming_howto.html
 

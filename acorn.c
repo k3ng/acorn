@@ -20,7 +20,6 @@
 
 #define HARDCODE_DEBUG_LEVEL 8
 
-
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,8 +99,6 @@ struct setting_struct setting[] =
   	{"callsign", NULL, "", "", TYPE_INTEGER, 0, 30000000, 0, 0},
 
     {"", NULL, "", "", TYPE_NULL, 0, 0, 0, 0}
-
-
 
   };
 
@@ -545,8 +542,13 @@ void wind_things_down(){
 
 void launch_telnet_server_thread(){
 
-  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, NULL)){
-    sprintf(debug_text,"launch_telnet_server_thread: could not create tcpserver_thread");
+  struct tcpserver_struct *new_tcpserver;
+
+  new_tcpserver = malloc(sizeof(new_tcpserver));
+  new_tcpserver->tcpport = TCP_SERVER_RIG_COMMAND;
+
+  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, (void*) new_tcpserver)){
+    sprintf(debug_text,"launch_telnet_server_thread: could not create tcpserver_thread port:%d",new_tcpserver->tcpport);
     debug(debug_text,1);
   }
 
