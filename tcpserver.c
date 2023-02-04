@@ -227,10 +227,10 @@ void *tcpserver_main_thread(void *passed_tcpserver_struct){
 		pthread_t tcp_connection_handler_thread;
 		new_sock = malloc(1);
 		*new_sock = client_sock;
-    // struct tcp_connection_handler_struct *new_tcp_connection_handler_struct;
-    // new_tcp_connection_handler_struct = malloc(sizeof(new_tcp_connection_handler_struct));
 
-		// new_tcp_connection_handler_struct->socket_desc = socket_desc;
+    struct tcp_connection_handler_parms_struct *tcp_connection_handler_parms;
+    tcp_connection_handler_parms = malloc(sizeof(tcp_connection_handler_parms_struct));
+		tcp_connection_handler_parms->client_sock = client_sock;
 
 		if (pthread_create(&tcp_connection_handler_thread, NULL, tcp_connection_handler, (void*) new_sock) < 0) {
     //if (pthread_create(&sniffer_thread, NULL, tcp_connection_handler, (void*) new_tcp_connection_handler_struct) < 0) {
