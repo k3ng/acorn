@@ -31,7 +31,7 @@ fftw_complex *fft_out;		// holds the incoming samples in freq domain (for rx as 
 fftw_complex *fft_in;			// holds the incoming samples in time domain (for rx as well as tx) 
 fftw_complex *fft_m;			// holds previous samples for overlap and discard convolution 
 fftw_plan plan_fwd, plan_tx;
-int bfo_freq = 40035000;
+int bfo_frequency = 40035000;
 int freq_hdr = 7000000;
 
 static double volume 	= 100.0;
@@ -100,12 +100,23 @@ int count = 0;
 
 // ---------------------------------------------------------------------------------------
 
+int set_dds_frequency(int dds_chip, int clock, unsigned int frequency){
 
-void radio_tune_to(unsigned int f){
+  if (dds_chip == 0){
+    
 
-  //si5351bx_setfreq(2, f + bfo_freq - 24000 + TUNING_SHIFT);
+  }
 
-  sprintf(debug_text,"radio_tune_to: setting radio to freq:%d", f);
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void radio_tune_to(unsigned int frequency){
+
+  set_dds_frequency(0, 2, frequency + bfo_frequency - 24000 + TUNING_SHIFT);
+
+  sprintf(debug_text,"radio_tune_to: setting radio to freq:%d", frequency);
   debug(debug_text,1);
 
 }
@@ -320,6 +331,7 @@ FILE *wav_start_writing(const char* path){
 
 
 void wav_record(int32_t *samples, int count){
+
 	int16_t *w;
 	int32_t *s;
 	int i = 0, j = 0;
@@ -336,15 +348,18 @@ void wav_record(int32_t *samples, int count){
 		j++;
 	}
 	fwrite(record_buffer, j, sizeof(int16_t), pf_record);
+	
 }
 
 // ---------------------------------------------------------------------------------------
 
 
 /*
+
 The sound process is called by the duplex sound system for each block of samples
 In this demo, we read and equivalent block from the file instead of processing from
 the input I and Q signals.
+
 */
 
 
@@ -822,17 +837,8 @@ void setup_oscillators(){
 
 	debug("setup_oscillators: called",2);
 
-  //initialize the SI5351
+  set_dds_frequency(0, 1, bfo_frequency);
 
-  // delay(200);
-  // si5351bx_init();
-  // delay(200);
-  // si5351bx_setfreq(1, bfo_freq);
-
-  // delay(200);
-  // si5351bx_setfreq(1, bfo_freq);
-
-  // si5351_reset();
 }
 
 // ---------------------------------------------------------------------------------------
@@ -842,7 +848,8 @@ void set_tx_power_levels(){
 
 
 	/*
-		 the PA gain varies across the band from 3.5 MHz to 30 MHz
+
+		the PA gain varies across the band from 3.5 MHz to 30 MHz
 	 	here we adjust the drive levels to keep it up, almost level
 
 	*/
@@ -997,7 +1004,7 @@ void setup_sdr(){
 int sdr_request(char *request, char *response){
 
 
-	char cmd[100], value[1000];
+	char command[100], command_argument[1000];
 
   sprintf(debug_text,"sdr_request: request:%s", request);
   debug(debug_text,2);
@@ -1008,45 +1015,45 @@ int sdr_request(char *request, char *response){
 		return 1;
 	}
 
-  // parse out cmd and value (cmd=value)
-	char *p = strchr(request, '=');
-	int n = p - request;
-	if (!p){
+  // parse out command and command_argument (command=command_argument)
+	char *equal_character = strchr(request, '=');
+	int number_of_command_characters = equal_character - request;
+	if (!equal_character){
 		strcpy(response, "error");
 		return -1;
 	}
-	strncpy(cmd, request, n);
-	cmd[n] = 0;
-	strcpy(value, request+n+1);
+	strncpy(command, request, number_of_command_characters);
+	command[number_of_command_characters] = 0;
+	strcpy(command_argument, request+number_of_command_characters+1);
 
 
-	if (!strcmp(cmd, "stat:tx")){
+	if (!strcmp(command, "stat:tx")){
 		if (in_tx)
 			strcpy(response, "ok on");
 		else
 			strcpy(response, "ok off");
 	}
-	else if (!strcmp(cmd, "r1:freq")){
-		int d = atoi(value);
+	else if (!strcmp(command, "r1:freq")){
+		int d = atoi(command_argument);
 		set_rx1(d);
 	  sprintf(debug_text,"sdr_request: rx freq set to:%s", freq_hdr);
 	  debug(debug_text,2);		
 		strcpy(response, "ok");	
 	} 
-	else if (!strcmp(cmd, "r1:mode")){
-		if (!strcmp(value, "LSB"))
+	else if (!strcmp(command, "r1:mode")){
+		if (!strcmp(command_argument, "LSB"))
 			rx_list->mode = MODE_LSB;
-		else if (!strcmp(value, "CW"))
+		else if (!strcmp(command_argument, "CW"))
 			rx_list->mode = MODE_CW;
-		else if (!strcmp(value, "CWR"))
+		else if (!strcmp(command_argument, "CWR"))
 			rx_list->mode = MODE_CWR;
-		else if (!strcmp(value, "2TONE"))
+		else if (!strcmp(command_argument, "2TONE"))
 			rx_list->mode = MODE_2TONE;
-		else if (!strcmp(value, "FT8"))
+		else if (!strcmp(command_argument, "FT8"))
 			rx_list->mode = MODE_FT8;
-		else if (!strcmp(value, "PSK31"))
+		else if (!strcmp(command_argument, "PSK31"))
 			rx_list->mode = MODE_PSK31;
-		else if (!strcmp(value, "RTTY"))
+		else if (!strcmp(command_argument, "RTTY"))
 			rx_list->mode = MODE_RTTY;
 		else
 			rx_list->mode = MODE_USB;
@@ -1097,29 +1104,29 @@ int sdr_request(char *request, char *response){
 	  debug(debug_text,2);		
 		strcpy(response, "ok");
 	}
-	else if (!strcmp(cmd, "txmode")){
+	else if (!strcmp(command, "txmode")){
 		//puts("\n\n\n\n###### tx filter #######");
-		if (!strcmp(value, "LSB") || !strcmp(value, "CWR"))
+		if (!strcmp(command_argument, "LSB") || !strcmp(command_argument, "CWR"))
 			filter_tune(tx_filter, (1.0*-3000)/96000.0, (1.0 * -300)/96000.0, 5);
 		else
 			filter_tune(tx_filter, (1.0*300)/96000.0, (1.0*3000)/96000.0, 5);
 	}
-	else if(!strcmp(cmd, "record")){
-		if (!strcmp(value, "off")){
+	else if(!strcmp(command, "record")){
+		if (!strcmp(command_argument, "off")){
 			fclose(pf_record);
 			pf_record = NULL;
 		}
 		else
-			pf_record = wav_start_writing(value);
+			pf_record = wav_start_writing(command_argument);
 	}
-	else if (!strcmp(cmd, "tx")){
-		if (!strcmp(value, "on"))
+	else if (!strcmp(command, "tx")){
+		if (!strcmp(command_argument, "on"))
 			tr_switch(1);
 		else
 			tr_switch(0);
 		strcpy(response, "ok");
 		/*
-		if (!strcmp(value, "on")){
+		if (!strcmp(command_argument, "on")){
 			in_tx = 1;
 			//mute it all and hang on for a millisecond
 			sound_mixer(audio_card, "Master", 0);
@@ -1165,57 +1172,68 @@ int sdr_request(char *request, char *response){
 		}
 		*/
 	}
-	else if (!strcmp(cmd, "tx_gain")){
-		tx_gain = atoi(value);
-		if(in_tx)
+	else if (!strcmp(command, "tx_gain")){
+		tx_gain = atoi(command_argument);
+		if(in_tx){
 			set_tx_power_levels();
+		}
 	}
-	else if (!strcmp(cmd, "tx_power")){
-    tx_drive = atoi(value);
-		if(in_tx)
+	else if (!strcmp(command, "tx_power")){
+    tx_drive = atoi(command_argument);
+		if(in_tx){
 			set_tx_power_levels();	
+		}
 	}
-	else if(!strcmp(cmd, "r1:gain")){
-		rx_gain = atoi(value);
-		if(!in_tx)
+	else if(!strcmp(command, "r1:gain")){
+		rx_gain = atoi(command_argument);
+		if(!in_tx){
 			sound_mixer(audio_card, "Capture", rx_gain);
+		}
 	}
-	else if (!strcmp(cmd, "r1:volume")){
-		rx_vol = atoi(value);
-		if(!in_tx)	
+	else if (!strcmp(command, "r1:volume")){
+		rx_vol = atoi(command_argument);
+		if(!in_tx){	
 			sound_mixer(audio_card, "Master", rx_vol);
+		}
 	}
-	else if(!strcmp(cmd, "r1:high")){
-    rx_list->high_hz = atoi(value);
+	else if(!strcmp(command, "r1:high")){
+    rx_list->high_hz = atoi(command_argument);
     set_rx_filter();
   }
-	else if(!strcmp(cmd, "r1:low")){
-    rx_list->low_hz = atoi(value);
+	else if(!strcmp(command, "r1:low")){
+    rx_list->low_hz = atoi(command_argument);
     set_rx_filter();
   }
-  else if (!strcmp(cmd, "r1:agc")){
-    if (!strcmp(value, "OFF"))
+  else if (!strcmp(command, "r1:agc")){
+    if (!strcmp(command_argument, "OFF")){
       rx_list->agc_speed = -1;
-    else if (!strcmp(value, "SLOW"))
+    }
+    else if (!strcmp(command_argument, "SLOW")){
       rx_list->agc_speed = 100;
-		else if (!strcmp(value, "MED"))
+    }
+		else if (!strcmp(command_argument, "MED")){
 			rx_list->agc_speed = 33; 
-    else if (!strcmp(value, "FAST"))
+		}
+    else if (!strcmp(command_argument, "FAST")){
       rx_list->agc_speed = 10;
+    }
   }
-	else if (!strcmp(cmd, "sidetone")){ //between 100 and 0
-		float t_sidetone = atof(value);
-		if (0 <= t_sidetone && t_sidetone <= 100)
-			sidetone = atof(value) * 20000000;
+	else if (!strcmp(command, "sidetone")){ //between 100 and 0
+		float t_sidetone = atof(command_argument);
+		if (0 <= t_sidetone && t_sidetone <= 100){
+			sidetone = atof(command_argument) * 20000000;
+		}
 	}
-  else if (!strcmp(cmd, "mod")){
-    if (!strcmp(value, "MIC"))
+  else if (!strcmp(command, "mod")){
+    if (!strcmp(command_argument, "MIC")){
       tx_use_line = 0;
-    else if (!strcmp(value, "LINE"))
+    }
+    else if (!strcmp(command_argument, "LINE")){
       tx_use_line = 1;
+    }
   }
-	else if (!strcmp(cmd, "tx_compress")){
-		tx_compress = atoi(value); 
+	else if (!strcmp(command, "tx_compress")){
+		tx_compress = atoi(command_argument); 
 	}
 	else {
   	strcpy(response, "error");

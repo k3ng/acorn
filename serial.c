@@ -25,7 +25,7 @@
 
   Standalone compile with:
 
-  gcc -g -o serial serial.c -pthread
+    gcc -g -o serial serial.c -pthread
 
   The standalone compilation tests the connection to the AVR on /dev/ttyS0 by sending the p (poll) command in a loop.
 

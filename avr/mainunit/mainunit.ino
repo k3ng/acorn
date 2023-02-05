@@ -18,9 +18,11 @@
 
     p: poll the serial ring to identify devices
 
-    s: send CW string
-    w: change CW WPM
-    x: empty CW buffer
+    TODO s: send CW string
+    TODO w: change CW WPM
+    TODO x: empty CW buffer
+    TODO z: read paddle echo buffer
+    TODO R: reverse paddle
 
 
 */
