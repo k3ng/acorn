@@ -107,7 +107,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
   int client_sock = tcp_connection_handler_parms.client_sock;
 
 	int read_size;
-	char *message, client_message[32], sdr_response[32];
+	char *message, client_message[1000], sdr_response[1000];
   char debug_text[100];
 
   sprintf(debug_text,"tcp_connection_handler: starting client_sock:%d", client_sock);

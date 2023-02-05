@@ -519,7 +519,7 @@ void start_things_up(int argc, char* argv[]){
 
   if (!process_lock(OPEN_LOCK)){
     fprintf(stderr,"There is another Acorn running.  Exiting.\r\n");
-    exit(1);
+    exit(-1);
   }
 
   signal(SIGINT, signal_handler);

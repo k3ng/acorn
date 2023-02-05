@@ -348,7 +348,7 @@ void wav_record(int32_t *samples, int count){
 		j++;
 	}
 	fwrite(record_buffer, j, sizeof(int16_t), pf_record);
-	
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1004,7 +1004,32 @@ void setup_sdr(){
 int sdr_request(char *request, char *response){
 
 
-	char command[100], command_argument[1000];
+	/*
+
+
+    Commands:
+
+		  stat:tx=                                         : query tx status
+		  r1:freq=<frequency>
+		  r1:mode=<LSB,CW,CWR,2TONE,FT8,PSK31,RTTY,USB>
+		  txmode=<LSB,CW,CWR,2TONE,FT8,PSK31,RTTY,USB>     : switches filtering around
+		  record=<on,off>
+		  tx=<on,off>
+		  tx_gain=#
+		  tx_power=#
+		  r1:gain
+		  r1:volume
+		  r1:high
+		  r1:low
+		  r1:agc=<OFF,SLOW,MED,FAST>
+		  sidetone=# (0 =< # <= 100)
+		  mod=<MIC,LINE>
+		  tx_compress=#
+
+  */
+
+
+	char command[32], command_argument[32];
 
   sprintf(debug_text,"sdr_request: request:%s", request);
   debug(debug_text,2);
@@ -1014,6 +1039,30 @@ int sdr_request(char *request, char *response){
 		strcpy(response, "hello from sdr_request!");
 		return 1;
 	}
+
+
+  if (!strcmp(request, "help")){
+		strcpy(response, "stat:tx=                                         : query tx status\r\n"
+			               "r1:freq=<frequency>\r\n"
+			               "r1:mode=<LSB,CW,CWR,2TONE,FT8,PSK31,RTTY,USB>\r\n"
+										 "txmode=<LSB,CW,CWR,2TONE,FT8,PSK31,RTTY,USB>     : switches filtering around\r\n"
+										 "record=<on,off>\r\n"
+										 "tx=<on,off>\r\n"
+										 "tx_gain=#\r\n"
+										 "tx_power=#\r\n"
+										 "r1:gain\r\n"
+										 "r1:volume\r\n"
+										 "r1:high\r\n"
+										 "r1:low\r\n"
+										 "r1:agc=<OFF,SLOW,MED,FAST>\r\n"
+										 "sidetone=# (0 =< # <= 100)\r\n"
+										 "mod=<MIC,LINE>\r\n"
+										 "tx_compress=#\r\n"
+			               );               
+
+		return 1;
+	}
+
 
   // parse out command and command_argument (command=command_argument)
 	char *equal_character = strchr(request, '=');
@@ -1027,6 +1076,7 @@ int sdr_request(char *request, char *response){
 	strcpy(command_argument, request+number_of_command_characters+1);
 
 
+
 	if (!strcmp(command, "stat:tx")){
 		if (in_tx)
 			strcpy(response, "ok on");
@@ -1034,8 +1084,8 @@ int sdr_request(char *request, char *response){
 			strcpy(response, "ok off");
 	}
 	else if (!strcmp(command, "r1:freq")){
-		int d = atoi(command_argument);
-		set_rx1(d);
+		int frequency = atoi(command_argument);
+		set_rx1(frequency);
 	  sprintf(debug_text,"sdr_request: rx freq set to:%s", freq_hdr);
 	  debug(debug_text,2);		
 		strcpy(response, "ok");	
@@ -1107,9 +1157,9 @@ int sdr_request(char *request, char *response){
 	else if (!strcmp(command, "txmode")){
 		//puts("\n\n\n\n###### tx filter #######");
 		if (!strcmp(command_argument, "LSB") || !strcmp(command_argument, "CWR"))
-			filter_tune(tx_filter, (1.0*-3000)/96000.0, (1.0 * -300)/96000.0, 5);
+			filter_tune(tx_filter, (1.0 * -3000) / 96000.0, (1.0 * -300) / 96000.0, 5);
 		else
-			filter_tune(tx_filter, (1.0*300)/96000.0, (1.0*3000)/96000.0, 5);
+			filter_tune(tx_filter, (1.0 * 300) / 96000.0,   (1.0 * 3000) / 96000.0, 5);
 	}
 	else if(!strcmp(command, "record")){
 		if (!strcmp(command_argument, "off")){
@@ -1125,52 +1175,6 @@ int sdr_request(char *request, char *response){
 		else
 			tr_switch(0);
 		strcpy(response, "ok");
-		/*
-		if (!strcmp(command_argument, "on")){
-			in_tx = 1;
-			//mute it all and hang on for a millisecond
-			sound_mixer(audio_card, "Master", 0);
-			sound_mixer(audio_card, "Capture", 0);
-			delay(1);
-
-			//now switch of the signal back
-			//now ramp up after 5 msecs
-			digitalWrite(TX_LINE, HIGH);
-			mute_count = 20;
-      fft_reset_m_bins();
-			//give time for the reed relay to switch
-      delay(2);
-			set_tx_power_levels();
-			//finally ramp up the power 
-			digitalWrite(TX_POWER, HIGH);
-			strcpy(response, "ok");
-			spectrum_reset();
-		//	rx_tx_ramp = 1;
-		}
-		else {
-			in_tx = 0;
-			//mute it all and hang on
-			sound_mixer(audio_card, "Master", 0);
-			sound_mixer(audio_card, "Capture", 0);
-			delay(1);
-      fft_reset_m_bins();
-			mute_count = MUTE_MAX;
-			strcpy(response, "ok");
-
-			//power down the PA chain to null any gain
-			digitalWrite(TX_POWER, LOW);
-			delay(2);
-
-			//drive the tx line low, switching the signal path 
-			digitalWrite(TX_LINE, LOW);
-			delay(5); 
-			//audio codec is back on
-			sound_mixer(audio_card, "Master", rx_vol);
-			sound_mixer(audio_card, "Capture", rx_gain);
-			spectrum_reset();
-			//rx_tx_ramp = 10;
-		}
-		*/
 	}
 	else if (!strcmp(command, "tx_gain")){
 		tx_gain = atoi(command_argument);
