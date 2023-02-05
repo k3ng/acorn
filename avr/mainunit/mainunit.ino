@@ -1,6 +1,6 @@
 /*
 
-  acorn arduino code
+  acorn avr main unit
 
   Anthony Good, K3NG
 
@@ -11,27 +11,22 @@
     b: set clock 1 frequency
     c: set clock 2 frequency
 
-    hi: say hello
+    d: query dds status
 
     f: read forward power voltage
     r: read reflected power voltage
 
-    v: return code version
+    p: poll the serial ring to identify devices
 
     s: send CW string
     w: change CW WPM
     x: empty CW buffer
 
 
-  error codes returned on serial port
-
-    e00: unknown command
-    e01: no Si5351 found
-
-
 */
 
 #define CODE_VERSION "202301161347"
+#define UNIT_TYPE "CW_Si5351_unit"
 
 #include <stdio.h>
 #include <avr/pgmspace.h>
@@ -115,6 +110,8 @@ byte char_send_buffer_status = SERIAL_SEND_BUFFER_NORMAL;
 byte element_send_buffer_array[element_send_buffer_size];
 byte element_send_buffer_bytes = 0;
 
+int dds_status = 0;
+
 
 //-------------------------------------------------------------------------------------------------------
 
@@ -136,8 +133,9 @@ void initialize_hardware(){
 
   if (clockgen.begin() == ERROR_NONE){
     clockgen.enableOutputs(true);
+    dds_status = 1;
   } else {
-    Serial.println("e01");
+    dds_status = 0;
   }
 
 
@@ -150,7 +148,6 @@ void initialize_hardware(){
 void initialize_serial(){
 
   Serial.begin(default_serial_baud_rate); 
-  Serial.println("hi");
 
 }
 
@@ -663,28 +660,36 @@ void check_serial(){
         incoming_serial_buffer[incoming_serial_buffer_bytes-1] = 0;  // remove carriage return
       }
 
-      if (!strcmp(incoming_serial_buffer,"v")){
-        Serial.print("v");
-        Serial.println(CODE_VERSION);
+      if (incoming_serial_buffer[0] == 'p'){
+        Serial.print(incoming_serial_buffer);  // send along any other devices that were before us on the serial ring
+        Serial.print(UNIT_TYPE);
+        Serial.print(":");
+        Serial.print(CODE_VERSION);
+        Serial.println("$");
       } else if (incoming_serial_buffer[0] == 'a'){ 
-        Serial.println("a");
+        Serial.println("aOK");
         set_clk_freq(0,atol(command_argument(incoming_serial_buffer)));
       } else if (incoming_serial_buffer[0] == 'b'){
         set_clk_freq(1,atol(command_argument(incoming_serial_buffer)));
-        Serial.println("b");
+        Serial.println("bOK");
       } else if (incoming_serial_buffer[0] == 'c'){ 
         set_clk_freq(2,atol(command_argument(incoming_serial_buffer)));   
-        Serial.println("c");
+        Serial.println("cOK");
+      } else if (incoming_serial_buffer[0] == 'd'){ 
+        if (dds_status == 1){   
+          Serial.println("dOK"); 
+        } else {
+          Serial.println("dERROR"); 
+        }       
       } else if (!strcmp(incoming_serial_buffer,"f")){
         Serial.print("f");   
         Serial.println(analogRead(PIN_SWR_FWD_V));    
       } else if (!strcmp(incoming_serial_buffer,"r")){
         Serial.print("r");   
         Serial.println(analogRead(PIN_SWR_REV_V));             
-      } else if (!strcmp(incoming_serial_buffer,"hi")){
-        Serial.println("hi");
       } else {
-        Serial.println("e00");
+        // we don't know this command, so pass it on in case there's another AVR on the serial ring
+        Serial.println(incoming_serial_buffer);
       }
 
 

@@ -64,17 +64,24 @@ char debug_text[64];
 
 int shutdown_flag;
 
-struct command_handler_struct{
+// struct command_handler_struct{
 
-  char *request;
-  char *response;
+//   char *request;
+//   char *response;
+
+// };
+
+struct tcpserver_parms_struct{
+
+  int tcpport;
+  int (*command_handler)(char *request, char *response);
 
 };
 
-struct tcpserver_struct{
+struct tcp_connection_handler_parms_struct{
 
-  int tcpport;
-  int (*command_handler)(struct command_handler_struct *passed_request_and_response);
+  int client_sock;
+  int (*command_handler)(char *request, char *response);
 
 };
 

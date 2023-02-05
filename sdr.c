@@ -639,7 +639,7 @@ void rx_process(int32_t *input_rx,  int32_t *input_mic,
 			rx_tx_ramp--;
 		}
 	*/
-		
+
 	//push the data to any potential modem 
 	modem_rx(rx_list->mode, output_speaker, MAX_BINS/2);
 }
@@ -994,7 +994,7 @@ void setup_sdr(){
 
 
 
-void sdr_request(char *request, char *response){
+int sdr_request(char *request, char *response){
 
 
 	char cmd[100], value[1000];
@@ -1002,15 +1002,23 @@ void sdr_request(char *request, char *response){
   sprintf(debug_text,"sdr_request: request:%s", request);
   debug(debug_text,2);
 
+
+  if (!strcmp(request, "hello")){
+		strcpy(response, "hello from sdr_request!");
+		return 1;
+	}
+
+  // parse out cmd and value (cmd=value)
 	char *p = strchr(request, '=');
 	int n = p - request;
 	if (!p){
 		strcpy(response, "error");
-		return;
+		return -1;
 	}
 	strncpy(cmd, request, n);
 	cmd[n] = 0;
 	strcpy(value, request+n+1);
+
 
 	if (!strcmp(cmd, "stat:tx")){
 		if (in_tx)
@@ -1212,6 +1220,10 @@ void sdr_request(char *request, char *response){
 	else {
   	strcpy(response, "error");
 		sprintf(debug_text,"sdr_request: request error: %s", request);
-	  debug(debug_text,255);		
+	  debug(debug_text,255);	
+	  return -1;	
   }
+
+  return 1;
+
 }

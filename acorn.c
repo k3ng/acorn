@@ -18,7 +18,7 @@
 
 */
 
-#define HARDCODE_DEBUG_LEVEL 8
+#define HARDCODE_DEBUG_LEVEL 8   // use this for troubleshooting to bypass having to do a command line parm
 
 #include <unistd.h>
 #include <stdio.h>
@@ -424,7 +424,7 @@ void read_command_line_arguments(int argc, char* argv[]) {
 
 // ---------------------------------------------------------------------------------------
 
-// these are dropped in to satisfy modems.c for the moment
+// these are dropped in to satisfy modems.c for the moment - Goody K3NG
 
 
 int get_tx_data_byte(char *c){
@@ -540,15 +540,16 @@ void wind_things_down(){
 // ---------------------------------------------------------------------------------------
 
 
-void launch_telnet_server_thread(){
+void launch_tcp_server_threads(){
 
-  struct tcpserver_struct *new_tcpserver;
+  struct tcpserver_parms_struct *tcpserver_parms;
 
-  new_tcpserver = malloc(sizeof(new_tcpserver));
-  new_tcpserver->tcpport = TCP_SERVER_RIG_COMMAND;
+  tcpserver_parms = malloc(sizeof(tcpserver_parms));
+  tcpserver_parms->tcpport = TCP_SERVER_RIG_COMMAND;
+  tcpserver_parms->command_handler = &sdr_request;
 
-  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, (void*) new_tcpserver)){
-    sprintf(debug_text,"launch_telnet_server_thread: could not create tcpserver_thread port:%d",new_tcpserver->tcpport);
+  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
+    sprintf(debug_text,"launch_tcp_server_threads: could not create tcpserver_thread port:%d",tcpserver_parms->tcpport);
     debug(debug_text,1);
   }
 
@@ -580,7 +581,7 @@ int main(int argc, char* argv[]) {
 
   initialize_hardware();
 
-  launch_telnet_server_thread();
+  launch_tcp_server_threads();
 
   setup_sdr();
 
