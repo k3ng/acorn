@@ -107,27 +107,38 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
   int client_sock = tcp_connection_handler_parms.client_sock;
 
 	int read_size;
-	char *message, client_message[1000], sdr_response[1000];
-  char debug_text[100];
+	char client_message_temp[34], client_message[34], sdr_response[1000], debug_text[100];
 
   sprintf(debug_text,"tcp_connection_handler: starting client_sock:%d", client_sock);
   debug(debug_text,1);
 	
-	message = "acorn ready!\n";
+	char *message = "acorn ready!\n";
 	write(client_sock, message, strlen(message));
 
 
   while(connection_active && !shutdown_flag){
-    read_size = recv(client_sock, client_message, 32, 0);
+    read_size = recv(client_sock, client_message_temp, 32, 0);
     if (read_size > 0){
+      strncpy(client_message,client_message_temp,read_size);
       //echo the message back to client
-      sprintf(debug_text,"tcp_connection_handler: client_sock: %d msg: %s strlen: %d read_size: %d", client_sock, client_message, strlen(client_message), read_size);
-      debug(debug_text,3);
+      // sprintf(debug_text,"tcp_connection_handler: client_sock:%d msg:%s strlen:%d read_size:%d", client_sock, client_message, strlen(client_message), read_size);
+      // debug(debug_text,3);
       write(client_sock, client_message, read_size);
 
-      if (read_size > 1){
-        client_message[read_size - 2] = 0;  // yank off the carriage return and whatever
+      // if (read_size > 1){
+      //   client_message[read_size - 2] = 0;  // yank off the carriage return and whatever
+      // }
+
+      // yank off the carriage return and whatever
+      char *return_character = strchr(client_message, '\r');
+      if (return_character){
+        int number_of_command_characters = return_character - client_message;
+        // char client_message_temp[33];
+        strcpy(client_message_temp,client_message);
+        strncpy(client_message, client_message_temp, number_of_command_characters);
+        client_message[number_of_command_characters] = 0;
       }
+
 
       // handle some telnet commands right here
       if (!strcmp(client_message,"quit")){  
@@ -145,12 +156,14 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
           tcp_connection_handler_parms.command_handler(client_message, sdr_response); 
 
-          sprintf(client_message,"%s\r\n",sdr_response);
-          write(client_sock, client_message, strlen(client_message));
+          //sprintf(client_message,"%s\r\n",sdr_response);
+          // write(client_sock, client_message, strlen(client_message));
+          write(client_sock, sdr_response, strlen(sdr_response));
+          write(client_sock, "\r\n", 2);
         #endif
       }
-      
-
+      strcpy(sdr_response,"");
+      strcpy(client_message_temp,"");
       strcpy(client_message,"");
     } else {
       connection_active = 0;
