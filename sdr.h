@@ -85,6 +85,15 @@ for the transmission. The data required is the same!
 
 #define _sdr_h_
 
+#if !defined(DEVELOPMENT_IMIC)
+	#define SOUND_THREAD_START_DEVICE "plughw:0,0"
+	#define AUDIO_CARD_NAME "hw:0"
+#else	
+  #define SOUND_THREAD_START_DEVICE "plughw:1,0"
+  #define AUDIO_CARD_NAME "hw:1"
+#endif 
+
+
 #define MAX_BINS 2048
 
 extern float fft_bins[];

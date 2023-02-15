@@ -18,7 +18,7 @@
 
 */
 
-#define HARDCODE_DEBUG_LEVEL 8   // use this for troubleshooting to bypass having to do a command line parm
+// #define HARDCODE_DEBUG_LEVEL 8   // use this for troubleshooting to bypass having to do a command line parm
 
 #include <unistd.h>
 #include <stdio.h>
@@ -562,7 +562,7 @@ void main_loop(){
 
 
   while(!shutdown_flag){
-    usleep (100000);
+    sleep (1);
   }
 
 }
@@ -587,6 +587,18 @@ int main(int argc, char* argv[]) {
 
   //change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
 
+  char dummy_char[100];
+
+  sdr_request("tx=0",dummy_char);
+  sdr_request("r1:gain=80",dummy_char);
+  sdr_request("r1:volume=80",dummy_char);
+  sdr_request("r1:agc=OFF",dummy_char);
+  sdr_request("r1:mode=CW",dummy_char);
+  sdr_request("r1:low=200",dummy_char);
+  sdr_request("r1:high=700",dummy_char);
+  //sdr_request("txmode=USB",dummy_char);
+  sdr_request("txmode=CW",dummy_char);
+  sdr_request("r1:freq=7000000",dummy_char);
 
   main_loop();
 

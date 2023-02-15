@@ -125,15 +125,10 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
       // debug(debug_text,3);
       write(client_sock, client_message, read_size);
 
-      // if (read_size > 1){
-      //   client_message[read_size - 2] = 0;  // yank off the carriage return and whatever
-      // }
-
       // yank off the carriage return and whatever
       char *return_character = strchr(client_message, '\r');
       if (return_character){
         int number_of_command_characters = return_character - client_message;
-        // char client_message_temp[33];
         strcpy(client_message_temp,client_message);
         strncpy(client_message, client_message_temp, number_of_command_characters);
         client_message[number_of_command_characters] = 0;
@@ -142,11 +137,20 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
       // handle some telnet commands right here
       if (!strcmp(client_message,"quit")){  
-        sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client quit client_sock: %d", client_sock);
+        sprintf(debug_text,"tcp_connection_handler: client quit client_sock: %d", client_sock);
         debug(debug_text,1); 
         close(client_sock);    
         free(passed_tcp_connection_handler_parms);
         return 0;  
+      } else if(!strcmp(client_message,"shutdown")){
+        sprintf(client_message,"shutting down!\r\n");
+        write(client_sock, client_message, strlen(client_message));  
+        sprintf(debug_text,"tcp_connection_handler: client shutdown client_sock: %d", client_sock);
+        debug(debug_text,1); 
+        close(client_sock);    
+        free(passed_tcp_connection_handler_parms);      
+        shutdown_flag = 1;
+        return 0;        
       } else if(!strcmp(client_message,"hi")){
         sprintf(client_message,"hi from tcp_connection_handler!\r\n");
         write(client_sock, client_message, strlen(client_message));

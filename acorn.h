@@ -3,9 +3,18 @@
 
 #define _acorn_h_
 
+//#define DEVELOPMENT_IMIC
+
 #define VERSION_STRING "acorn 0.1"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 
+#if !defined(DEVELOPMENT_IMIC)
+	#define AUDIO_CARD_ELEMENT_RX_VOL "Master"
+	#define AUDIO_CARD_ELEMENT_RX_GAIN "Capture"
+#else
+  #define AUDIO_CARD_ELEMENT_RX_VOL "Speaker"
+  #define AUDIO_CARD_ELEMENT_RX_GAIN "Mic"
+#endif
 
 #define MAX_SETTING_LENGTH 32
 

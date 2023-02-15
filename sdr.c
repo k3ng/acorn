@@ -16,7 +16,7 @@
 #include "sound.h"
 
 
-char audio_card[32];
+//char audio_card[32];
 static int tx_shift = 512;
 
 FILE *pf_debug = NULL;
@@ -114,10 +114,12 @@ int set_dds_frequency(int dds_chip, int clock, unsigned int frequency){
 
 void radio_tune_to(unsigned int frequency){
 
-  set_dds_frequency(0, 2, frequency + bfo_frequency - 24000 + TUNING_SHIFT);
-
   sprintf(debug_text,"radio_tune_to: setting radio to freq:%d", frequency);
   debug(debug_text,1);
+
+  set_dds_frequency(0, 2, frequency + bfo_frequency - 24000 + TUNING_SHIFT);
+
+
 
 }
 
@@ -869,8 +871,8 @@ void set_tx_power_levels(){
 	}
 	//printf("tx_gain_compensation is set to %g for %d watts\n", tx_amp, tx_drive);
 	//we keep the audio card output 'volume' constant'
-	sound_mixer(audio_card, "Master", 95);
-	sound_mixer(audio_card, "Capture", tx_gain);
+	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, 95);
+	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, tx_gain);
 	sprintf(debug_text,"set_tx_power_levels: tx_drive: %dtx_amp:%d tx_gain:%d", tx_drive, tx_amp, tx_gain);
 	debug(debug_text,2);
 }
@@ -897,8 +899,8 @@ void tr_switch(int tx_on){
 
 		in_tx = 1;
 		//mute it all and hang on for a millisecond
-		sound_mixer(audio_card, "Master", 0);
-		sound_mixer(audio_card, "Capture", 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, 0);
 		delay(1);
 
 		//now switch of the signal back
@@ -917,8 +919,8 @@ void tr_switch(int tx_on){
 
 		in_tx = 0;
 		//mute it all and hang on
-		sound_mixer(audio_card, "Master", 0);
-		sound_mixer(audio_card, "Capture", 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, 0);
 		delay(1);
     fft_reset_m_bins();
 		mute_count = MUTE_MAX;
@@ -931,8 +933,8 @@ void tr_switch(int tx_on){
 		delay(5); 
 
 		//audio codec is back on
-		sound_mixer(audio_card, "Master", rx_vol);
-		sound_mixer(audio_card, "Capture", rx_gain);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, rx_vol);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, rx_gain);
 		spectrum_reset();
 		//rx_tx_ramp = 10;
 
@@ -985,8 +987,8 @@ void setup_sdr(){
 	tx_init(7000000, MODE_LSB, -3000, -300);
 
 
-	setup_audio_codec();
-	sound_thread_start("plughw:0,0");
+	setup_audio_codec(AUDIO_CARD_NAME);
+	sound_thread_start(SOUND_THREAD_START_DEVICE);
 
 	sleep(1); //why? to allow the aloop to initialize?
 
@@ -1086,7 +1088,7 @@ int sdr_request(char *request, char *response){
 	else if (!strcmp(command, "r1:freq")){
 		int frequency = atoi(command_argument);
 		set_rx1(frequency);
-	  sprintf(debug_text,"sdr_request: rx freq set to:%s", freq_hdr);
+	  sprintf(debug_text,"sdr_request: rx freq set to:%d", freq_hdr);
 	  debug(debug_text,2);		
 		strcpy(response, "ok");	
 	} 
@@ -1191,13 +1193,13 @@ int sdr_request(char *request, char *response){
 	else if(!strcmp(command, "r1:gain")){
 		rx_gain = atoi(command_argument);
 		if(!in_tx){
-			sound_mixer(audio_card, "Capture", rx_gain);
+			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, rx_gain);
 		}
 	}
 	else if (!strcmp(command, "r1:volume")){
 		rx_vol = atoi(command_argument);
 		if(!in_tx){	
-			sound_mixer(audio_card, "Master", rx_vol);
+			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, rx_vol);
 		}
 	}
 	else if(!strcmp(command, "r1:high")){
