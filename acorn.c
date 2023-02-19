@@ -593,9 +593,9 @@ int main(int argc, char* argv[]) {
   sdr_request("r1:gain=80",dummy_char);
   sdr_request("r1:volume=80",dummy_char);
   sdr_request("r1:agc=OFF",dummy_char);
-  sdr_request("r1:mode=CW",dummy_char);
-  sdr_request("r1:low=200",dummy_char);
-  sdr_request("r1:high=700",dummy_char);
+  sdr_request("r1:mode=USB",dummy_char);
+  sdr_request("r1:low=50",dummy_char);
+  sdr_request("r1:high=3000",dummy_char);
   //sdr_request("txmode=USB",dummy_char);
   sdr_request("txmode=CW",dummy_char);
   sdr_request("r1:freq=7000000",dummy_char);

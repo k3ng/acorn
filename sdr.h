@@ -89,8 +89,8 @@ for the transmission. The data required is the same!
 	#define SOUND_THREAD_START_DEVICE "plughw:0,0"
 	#define AUDIO_CARD_NAME "hw:0"
 #else	
-  #define SOUND_THREAD_START_DEVICE "plughw:1,0"
-  #define AUDIO_CARD_NAME "hw:1"
+  #define SOUND_THREAD_START_DEVICE "default"
+  #define AUDIO_CARD_NAME "default"
 #endif 
 
 

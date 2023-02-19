@@ -257,8 +257,11 @@ void setup_audio_codec(char *audio_card){
     //debug("setup_audio_codec: Line",1);
     //sound_mixer(audio_card, "Line", 1);
 
-    debug("setup_audio_codec: Mic",1);
-    sound_mixer(audio_card, "Mic", 0);
+    // debug("setup_audio_codec: Mic",1);
+    // sound_mixer(audio_card, "Mic", 0);
+
+debug("setup_audio_codec: Aux",1);
+sound_mixer(audio_card, "Aux", 0);    
 
     //debug("setup_audio_codec: Mic Boost",1);
     //sound_mixer(audio_card, "Mic Boost", 0);
@@ -267,8 +270,11 @@ void setup_audio_codec(char *audio_card){
     //sound_mixer(audio_card, "Playback Deemphasis", 0);
    
 
-    debug("setup_audio_codec: Speaker",1);   
-    sound_mixer(audio_card, "Speaker", 10);
+    // debug("setup_audio_codec: Speaker",1);   
+    // sound_mixer(audio_card, "Speaker", 10);
+
+debug("setup_audio_codec: Headphone",1);   
+sound_mixer(audio_card, "Headphone", 10);
 
     //debug("setup_audio_codec: Master",1);   
     //sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL, 10);
@@ -325,36 +331,39 @@ void sound_mixer(char *card_name, char *element, int make_on){
     snd_mixer_selem_id_set_name(sid, element);
     snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, sid);
 
-    sprintf(debug_text,"sound_mixer: card_name:%s element:%s make_on:%d",card_name, element, make_on);
+    sprintf(debug_text,"sound_mixer: card_name:%s element:%s make_on:%d elem:0x%08x",card_name, element, make_on, elem);
     debug(debug_text,1);
 
-    if (elem)
+    if (elem){
 		  debug("sound_mixer: element found",2);
 	    //find out if the his element is capture side or plaback
 	    if(snd_mixer_selem_has_capture_switch(elem)){	
 	      debug("sound_mixer: this is a capture switch",2);  
 		  	snd_mixer_selem_set_capture_switch_all(elem, make_on);
 			}
-    else if (snd_mixer_selem_has_playback_switch(elem)){
-      debug("sound_mixer: this is a playback switch",2);
-			snd_mixer_selem_set_playback_switch_all(elem, make_on);
-		}
-    else if (snd_mixer_selem_has_playback_volume(elem)){
-      debug("sound_mixer: this is playback volume",2);
-			long volume = make_on;
-    	snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-    	snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
-    }	
-    else if (snd_mixer_selem_has_capture_volume(elem)){
-	    debug("sound_mixer: this is a capture volume",2);
-			long volume = make_on;
-    	snd_mixer_selem_get_capture_volume_range(elem, &min, &max);
-    	snd_mixer_selem_set_capture_volume_all(elem, volume * max / 100);
+      else if (snd_mixer_selem_has_playback_switch(elem)){
+        debug("sound_mixer: this is a playback switch",2);
+  			snd_mixer_selem_set_playback_switch_all(elem, make_on);
+  		}
+      else if (snd_mixer_selem_has_playback_volume(elem)){
+        debug("sound_mixer: this is playback volume",2);
+  			long volume = make_on;
+      	snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
+      	snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
+      }	
+      else if (snd_mixer_selem_has_capture_volume(elem)){
+  	    debug("sound_mixer: this is a capture volume",2);
+  			long volume = make_on;
+      	snd_mixer_selem_get_capture_volume_range(elem, &min, &max);
+      	snd_mixer_selem_set_capture_volume_all(elem, volume * max / 100);
+      }
+  		else if (snd_mixer_selem_is_enumerated(elem)){
+  			debug("sound_mixer: this is an enumerated capture element",2);
+  			snd_mixer_selem_set_enum_item(elem, 0, make_on);
+  		}
+    } else {
+      debug("sound_mixer: element not found",255);
     }
-		else if (snd_mixer_selem_is_enumerated(elem)){
-			debug("sound_mixer: this is an enumerated capture element",2);
-			snd_mixer_selem_set_enum_item(elem, 0, make_on);
-		}
     snd_mixer_close(handle);
 }
 
