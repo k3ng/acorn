@@ -3885,7 +3885,7 @@ void cmd_exec(char *cmd){
 
 int main( int argc, char* argv[] ) {
 
-	puts(VER_STR);
+	puts(VERSION_STRING);
 	active_layout = main_controls;
 
 	//unlink any pending ft8 transmission
@@ -3949,7 +3949,7 @@ int main( int argc, char* argv[] ) {
   set_field("r1:freq", buff);
 
 	console_init();
-	write_console(FONT_LOG, VER_STR);
+	write_console(FONT_LOG, VERSION_STRING);
   write_console(FONT_LOG, "\r\nEnter \\help for help\r\n");
 
 	if (strcmp(mycallsign, "N0BDY")){

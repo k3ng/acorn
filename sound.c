@@ -66,7 +66,7 @@ gcc -g -o sound debug.c sound.c -lasound -pthread
 
 #include "debug.h"
 #include "sound.h"
-#include "acorn.h"
+#include "acorn-server.h"
 
 
 

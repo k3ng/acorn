@@ -1,11 +1,11 @@
 
-#if !defined(_acorn_h_)
+#if !defined(_acorn_server_h_)
 
-#define _acorn_h_
+#define _acorn_server_h_
 
 #define DEVELOPMENT_IMIC
 
-#define VERSION_STRING "acorn 0.1"
+#define VERSION_STRING "2023.02.20.2156"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 
 #if !defined(DEVELOPMENT_IMIC)
@@ -96,4 +96,4 @@ struct tcp_connection_handler_parms_struct{
 
 };
 
-#endif //!defined(_acorn_h_)
+#endif //!defined(_acorn_server_h_)

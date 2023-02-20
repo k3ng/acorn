@@ -11,7 +11,7 @@
 
   command line parameters:
 
-  acorn
+  acorn-server
 
     -d [#] : debug level 1-9; higher = more debugging messages
 
@@ -52,7 +52,7 @@
 // #include <wiringSerial.h>
 // #include <sys/stat.h>
 
-#include "acorn.h"
+#include "acorn-server.h"
 #include "debug.h"
 #include "ini.h"
 #include "sdr.h"

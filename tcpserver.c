@@ -76,7 +76,7 @@
 
   #include <fftw3.h>
   #include <complex.h>
-  #include "acorn.h"
+  #include "acorn-server.h"
   #include "sdr.h"
   #include "sound.h"
 

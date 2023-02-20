@@ -11,7 +11,7 @@
 #include <linux/limits.h>
 #include <stdint.h>
 #include <time.h>
-#include "acorn.h"
+#include "acorn-server.h"
 #include "sdr.h"
 #include "sound.h"
 

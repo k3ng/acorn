@@ -1,6 +1,6 @@
 
 
-#define VER_STR "acorn-gtk-client 2023.02.19.1922"
+#define VERSION_STRING "2023.02.19.1922"
 
 #define FONT_FIELD_LABEL 0
 #define FONT_FIELD_VALUE 1
