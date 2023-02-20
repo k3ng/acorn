@@ -17,7 +17,7 @@
 
   Standalone compile with:
 
-    gcc -g -o tcpserver tcpserver.c -pthread
+    gcc -g -o tcpserver debug.c tcpserver.c -pthread
 
   The standalone compilation turns up listeners on port 8888, 8889, and 8890.  Commands are hi and quit. 
 
@@ -38,6 +38,8 @@
 #include<unistd.h>
 #include<pthread.h>
 
+#include "debug.h"
+
 
 
 // ---------------------------------------------------------------------------------------
@@ -47,13 +49,13 @@
 
   int shutdown_flag = 0;
 
-  void debug(char *debug_text_in, int debug_text_level){
+  // void debug(char *debug_text_in, int debug_text_level){
 
-    printf(debug_text_in);
-    printf("\r\n");
-    fflush(stdout);
+  //   printf(debug_text_in);
+  //   printf("\r\n");
+  //   fflush(stdout);
 
-  }
+  // }
 
 
   struct tcpserver_parms_struct{

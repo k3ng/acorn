@@ -1,0 +1,72 @@
+
+
+#define VER_STR "acorn-gtk-client 2023.02.19.1922"
+
+#define FONT_FIELD_LABEL 0
+#define FONT_FIELD_VALUE 1
+#define FONT_LARGE_FIELD 2
+#define FONT_LARGE_VALUE 3
+#define FONT_SMALL 4
+#define FONT_LOG 5
+#define FONT_LOG_RX 6
+#define FONT_LOG_TX 7
+#define FONT_SMALL_FIELD_VALUE 8
+
+#define COLOR_SELECTED_TEXT 0
+#define COLOR_TEXT 1
+#define COLOR_TEXT_MUTED 2
+#define COLOR_SELECTED_BOX 3 
+#define COLOR_BACKGROUND 4
+#define COLOR_FREQ 5
+#define COLOR_LABEL 6
+#define SPECTRUM_BACKGROUND 7
+#define SPECTRUM_GRID 8
+#define SPECTRUM_PLOT 9
+#define SPECTRUM_NEEDLE 10
+#define COLOR_CONTROL_BOX 11
+#define SPECTRUM_BANDWIDTH 12
+#define SPECTRUM_PITCH 13
+#define SELECTED_LINE 14
+
+#define MAX_FIELD_LENGTH 128
+
+#define FIELD_NUMBER 0
+#define FIELD_BUTTON 1
+#define FIELD_TOGGLE 2
+#define FIELD_SELECTION 3
+#define FIELD_TEXT 4
+#define FIELD_STATIC 5
+#define FIELD_CONSOLE 6
+
+#define MAX_CONSOLE_BUFFER 10000
+#define MAX_LINE_LENGTH 128
+#define MAX_CONSOLE_LINES 500
+
+// event ids, some of them are mapped from gtk itself
+#define FIELD_DRAW 0
+#define FIELD_UPDATE 1 
+#define FIELD_EDIT 2
+#define MIN_KEY_UP 0xFF52
+#define MIN_KEY_DOWN	0xFF54
+#define MIN_KEY_LEFT 0xFF51
+#define MIN_KEY_RIGHT 0xFF53
+#define MIN_KEY_ENTER 0xFF0D
+#define MIN_KEY_ESC	0xFF1B
+#define MIN_KEY_BACKSPACE 0xFF08
+#define MIN_KEY_TAB 0xFF09
+#define MIN_KEY_CONTROL 0xFFE3
+#define MIN_KEY_F1 0xFFBE
+#define MIN_KEY_F2 0xFFBF
+#define MIN_KEY_F3 0xFFC0
+#define MIN_KEY_F4 0xFFC1
+#define MIN_KEY_F5 0xFFC2
+#define MIN_KEY_F6 0xFFC3
+#define MIN_KEY_F7 0xFFC4
+#define MIN_KEY_F8 0xFFC5
+#define MIN_KEY_F9 0xFFC6
+#define MIN_KEY_F9 0xFFC6
+#define MIN_KEY_F10 0xFFC7
+#define MIN_KEY_F11 0xFFC8
+#define MIN_KEY_F12 0xFFC9
+#define COMMAND_ESCAPE '\\'
+

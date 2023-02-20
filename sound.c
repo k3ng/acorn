@@ -50,7 +50,7 @@ standalone test compilation
 
 compile with:
 
-gcc -g -o sound sound.c -lasound -pthread
+gcc -g -o sound debug.c sound.c -lasound -pthread
 
 
 */
@@ -64,6 +64,7 @@ gcc -g -o sound sound.c -lasound -pthread
 #include <fftw3.h>
 #include <time.h>
 
+#include "debug.h"
 #include "sound.h"
 #include "acorn.h"
 
@@ -86,27 +87,6 @@ gcc -g -o sound sound.c -lasound -pthread
 
 
 
-//char audio_card[32];
-
-
-#if !defined(COMPILING_EVERYTHING)
-
-	int debug_level = 0;
-
-	void debug(char *debug_text_in, int debug_text_level){
-
-	  if (debug_text_level > 254){ // this debug text is to go out STDERR
-	    fprintf(stderr, debug_text_in);
-	    fprintf(stderr, "\r\n");
-	  } else {
-	    if (debug_text_level <= debug_level){
-	    	printf(debug_text_in);
-	    	printf("\r\n");
-	    }
-	  }
-	}
-
-#endif //!defined(COMPILING_EVERYTHING)
 
 struct queue{
   int id;
@@ -975,8 +955,8 @@ int sound_loop(){
 			pcmreturn = snd_pcm_writei(loopback_play_handle, line_out + offset, framesize);
 			if(pcmreturn < 0){
 				loopback_write_error++;
-				if (loopback_write_error % 10000 == 0){
-	        sprintf(debug_text,"Loopback PCM Write Error:%s count:%d",snd_strerror(pcmreturn), loopback_write_error);
+				if ((loopback_write_error < 11) || ((loopback_write_error < 100) && (loopback_write_error % 10 == 0)) || ((loopback_write_error < 1000) && (loopback_write_error % 100 == 0)) || (loopback_write_error % 10000 == 0)) {
+	        sprintf(debug_text,"sound_loop: loopback PCM write error:%s count:%d",snd_strerror(pcmreturn), loopback_write_error);
 	        debug(debug_text,255);
 	      }
 				// Handle an error condition from the snd_pcm_writei function

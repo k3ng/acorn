@@ -53,6 +53,7 @@
 // #include <sys/stat.h>
 
 #include "acorn.h"
+#include "debug.h"
 #include "ini.h"
 #include "sdr.h"
 #include "sound.h"
@@ -67,7 +68,7 @@
 // ---------------------------------------------------------------------------------------
 
 
-void debug(char *debug_text, int debug_text_level);
+//void debug(char *debug_text, int debug_text_level);
 
 
 
@@ -104,7 +105,7 @@ struct setting_struct setting[] =
 
 
 
-int debug_level = 0;
+
 
 
 pthread_t tcpserver_thread;
@@ -215,21 +216,21 @@ int setting_change_handler_vfo(struct setting_struct *passed_setting, char *valu
 // ---------------------------------------------------------------------------------------
 
 
-void debug(char *debug_text_in, int debug_text_level){
+// void debug(char *debug_text_in, int debug_text_level){
 
-  if (debug_text_level > 254){ // this debug text is to go out STDERR
-    fprintf(stderr, debug_text_in);
-    fprintf(stderr, "\r\n");
-    fflush(stderr);
-  } else {
-    if (debug_text_level <= debug_level){
-    	printf(debug_text_in);
-    	printf("\r\n");
-      fflush(stdout);
-    }
-  }
+//   if (debug_text_level > 254){ // this debug text is to go out STDERR
+//     fprintf(stderr, debug_text_in);
+//     fprintf(stderr, "\r\n");
+//     fflush(stderr);
+//   } else {
+//     if (debug_text_level <= debug_level){
+//     	printf(debug_text_in);
+//     	printf("\r\n");
+//       fflush(stdout);
+//     }
+//   }
 
-}
+// }
 
 
 // ---------------------------------------------------------------------------------------
@@ -596,8 +597,8 @@ int main(int argc, char* argv[]) {
   sdr_request("r1:mode=USB",dummy_char);
   sdr_request("r1:low=50",dummy_char);
   sdr_request("r1:high=3000",dummy_char);
-  //sdr_request("txmode=USB",dummy_char);
-  sdr_request("txmode=CW",dummy_char);
+  sdr_request("txmode=USB",dummy_char);
+  // sdr_request("txmode=CW",dummy_char);
   sdr_request("r1:freq=7000000",dummy_char);
 
   main_loop();
