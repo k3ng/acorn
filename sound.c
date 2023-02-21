@@ -69,16 +69,19 @@ gcc -g -o sound debug.c sound.c -lasound -pthread
 #include "acorn-server.h"
 
 
+#define LOOPBACK_CAPTURE "plughw:2,1"
+#define LOOPBACK_PLAY "plughw:1,0"
 
 
+// #if defined(CODEC_WM8731)
+//   #define LOOPBACK_CAPTURE "plughw:2,1"
+//   #define LOOPBACK_PLAY "plughw:1,0"
+// #endif
 
-#if !defined(DEVELOPMENT_IMIC)
-  #define LOOPBACK_CAPTURE "plughw:2,1"
-  #define LOOPBACK_PLAY "plughw:1,0"
-#else
-  #define LOOPBACK_CAPTURE "plughw:3,1"
-  #define LOOPBACK_PLAY "plughw:2,0"
-#endif
+// #if defined(CODEC_IQAUDIO_CODEC_ZERO)
+//   #define LOOPBACK_CAPTURE "plughw:3,1"
+//   #define LOOPBACK_PLAY "plughw:2,0"
+// #endif
 
 #if !defined(COMPILING_EVERYTHING)
   #define TEST_STANDALONE_COMPILE_THREAD_START "plughw:0,0"
@@ -128,6 +131,8 @@ static int play_write_error = 0;				// count play channel write errors
 static int loopback_write_error = 0;			// count loopback channel write errors
 
 int use_virtual_cable = 0;
+
+int supress_loopback_pcm_errors = 0;
 
 
 
@@ -203,7 +208,7 @@ void setup_audio_codec(char *audio_card){
 
 	//configure all the channels of the mixer
 
-  #if !defined(DEVELOPMENT_IMIC)
+  #if defined(CODEC_WM8731)
 
   	debug("setup_audio_codec: Input Mux",1);
   	sound_mixer(audio_card, "Input Mux", 0);
@@ -229,7 +234,9 @@ void setup_audio_codec(char *audio_card){
     debug("setup_audio_codec: Output Mixer Mic Sidetone",1);
   	sound_mixer(audio_card, "Output Mixer Mic Sidetone", 0);
 
-  #else //#if !defined(DEVELOPMENT_IMIC)
+  #endif //CODEC_WM8731
+
+  #if defined(CODEC_IQAUDIO_CODEC_ZERO)	
 
     //debug("setup_audio_codec: Input Mux",1);
     //sound_mixer(audio_card, "Input Mux", 0);
@@ -240,8 +247,8 @@ void setup_audio_codec(char *audio_card){
     // debug("setup_audio_codec: Mic",1);
     // sound_mixer(audio_card, "Mic", 0);
 
-debug("setup_audio_codec: Aux",1);
-sound_mixer(audio_card, "Aux", 0);    
+		debug("setup_audio_codec: Aux",1);
+		sound_mixer(audio_card, "Aux", 0);    
 
     //debug("setup_audio_codec: Mic Boost",1);
     //sound_mixer(audio_card, "Mic Boost", 0);
@@ -253,8 +260,8 @@ sound_mixer(audio_card, "Aux", 0);
     // debug("setup_audio_codec: Speaker",1);   
     // sound_mixer(audio_card, "Speaker", 10);
 
-debug("setup_audio_codec: Headphone",1);   
-sound_mixer(audio_card, "Headphone", 10);
+		debug("setup_audio_codec: Headphone",1);   
+		sound_mixer(audio_card, "Headphone", 10);
 
     //debug("setup_audio_codec: Master",1);   
     //sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL, 10);
@@ -265,7 +272,7 @@ sound_mixer(audio_card, "Headphone", 10);
     //debug("setup_audio_codec: Output Mixer Mic Sidetone",1);
     //sound_mixer(audio_card, "Output Mixer Mic Sidetone", 0);
 
-  #endif //#if !defined(DEVELOPMENT_IMIC)
+  #endif //CODEC_IQAUDIO_CODEC_ZERO
 
 }
 
@@ -955,7 +962,7 @@ int sound_loop(){
 			pcmreturn = snd_pcm_writei(loopback_play_handle, line_out + offset, framesize);
 			if(pcmreturn < 0){
 				loopback_write_error++;
-				if ((loopback_write_error < 11) || ((loopback_write_error < 100) && (loopback_write_error % 10 == 0)) || ((loopback_write_error < 1000) && (loopback_write_error % 100 == 0)) || (loopback_write_error % 10000 == 0)) {
+				if (((loopback_write_error < 11) || ((loopback_write_error < 100) && (loopback_write_error % 10 == 0)) || ((loopback_write_error < 1000) && (loopback_write_error % 100 == 0)) || (loopback_write_error % 10000 == 0)) && !supress_loopback_pcm_errors) {
 	        sprintf(debug_text,"sound_loop: loopback PCM write error:%s count:%d",snd_strerror(pcmreturn), loopback_write_error);
 	        debug(debug_text,255);
 	      }

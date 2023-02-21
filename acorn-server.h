@@ -3,19 +3,21 @@
 
 #define _acorn_server_h_
 
-#define DEVELOPMENT_IMIC
+// #define CODEC_WM8731
+#define CODEC_IQAUDIO_CODEC_ZERO
+
 
 #define VERSION_STRING "2023.02.20.2156"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 
-#if !defined(DEVELOPMENT_IMIC)
+#if defined(CODEC_WM8731)
 	#define AUDIO_CARD_ELEMENT_RX_VOL "Master"
 	#define AUDIO_CARD_ELEMENT_RX_GAIN "Capture"
-#else
+#endif
+
+#if defined(CODEC_IQAUDIO_CODEC_ZERO)
   #define AUDIO_CARD_ELEMENT_RX_VOL "Headphone"
   #define AUDIO_CARD_ELEMENT_RX_GAIN "Aux"
-  // #define AUDIO_CARD_ELEMENT_RX_VOL "Speaker"
-  // #define AUDIO_CARD_ELEMENT_RX_GAIN "Mic"
 #endif
 
 #define MAX_SETTING_LENGTH 32
@@ -48,6 +50,8 @@
 #define PIN_PI_BAND_HF 26 // physical pin 32 / GPIO12
 
 #define TCP_SERVER_RIG_COMMAND 8888
+
+#define SUPRESS_LOOPBACK_PCM_ERRORS
 
 /*
 

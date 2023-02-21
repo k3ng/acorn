@@ -29,6 +29,8 @@ sound_mixer(). search for this function to know how to work this.
 
 #define _sound_h_
 
+int supress_loopback_pcm_errors;
+
 int sound_thread_start(char *device);
 void sound_process(
 	int32_t *input_rx, int32_t *input_mic, 

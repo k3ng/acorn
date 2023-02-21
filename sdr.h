@@ -85,10 +85,12 @@ for the transmission. The data required is the same!
 
 #define _sdr_h_
 
-#if !defined(DEVELOPMENT_IMIC)
+#if defined(CODEC_WM8731)
 	#define SOUND_THREAD_START_DEVICE "plughw:0,0"
 	#define AUDIO_CARD_NAME "hw:0"
-#else	
+#endif
+
+#if defined(CODEC_IQAUDIO_CODEC_ZERO)
   #define SOUND_THREAD_START_DEVICE "default"
   #define AUDIO_CARD_NAME "default"
 #endif 

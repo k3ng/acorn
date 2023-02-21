@@ -65,11 +65,6 @@
 // #include "wsjtx.h"
 
 
-// ---------------------------------------------------------------------------------------
-
-
-//void debug(char *debug_text, int debug_text_level);
-
 
 
 // Variables ------------------------------------------------------------------------------
@@ -212,25 +207,6 @@ int setting_change_handler_vfo(struct setting_struct *passed_setting, char *valu
   return 255;
 
 }
-
-// ---------------------------------------------------------------------------------------
-
-
-// void debug(char *debug_text_in, int debug_text_level){
-
-//   if (debug_text_level > 254){ // this debug text is to go out STDERR
-//     fprintf(stderr, debug_text_in);
-//     fprintf(stderr, "\r\n");
-//     fflush(stderr);
-//   } else {
-//     if (debug_text_level <= debug_level){
-//     	printf(debug_text_in);
-//     	printf("\r\n");
-//       fflush(stdout);
-//     }
-//   }
-
-// }
 
 
 // ---------------------------------------------------------------------------------------
@@ -514,12 +490,19 @@ time_t time_system(){
 
 void start_things_up(int argc, char* argv[]){
 
+
+
   read_command_line_arguments(argc, argv);
 
   puts(VERSION_STRING);
 
+  #if defined(SUPRESS_LOOPBACK_PCM_ERRORS)
+    supress_loopback_pcm_errors = 1;
+    debug("start_things_up: supressing loopback PCM error printing",1);
+  #endif  
+
   if (!process_lock(OPEN_LOCK)){
-    fprintf(stderr,"There is another Acorn running.  Exiting.\r\n");
+    debug("start_things_up: there is another Acorn running.  Exiting.",255);
     exit(-1);
   }
 

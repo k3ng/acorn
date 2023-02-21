@@ -2,6 +2,26 @@
 
 #define VERSION_STRING "2023.02.19.1922"
 
+#define EXCLUDE_ENCODER_CODE
+// #define EXCLUDE_SCALING_CODE
+
+#define WINDOW_NAME "Acorn"
+#define WINDOW_ICON_FILE "/home/pi/acorn/icon.png"
+// #define DO_NOT_FULLSCREEN
+
+// #define FORCE_SCALE_WIDTH_TO 700
+// #define FORCE_SCALE_HEIGHT_TO 380
+
+#define FONT_SCALING_FACTOR 0.85
+
+#define LOGBOOK_COMMAND "mousepad %s/acorn/data/logbook.txt"
+
+#define DEFAULT_CALLSIGN "N0BDY"
+#define DEFAULT_GRID "AA00aa"
+
+#define INI_FILE "/acorn/data/user_settings.ini"
+
+
 #define FONT_FIELD_LABEL 0
 #define FONT_FIELD_VALUE 1
 #define FONT_LARGE_FIELD 2
@@ -11,6 +31,9 @@
 #define FONT_LOG_RX 6
 #define FONT_LOG_TX 7
 #define FONT_SMALL_FIELD_VALUE 8
+#define FONT_SPECTRUM_FREQ 9
+#define FONT_VFO_LARGE 10
+#define FONT_VFO_SMALL 11
 
 #define COLOR_SELECTED_TEXT 0
 #define COLOR_TEXT 1
@@ -69,4 +92,56 @@
 #define MIN_KEY_F11 0xFFC8
 #define MIN_KEY_F12 0xFFC9
 #define COMMAND_ESCAPE '\\'
+
+#define MAX_MODES 11 
+
+#define DISABLED 0
+#define ENABLED 1
+
+#define ABSOLUTE 0
+#define RELATIVE 1
+
+#define MODE_USB 0
+#define MODE_LSB 1
+#define MODE_CW 2
+#define MODE_CWR 3
+#define MODE_NBFM 4 
+#define MODE_AM 5 
+#define MODE_FT8 6  
+#define MODE_PSK31 7 
+#define MODE_RTTY 8 
+#define MODE_DIGITAL 9 
+#define MODE_2TONE 10 
+
+#define FT8_AUTO 2
+#define FT8_SEMI 1
+#define FT8_MANUAL 0
+
+//cw defines
+#define CW_DASH (1)
+#define CW_DOT (2)
+//straight key, iambic, keyboard
+#define CW_STRAIGHT 0
+#define CW_IAMBIC	1
+#define CW_KBD 2
+
+#define power2dB(x) (10*log10f(x))
+#define MAX_BINS 2048
+
+#define ENC1_A (13)
+#define ENC1_B (12)
+#define ENC1_SW (14)
+
+#define ENC2_A (0)
+#define ENC2_B (2)
+#define ENC2_SW (3)
+
+#define SW5 (22)
+#define PTT (7)
+#define DASH (21)
+
+#define ENC_FAST 1
+#define ENC_SLOW 5
+
+#define DS3231_I2C_ADD 0x68
 
