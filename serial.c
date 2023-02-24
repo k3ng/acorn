@@ -42,6 +42,7 @@
 #include <string.h>
 #include <termios.h>
 #include <pthread.h>
+#include "serial.h"
 
 
 // ---------------------------------------------------------------------------------------
@@ -51,7 +52,7 @@
 struct serial_buffer_struct{
   int fd;                                           // serial port file descriptor
   char portname[16];                                // port name i.e. /dev/ttyS0
-  char incoming_buffer[100];
+  char incoming_buffer[SERIAL_PORT_INCOMING_BUFFER_SIZE];
   void *incoming_buffer_spin_lock;   // 0 = no lock
   struct serial_buffer_struct* next_serial_buffer;  // pointer to the next serial buffer
 };
@@ -147,6 +148,38 @@ int add_to_serial_incoming_buffer(char *whichone,char *stuff_to_add){
       }
     }
   }
+
+}
+// ---------------------------------------------------------------------------------------
+
+
+int bytes_in_incoming_buffer(char *whichone){
+
+
+  /* whichone can be either the portname (i.e. /dev/ttyS0) or the file descriptor ("fd:3") */
+
+  
+  struct serial_buffer_struct *serial_buffer_temp = serial_buffer_first;
+
+  char temp_char_fd[16];
+
+  while(1){
+    sprintf(temp_char_fd,"fd:%d",serial_buffer_temp->fd);  // make the format of the file descriptor
+
+    // try to match either the portname (i.e. /dev/ttyS0) or the file descriptor ("fd:3")
+    if ((!strcmp(whichone,serial_buffer_temp->portname)) || (!strcmp(whichone,temp_char_fd))){ 
+      // found a match
+      return strlen(serial_buffer_temp->incoming_buffer);
+    } else {
+      if (serial_buffer_temp->next_serial_buffer != NULL){
+         serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
+      } else {
+        // no match
+        return -1;
+      }
+    }
+  }
+
 
 }
 
@@ -353,27 +386,169 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
 
   pthread_t serial_incoming_pthread;
+
   new_fd = malloc(1);
   *new_fd = fd;
 
-  if (pthread_create(&serial_incoming_pthread, NULL, serial_incoming_thread, (void*) new_fd) < 0){
-    sprintf(debug_text,"setup_serial_port: could not create serial_incoming_thread");
-    debug(debug_text,255);
-  }
-
-  // set up a struct for the serial port
+  //set up a struct for the serial port
   struct serial_buffer_struct *serial_buffer = malloc(sizeof(struct serial_buffer_struct));
+  serial_buffer = malloc(sizeof(struct serial_buffer_struct));
   serial_buffer->fd = fd;
   serial_buffer->incoming_buffer_spin_lock = 0;
   strcpy(serial_buffer->portname,portname);
   serial_buffer->next_serial_buffer = serial_buffer_first;
   serial_buffer_first = serial_buffer;
 
+  for (int x=0;x < SERIAL_PORT_INCOMING_BUFFER_SIZE;x++){
+    serial_buffer->incoming_buffer[x] = 0;
+  }
+
+  if (pthread_create(&serial_incoming_pthread, NULL, serial_incoming_thread, (void*) new_fd) < 0){
+    sprintf(debug_text,"setup_serial_port: could not create serial_incoming_thread");
+    debug(debug_text,255);
+  }
+
   sprintf(debug_text,"setup_serial_port: fd:%d exiting",fd);
   debug(debug_text,2);
 
   return fd;
 }
+
+
+// ---------------------------------------------------------------------------------------
+
+
+// void *serial_incoming_thread(){
+
+
+//   char debug_text[100];
+//   char buffer[3];
+
+//   sprintf(debug_text,"serial_incoming_thread: fd:%d launched",serial_buffer.fd);
+//   debug(debug_text,2);
+
+
+//   struct serial_buffer_struct *serial_buffer;
+//   serial_buffer = malloc(sizeof(struct serial_buffer_struct));
+//   serial_buffer->fd = fd;
+//   serial_buffer->incoming_buffer_spin_lock = 0;
+//   strcpy(serial_buffer->portname,portname);
+//   serial_buffer->next_serial_buffer = serial_buffer_first;
+//   serial_buffer_first = serial_buffer;
+
+//   for (int x=0;x < SERIAL_PORT_INCOMING_BUFFER_SIZE;x++){
+//     serial_buffer->incoming_buffer[x] = 0;
+//   }
+
+
+//   while(!shutdown_flag){
+//     int n = read (serial_buffer.fd, buffer, 1);
+//     if (n){
+//       while(serial_buffer.incoming_buffer_spin_lock != serial_incoming_thread){ // spin lock the struct for writing
+//         if (serial_buffer.incoming_buffer_spin_lock == 0){
+//           serial_buffer.incoming_buffer_spin_lock = serial_incoming_thread;
+//         }
+//         usleep(5);
+//       }      
+//       strcat(serial_buffer.incoming_buffer,buffer);
+//       serial_buffer.incoming_buffer_spin_lock = 0; // unlock
+//     }
+//     usleep (1000);
+//   }
+
+//   sprintf(debug_text,"serial_incoming_thread: fd:%d exiting",serial_buffer.fd);
+//   debug(debug_text,2);
+
+// }
+
+
+
+
+// ---------------------------------------------------------------------------------------
+
+
+
+// int setup_serial_port(char *portname, int speed, int parity, int should_block){
+
+
+//   /*  
+
+//       This sets up a serial port and launches a thread, serial_incoming_thread, to
+//       service incoming bytes  
+
+//   */
+
+//   int *new_fd;
+//   char debug_text[100]; 
+
+//   int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
+//   if (fd < 1){
+//     sprintf(debug_text,"setup_serial_port: error %d opening %s: %s", errno, portname, strerror (errno));
+//     debug(debug_text,255);
+//     return -1;
+//   }
+
+//   struct termios tty;
+//   if (tcgetattr (fd, &tty) != 0){
+//     sprintf(debug_text,"setup_serial_port: error %d from tcgetattr", errno);
+//     debug(debug_text,255);    
+//     return -1;
+//   }
+
+//   cfsetospeed (&tty, speed);
+//   cfsetispeed (&tty, speed);
+
+//   tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;     // 8-bit chars
+//   // disable IGNBRK for mismatched speed tests; otherwise receive break
+//   // as \000 chars
+//   tty.c_iflag &= ~IGNBRK;         // disable break processing
+//   tty.c_lflag = 0;                // no signaling chars, no echo,
+//                                   // no canonical processing
+//   tty.c_oflag = 0;                // no remapping, no delays
+//   tty.c_cc[VMIN]  = 0;            // read doesn't block
+//   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+//   tty.c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+
+//   tty.c_cflag |= (CLOCAL | CREAD);// ignore modem controls,
+//                                   // enable reading
+//   tty.c_cflag &= ~(PARENB | PARODD);      // shut off parity
+//   tty.c_cflag |= parity;
+//   tty.c_cflag &= ~CSTOPB;
+//   tty.c_cflag &= ~CRTSCTS;
+
+//   if (tcsetattr (fd, TCSANOW, &tty) != 0){
+//     sprintf(debug_text,"setup_serial_port: error %d from tcsetattr", errno);
+//     debug(debug_text,255);     
+//     return -1;
+//   }
+
+
+//   tty.c_cc[VMIN]  = should_block ? 1 : 0;
+//   tty.c_cc[VTIME] = 5;            // 0.5 seconds read timeout
+
+//   if (tcsetattr (fd, TCSANOW, &tty) != 0){
+//     sprintf(debug_text,"error %d setting term attributes", errno);
+//     debug(debug_text,255);     
+//   }
+
+
+//   pthread_t serial_incoming_pthread;
+
+
+//   if (pthread_create(&serial_incoming_pthread, NULL, serial_incoming_thread, NULL) < 0){
+//     sprintf(debug_text,"setup_serial_port: could not create serial_incoming_thread");
+//     debug(debug_text,255);
+//   }
+
+
+
+//   sprintf(debug_text,"setup_serial_port: fd:%d exiting",fd);
+//   debug(debug_text,2);
+
+//   return fd;
+// }
+
 
 
 // ---------------------------------------------------------------------------------------
@@ -387,42 +562,47 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
     char *portname = "/dev/ttyS0";
     int fd = setup_serial_port(portname, B115200, 0, 1);  // set speed to 115200 baud, N81
-
-    printf("struct portname: %s\r\n",serial_buffer_first->portname);
-
-    char *portname2 = "/dev/ttyAMA0";
-    int fd2 = setup_serial_port(portname2, B115200, 0, 1);  // set speed to 115200 buad, N81
-
-    printf("struct portname: %s\r\n",serial_buffer_first->portname);
-
-
-    add_to_serial_incoming_buffer("/dev/ttyS0","here is some text");
-    add_to_serial_incoming_buffer("/dev/ttyAMA0","some text for AMA0 port");
-    add_to_serial_incoming_buffer("fd:3"," ...and some more text");
-
     char tempchar[100];
-    if (get_from_serial_incoming_buffer_everything("/dev/ttyS0",tempchar) > 0){
-      printf("/dev/ttyS0:%s\r\n",tempchar);
-    } else {
-      printf("/dev/ttyS0 empty\r\n");
-    }
-    if (get_from_serial_incoming_buffer_everything("/dev/ttyAMA0",tempchar) > 0){
-      printf("/dev/ttyAMA0:%s\r\n",tempchar);
-    } else {
-      printf("/dev/ttyAMA0 empty\r\n");
-    }
 
-    if (get_from_serial_incoming_buffer_everything("/dev/ttyS0",tempchar) > 0){
-      printf("/dev/ttyS0:%s\r\n",tempchar);
-    } else {
-      printf("/dev/ttyS0 empty\r\n");
-    }
-    if (get_from_serial_incoming_buffer_everything("/dev/ttyAMA0",tempchar) > 0){
-      printf("/dev/ttyAMA0:%s\r\n",tempchar);
-    } else {
-      printf("/dev/ttyAMA0 empty\r\n");
-    }
+    printf("struct portname: %s\r\n",serial_buffer_first->portname);
 
+    // char *portname2 = "/dev/ttyAMA0";
+    // int fd2 = setup_serial_port(portname2, B115200, 0, 1);  // set speed to 115200 buad, N81
+
+    // printf("struct portname: %s\r\n",serial_buffer_first->portname);
+
+
+    // add_to_serial_incoming_buffer() test
+
+    // add_to_serial_incoming_buffer("/dev/ttyS0","here is some text");
+    // add_to_serial_incoming_buffer("/dev/ttyAMA0","some text for AMA0 port");
+    // add_to_serial_incoming_buffer("fd:3"," ...and some more text");
+
+
+    // if (get_from_serial_incoming_buffer_everything("/dev/ttyS0",tempchar) > 0){
+    //   printf("/dev/ttyS0:%s\r\n",tempchar);
+    // } else {
+    //   printf("/dev/ttyS0 empty\r\n");
+    // }
+    // if (get_from_serial_incoming_buffer_everything("/dev/ttyAMA0",tempchar) > 0){
+    //   printf("/dev/ttyAMA0:%s\r\n",tempchar);
+    // } else {
+    //   printf("/dev/ttyAMA0 empty\r\n");
+    // }
+
+    // if (get_from_serial_incoming_buffer_everything("/dev/ttyS0",tempchar) > 0){
+    //   printf("/dev/ttyS0:%s\r\n",tempchar);
+    // } else {
+    //   printf("/dev/ttyS0 empty\r\n");
+    // }
+    // if (get_from_serial_incoming_buffer_everything("/dev/ttyAMA0",tempchar) > 0){
+    //   printf("/dev/ttyAMA0:%s\r\n",tempchar);
+    // } else {
+    //   printf("/dev/ttyAMA0 empty\r\n");
+    // }
+
+
+    // testing the AVR unit...
 
     char str[16];
 
@@ -430,9 +610,15 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
       // send commands to the AVR on /dev/ttyS0 and get responses back
 
+      printf("sending p command out /dev/ttyS0\r\n");
       send_out_serial_port("/dev/ttyS0","p\r");
    
       usleep(100000);
+
+      sprintf(str,"fd:%d",fd);
+      
+ 
+      printf("bytes_in_incoming_buffer:%d\r\n",bytes_in_incoming_buffer(str));
 
       if (get_from_serial_incoming_buffer_one_line("/dev/ttyS0",tempchar) > 0){
         printf("/dev/ttyS0:%s\r\n",tempchar);

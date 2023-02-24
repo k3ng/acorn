@@ -170,6 +170,8 @@ void initialize_hardware(){
 
 }
 
+
+
 // ---------------------------------------------------------------------------------------
 
 void isr_enc1(){
@@ -191,10 +193,11 @@ void signal_handler(int sig){
 
 
   signal(sig, SIG_IGN);
-  shutdown_flag = 1;
   signal(SIGINT, signal_handler);
 
   debug("\r\n\r\n\r\n\r\nsignal_handler: caught signal, shutting down",255);
+
+  shutdown_flag = 1;
 
 }
 
