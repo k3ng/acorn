@@ -43,6 +43,7 @@
 #include <termios.h>
 #include <pthread.h>
 #include "acorn.h"
+#include "acorn-server.h"
 #include "debug.h"
 #include "serial.h"
 
@@ -62,20 +63,6 @@ struct serial_buffer_struct{
 
 struct serial_buffer_struct *serial_buffer_first = NULL; //TODO: may have to declare extern in serial.h?
 
-
-// ---------------------------------------------------------------------------------------
-
-
-#if !defined(COMPILING_EVERYTHING)
-
-   
-  int shutdown_flag = 0;
-
-#else
-
-  #include "acorn_server.h"
-
-#endif //COMPILING_EVERYTHING
 
 // ---------------------------------------------------------------------------------------
 int send_out_serial_port(char *whichone,char *stuff_to_send){
@@ -331,14 +318,14 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
   int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
   if (fd < 1){
     sprintf(debug_text,"setup_serial_port: error %d opening %s: %s", errno, portname, strerror (errno));
-    debug(debug_text,255);
+    debug(debug_text,DEBUG_LEVEL_STDERR);
     return RETURN_ERROR;
   }
 
   struct termios tty;
   if (tcgetattr (fd, &tty) != 0){
     sprintf(debug_text,"setup_serial_port: error %d from tcgetattr", errno);
-    debug(debug_text,255);    
+    debug(debug_text,DEBUG_LEVEL_STDERR);    
     return RETURN_ERROR;
   }
 
@@ -366,7 +353,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
   if (tcsetattr (fd, TCSANOW, &tty) != 0){
     sprintf(debug_text,"setup_serial_port: error %d from tcsetattr", errno);
-    debug(debug_text,255);     
+    debug(debug_text,DEBUG_LEVEL_STDERR);     
     return RETURN_ERROR;
   }
 
@@ -376,7 +363,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
   if (tcsetattr (fd, TCSANOW, &tty) != 0){
     sprintf(debug_text,"error %d setting term attributes", errno);
-    debug(debug_text,255);     
+    debug(debug_text,DEBUG_LEVEL_STDERR);     
   }
 
 
@@ -400,7 +387,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
   if (pthread_create(&serial_incoming_pthread, NULL, serial_incoming_thread, (void*) new_fd) < 0){
     sprintf(debug_text,"setup_serial_port: could not create serial_incoming_thread");
-    debug(debug_text,255);
+    debug(debug_text,DEBUG_LEVEL_STDERR);
   }
 
   sprintf(debug_text,"setup_serial_port: fd:%d exiting",fd);
@@ -480,14 +467,14 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 //   int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
 //   if (fd < 1){
 //     sprintf(debug_text,"setup_serial_port: error %d opening %s: %s", errno, portname, strerror (errno));
-//     debug(debug_text,255);
+//     debug(debug_text,DEBUG_LEVEL_STDERR);
 //     return RETURN_ERROR;
 //   }
 
 //   struct termios tty;
 //   if (tcgetattr (fd, &tty) != 0){
 //     sprintf(debug_text,"setup_serial_port: error %d from tcgetattr", errno);
-//     debug(debug_text,255);    
+//     debug(debug_text,DEBUG_LEVEL_STDERR);    
 //     return RETURN_ERROR;
 //   }
 
@@ -515,7 +502,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
 //   if (tcsetattr (fd, TCSANOW, &tty) != 0){
 //     sprintf(debug_text,"setup_serial_port: error %d from tcsetattr", errno);
-//     debug(debug_text,255);     
+//     debug(debug_text,DEBUG_LEVEL_STDERR);     
 //     return RETURN_ERROR;
 //   }
 
@@ -525,7 +512,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
 //   if (tcsetattr (fd, TCSANOW, &tty) != 0){
 //     sprintf(debug_text,"error %d setting term attributes", errno);
-//     debug(debug_text,255);     
+//     debug(debug_text,DEBUG_LEVEL_STDERR);     
 //   }
 
 
@@ -534,7 +521,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
 //   if (pthread_create(&serial_incoming_pthread, NULL, serial_incoming_thread, NULL) < 0){
 //     sprintf(debug_text,"setup_serial_port: could not create serial_incoming_thread");
-//     debug(debug_text,255);
+//     debug(debug_text,DEBUG_LEVEL_STDERR);
 //   }
 
 

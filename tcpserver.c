@@ -75,17 +75,16 @@
 
 #endif //COMPILING_EVERYTHING
 
+
+
+
+// char debug_text[64];
+
+
+
 // ---------------------------------------------------------------------------------------
 
 
-char debug_text[64];
-
-
-
-// ---------------------------------------------------------------------------------------
-
-
-// void *tcp_connection_handler(void *socket_desc){
 
 void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
@@ -175,7 +174,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
     debug(debug_text,1);    
 	} else if(read_size == -1){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: recv failed client_sock: %d", client_sock);
-    debug(debug_text,255);       
+    debug(debug_text,DEBUG_LEVEL_STDERR);       
 	}
 		
 
@@ -205,7 +204,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
   	socket_desc = socket(AF_INET, SOCK_STREAM, 0);
   	if (socket_desc == -1){
       sprintf(debug_text,"tcpserver_main_thread: could not create socket");
-      debug(debug_text,255);     
+      debug(debug_text,DEBUG_LEVEL_STDERR);     
       exit;   
   	}
     sprintf(debug_text,"tcpserver_main_thread: socket created: %d", socket_desc);
@@ -220,7 +219,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
   	if (bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0){
   		//print the error message
       sprintf(debug_text,"tcpserver_main_thread: socket:%d bind failed, retrying",socket_desc);
-      debug(debug_text,255);
+      debug(debug_text,DEBUG_LEVEL_STDERR);
       sleep(5);
       close(socket_desc);     	
   	} else { 
@@ -257,7 +256,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 
     if (pthread_create(&tcp_connection_handler_thread, NULL, tcp_connection_handler, (void*) tcp_connection_handler_parms) < 0) {
       sprintf(debug_text,"tcpserver_main_thread: client_sock:%d port:%d could not create thread", client_sock, tcpserver_parms.tcpport);
-      debug(debug_text,255);       
+      debug(debug_text,DEBUG_LEVEL_STDERR);       
 			//return RETURN_NO_ERROR;
 		} else {
       sprintf(debug_text,"tcpserver_main_thread: client_sock:%d port:%d tcp_connection_handler launched", client_sock, tcpserver_parms.tcpport);
@@ -291,7 +290,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
     pthread_t tcpserver_thread_1;
 
     if (pthread_create(&tcpserver_thread_1, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
-      debug("main: could not create tcpserver_main_thread",255);
+      debug("main: could not create tcpserver_main_thread",DEBUG_LEVEL_STDERR);
       return RETURN_ERROR;
     }
   
@@ -302,7 +301,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
     pthread_t tcpserver_thread_2;
 
     if (pthread_create(&tcpserver_thread_2, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
-      debug("main: could not create tcpserver_main_thread",255);
+      debug("main: could not create tcpserver_main_thread",DEBUG_LEVEL_STDERR);
       return RETURN_ERROR;
     }    
 
@@ -313,7 +312,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
     pthread_t tcpserver_thread_3;
 
     if (pthread_create(&tcpserver_thread_3, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
-      debug("main: could not create tcpserver_main_thread",255);
+      debug("main: could not create tcpserver_main_thread",DEBUG_LEVEL_STDERR);
       return RETURN_ERROR;
     }    
 

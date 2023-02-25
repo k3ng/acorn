@@ -26,6 +26,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include "acorn.h"
 #include "debug.h"
 #include "tcpclient.h"
 
@@ -70,7 +71,7 @@ long get_address(char *host){
 	pent = gethostbyname(host);
 	if (!pent){
 		sprintf("get_address: failed to resolve %s", host);	
-		debug(debug_text,255);
+		debug(debug_text,DEBUG_LEVEL_STDERR);
 		return 0;
 	}
 
@@ -107,12 +108,12 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
 	if(!host_name){
 		sprintf(debug_text,"tcpclient_thread_function: invalid hostname:%s",host_name);
-		debug(debug_text,255);
+		debug(debug_text,DEBUG_LEVEL_STDERR);
 		return NULL;
 	}
 	if(!port){
 		sprintf(debug_text,"tcpclient_thread_function: invalid port:%s",port);
-		debug(debug_text,255);
+		debug(debug_text,DEBUG_LEVEL_STDERR);
 		return NULL;	
 	}	
 
@@ -134,7 +135,7 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
   if (connect(tcp_sock,(struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
 		sprintf(debug_text,"tcpclient_thread_function: failed to connect to %s", host_name);
-	  debug(debug_text,255);
+	  debug(debug_text,DEBUG_LEVEL_STDERR);
 		close(tcp_sock);
 
     tcpclient_handle_tcp_sock_array[tcpclient_parms.tcpclient_handle] = -1;
@@ -170,7 +171,7 @@ int tcpclient_write(int tcpclient_handle, char *text){
 
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
 		sprintf(debug_text,"tcpclient_write: invalid tcpclient_handle:%d", tcpclient_handle);
-	  debug(debug_text,255);		
+	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return -1;
 	}
 
@@ -178,7 +179,7 @@ int tcpclient_write(int tcpclient_handle, char *text){
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d connection is closed", tcpclient_handle);
-	  debug(debug_text,255);		
+	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return -1;
 	}
 
@@ -201,7 +202,7 @@ int tcpclient_close(int tcpclient_handle){
 
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
 		sprintf(debug_text,"tcpclient_close: invalid tcpclient_handle:%d", tcpclient_handle);
-	  debug(debug_text,255);		
+	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return -1;
 	}
 
@@ -209,7 +210,7 @@ int tcpclient_close(int tcpclient_handle){
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_close: invalid tcpclient_handle:%d connection already closed", tcpclient_handle);
-	  debug(debug_text,255);		
+	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return -1;
 	}
 
@@ -250,7 +251,7 @@ int tcpclient_open(char *server){
 
   if (assigned_slot == 0){
 			sprintf(debug_text,"tcpclient_open: out of tcpclient_handles");
-			debug(debug_text,255);
+			debug(debug_text,DEBUG_LEVEL_STDERR);
 		  return -1;	  	
   }
 

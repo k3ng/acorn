@@ -3,9 +3,7 @@ F=$@
 WORKING_DIRECTORY=`pwd`
 
 
-if [[ $F = "" ]]; then
-	F="acorn-server"
-fi
+
 
 if [ -e ./release_notes.txt ]; then
   echo -e "\r\n\r\n"
@@ -15,7 +13,7 @@ fi
 if [ "$F" = "acorn-server" ]; then
   VERSION=`grep VERSION_STRING acorn-server.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
-  gcc -D COMPILING_EVERYTHING -g -o $F debug.c ini.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
 fi
 
 
@@ -24,3 +22,34 @@ if [ "$F" = "acorn-gtk-client" ]; then
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
   gcc -g -o $F debug.c ini.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
 fi
+
+
+if [ "$F" = "test" ]; then
+  echo "compiling serial"
+  gcc -g -o serial debug.c serial.c -pthread
+  echo "compiling avr"
+  gcc -D COMPILING_AVR -g -o avr serial.c debug.c avr.c -pthread  
+  echo "compiling tcpclient"
+  gcc -g -o tcpclient debug.c tcpclient.c -pthread
+  echo "compiling tcpserver"
+  gcc -g -o tcpserver debug.c tcpserver.c -pthread
+  echo "compiling vfo"
+  gcc -g -o vfo vfo.c -lm
+
+  F=""
+fi
+
+
+if [[ $F = "" ]]; then
+  F="acorn-server"
+  VERSION=`grep VERSION_STRING acorn-server.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
+
+  F="acorn-gtk-client"
+  VERSION=`grep VERSION_STRING acorn-gtk-client.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -g -o $F debug.c ini.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+fi
+
+

@@ -49,6 +49,7 @@
 #include <pthread.h>
 
 #include "acorn.h"
+#include "acorn-server.h"
 #include "avr.h"
 #include "debug.h"
 #include "serial.h"
@@ -67,15 +68,94 @@ struct command_responses_struct {
   char response[32];
 } command_responses[NUMBER_OF_AVR_COMMAND_DEFINES];
 
+struct avr_incoming_serial_processor_thread_parms_struct{
+
+  char serial_port[16];
+
+};
+
+int avr_bus_online = 0;
+
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
+
+void *avr_incoming_serial_processor(void *passed_serial_processor_parms){
+
+  struct avr_incoming_serial_processor_thread_parms_struct serial_processor_parms 
+    = *(struct avr_incoming_serial_processor_thread_parms_struct*)passed_serial_processor_parms;
+
+  char incoming_line[SERIAL_PORT_INCOMING_BUFFER_SIZE+1];
+  char tempchar[SERIAL_PORT_INCOMING_BUFFER_SIZE+1];
+
+  avr_bus_online = 1;
+
+  while(!shutdown_flag){
+
+    if (get_from_serial_incoming_buffer_one_line(serial_processor_parms.serial_port,incoming_line)){
+
+
+      sprintf(debug_text,"avr_incoming_serial_processor: received:%s",incoming_line);
+      debug(debug_text,3);
+
+      // trim leading \r \n - not sure why we're getting them
+      if ((incoming_line[0] == '\r') || (incoming_line[0] == '\n')){
+        strcpy(tempchar,incoming_line+1);
+        strcpy(incoming_line,tempchar);
+      }
+    
+      switch(incoming_line[0]){
+        case 'a':
+          strcpy(command_responses[AVR_COMMAND_SET_FREQ_DDS0].response,incoming_line+1);
+          command_responses[AVR_COMMAND_SET_FREQ_DDS0].response_available = 1;
+          break;
+        case 'b':
+          strcpy(command_responses[AVR_COMMAND_SET_FREQ_DDS1].response,incoming_line+1);
+          command_responses[AVR_COMMAND_SET_FREQ_DDS0].response_available = 1;
+          break;
+        case 'c':
+          strcpy(command_responses[AVR_COMMAND_SET_FREQ_DDS2].response,incoming_line+1);
+          command_responses[AVR_COMMAND_SET_FREQ_DDS0].response_available = 1;
+          break;
+
+
+        case 'd':
+          strcpy(command_responses[AVR_COMMAND_QUERY_DDS_STATUS].response,incoming_line+1);
+          command_responses[AVR_COMMAND_QUERY_DDS_STATUS].response_available = 1;
+          break;
+
+        case 'f':
+          strcpy(command_responses[AVR_COMMAND_QUERY_FWD_POWER].response,incoming_line+1);
+          command_responses[AVR_COMMAND_QUERY_FWD_POWER].response_available = 1;
+          break;
+        case 'r':
+          strcpy(command_responses[AVR_COMMAND_QUERY_REF_POWER].response,incoming_line+1);
+          command_responses[AVR_COMMAND_QUERY_REF_POWER].response_available = 1;
+          break;
+
+
+
+        default:      
+          strcpy(command_responses[AVR_COMMAND_RAW].response,incoming_line+1);
+          command_responses[AVR_COMMAND_SET_FREQ_DDS0].response_available = 1;
+          break;
+      }
+
+
+    }
+    usleep(1000);
+  }
+
+  avr_bus_online = 0;
+  return RETURN_NO_ERROR;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
 
 int initialize_avr_bus(){
-
-
-  //zzzzzzz
 
   char incoming_line[SERIAL_PORT_INCOMING_BUFFER_SIZE+1];
   char tempchar1[SERIAL_PORT_INCOMING_BUFFER_SIZE+1];
@@ -98,7 +178,7 @@ int initialize_avr_bus(){
 
   if (fd < 1){
     sprintf(debug_text,"initialize_avr_bus: error attempting to open serial port:%s",AVR_BUS_SERIAL_PORT);
-    debug(debug_text,255);
+    debug(debug_text,DEBUG_LEVEL_STDERR);
     return RETURN_ERROR;
   }
 
@@ -111,6 +191,7 @@ int initialize_avr_bus(){
      example format: ptest_unit_1:202301161301$test_unit_2:202402161302$test_unit_3:202503161303$
 
   */
+
   debug("initialize_avr_bus: polling the AVR bus",2);
   send_out_serial_port(AVR_BUS_SERIAL_PORT,"p\r");
 
@@ -167,18 +248,37 @@ int initialize_avr_bus(){
     } //if (incoming_line[0] == 'p')
   }  // while (loops2-- > 0){
 
-  
+
+/// zzzzzzzzzzzzzz
+
+  pthread_t avr_incoming_serial_processor_thread;
+
+  struct avr_incoming_serial_processor_thread_parms_struct *avr_incoming_serial_processor_thread_parms = malloc(sizeof(avr_incoming_serial_processor_thread_parms));
+  // avr_incoming_serial_processor_thread_parms = malloc(sizeof(avr_incoming_serial_processor_thread_parms));
+  strcpy(avr_incoming_serial_processor_thread_parms->serial_port,AVR_BUS_SERIAL_PORT);
+
 
   if ((parsing_error) || (number_of_discovered_avr_bus_units < 1)){
     return RETURN_ERROR;
   } else {
     // launch thread to service incoming responses
 
+
+   if (pthread_create(&avr_incoming_serial_processor_thread, NULL, avr_incoming_serial_processor, (void*) avr_incoming_serial_processor_thread_parms)){
+      debug("initialize_avr_bus: could not create avr_incoming_serial_processing_thread",DEBUG_LEVEL_STDERR);
+      return RETURN_ERROR;
+    }
+
   }
 
+  
+  return RETURN_NO_ERROR;
 
 
 }
+
+
+
 // ---------------------------------------------------------------------------------------
 
 
@@ -188,9 +288,16 @@ int send_avr_bus_command(int command,char *arguments){
   char tempchar[32];
   int return_code = RETURN_ERROR;
 
-  sprintf(debug_text,"send_avr_bus_command: command:%d args:%s",command,arguments);
-  debug(debug_text,2);
+  if (!avr_bus_online){
+    sprintf(debug_text,"send_avr_bus_command: avr bus not online");
+    debug(debug_text,DEBUG_LEVEL_STDERR);
+    return RETURN_ERROR;
+  }
 
+  sprintf(debug_text,"send_avr_bus_command: command:%d args:%s",command,arguments);
+  debug(debug_text,DEBUG_LEVEL_SOMEWHST_NOISY_INFORMATIVE);
+
+  strcpy(tempchar,"");
 
   switch (command){
     case AVR_COMMAND_RAW:
@@ -204,18 +311,52 @@ int send_avr_bus_command(int command,char *arguments){
       break;
     case AVR_COMMAND_SET_FREQ_DDS2:
       sprintf(tempchar,"c%s\r",arguments);
-      break;              
+      break;    
+    case AVR_COMMAND_QUERY_DDS_STATUS:
+      sprintf(tempchar,"d\r");
+      break; 
+    case AVR_COMMAND_QUERY_FWD_POWER:
+      sprintf(tempchar,"f\r");
+      break; 
+    case AVR_COMMAND_QUERY_REF_POWER:
+      sprintf(tempchar,"r\r");
+      break;    
+
   } // switch (command)
 
   return_code = send_out_serial_port(AVR_BUS_SERIAL_PORT,tempchar);
 
   if (return_code == RETURN_ERROR){
-    debug("send_avr_bus_command: returning error",255);
+    debug("send_avr_bus_command: returning error",DEBUG_LEVEL_STDERR);
   }
 
   return return_code;
 
 }
+// ---------------------------------------------------------------------------------------
+
+int wait_for_avr_bus_command_response_available(int command){
+
+
+  sprintf(debug_text,"wait_for_avr_bus_command_response_available: command:%d",command);
+  debug(debug_text,2);
+
+  while (!command_responses[command].response_available){
+    usleep(1000);
+  }
+
+  return 1;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+int avr_bus_command_response_available(int command){
+
+  return command_responses[command].response_available;
+
+}
+
 
 // ---------------------------------------------------------------------------------------
 
@@ -277,20 +418,50 @@ char *get_avr_bus_command_response_string(int command){
 
     usleep(10000);
 
-    int loop = 10;
+    int loop = 1;
     int freq = 1000000;
     char tempchar[20];
 
+
+
+
+    strcpy(tempchar,"");
+    send_avr_bus_command(AVR_COMMAND_QUERY_DDS_STATUS,tempchar); 
+    wait_for_avr_bus_command_response_available(AVR_COMMAND_QUERY_DDS_STATUS);
+    strcpy(tempchar,get_avr_bus_command_response_string(AVR_COMMAND_QUERY_DDS_STATUS));
+    printf("main: DDS status:%s\r\n",tempchar);
+
+    strcpy(tempchar,"");
+    send_avr_bus_command(AVR_COMMAND_QUERY_FWD_POWER,tempchar); 
+    wait_for_avr_bus_command_response_available(AVR_COMMAND_QUERY_FWD_POWER);
+    strcpy(tempchar,get_avr_bus_command_response_string(AVR_COMMAND_QUERY_FWD_POWER));
+    printf("main: forward power reading:%s\r\n",tempchar);
+
+    strcpy(tempchar,"");
+    send_avr_bus_command(AVR_COMMAND_QUERY_REF_POWER,tempchar); 
+    wait_for_avr_bus_command_response_available(AVR_COMMAND_QUERY_REF_POWER);
+    strcpy(tempchar,get_avr_bus_command_response_string(AVR_COMMAND_QUERY_REF_POWER));
+    printf("main: reflected power reading:%s\r\n",tempchar);    
+
+
     while (loop-- > 0){
       freq = 1000000;
-      while (freq < 51000000){
+      while (freq < 60000000){
         sprintf(tempchar,"%d",freq);
-        printf("main: DD0:%s MHz\r\n",tempchar);
+        printf("main: DDS0:%s MHz\r\n",tempchar);
         send_avr_bus_command(AVR_COMMAND_SET_FREQ_DDS0,tempchar); 
-        freq = freq + 1000000;
+        if (avr_bus_command_response_available(AVR_COMMAND_SET_FREQ_DDS0)){
+          strcpy(tempchar,get_avr_bus_command_response_string(AVR_COMMAND_SET_FREQ_DDS0));
+          printf("main: command response:%s\r\n",tempchar);
+        }
+        freq = freq + 5000000;
         usleep(1000000);  
+
       }     
     }
+
+
+
 
 
   }

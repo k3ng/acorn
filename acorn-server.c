@@ -56,6 +56,7 @@
 #include "acorn-server.h"
 #include "debug.h"
 #include "ini.h"
+#include "avr.h"
 #include "sdr.h"
 #include "sound.h"
 #include "tcpserver.h"
@@ -196,7 +197,7 @@ void signal_handler(int sig){
   signal(sig, SIG_IGN);
   signal(SIGINT, signal_handler);
 
-  debug("\r\n\r\n\r\n\r\nsignal_handler: caught signal, shutting down",255);
+  debug("\r\n\r\n\r\n\r\nsignal_handler: caught signal, shutting down",DEBUG_LEVEL_BASIC_INFORMATIVE);
 
   shutdown_flag = 1;
 
@@ -502,11 +503,11 @@ void start_things_up(int argc, char* argv[]){
 
   #if defined(SUPRESS_LOOPBACK_PCM_ERRORS)
     supress_loopback_pcm_errors = 1;
-    debug("start_things_up: supressing loopback PCM error printing",1);
+    debug("start_things_up: supressing loopback PCM error printing",DEBUG_LEVEL_BASIC_INFORMATIVE);
   #endif  
 
   if (!process_lock(OPEN_LOCK)){
-    debug("start_things_up: there is another Acorn running.  Exiting.",255);
+    debug("start_things_up: there is another Acorn running.  Exiting.",DEBUG_LEVEL_STDERR);
     exit(-1);
   }
 
@@ -519,7 +520,7 @@ void start_things_up(int argc, char* argv[]){
 
 void wind_things_down(){
 
-  debug("wind_things_down: called",1);
+  debug("wind_things_down: called",DEBUG_LEVEL_BASIC_INFORMATIVE);
   process_lock(CLOSE_LOCK);
 
 }
@@ -538,7 +539,7 @@ void launch_tcp_server_threads(){
 
   if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
     sprintf(debug_text,"launch_tcp_server_threads: could not create tcpserver_thread port:%d",tcpserver_parms->tcpport);
-    debug(debug_text,1);
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
   }
 
 }
@@ -568,6 +569,8 @@ int main(int argc, char* argv[]) {
   read_ini_file_into_settings();
 
   initialize_hardware();
+
+  initialize_avr_bus();
 
   launch_tcp_server_threads();
 

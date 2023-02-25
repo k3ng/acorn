@@ -28,7 +28,7 @@
 */
 
 #define CODE_VERSION "202301161347"
-#define UNIT_TYPE "CW_Si5351_unit"
+#define UNIT_TYPE "CW_DDS_SWR"
 
 #include <stdio.h>
 #include <avr/pgmspace.h>

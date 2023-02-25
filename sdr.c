@@ -14,6 +14,8 @@
 #include "acorn-server.h"
 #include "sdr.h"
 #include "sound.h"
+#include "acorn.h"
+#include "avr.h"
 
 
 //char audio_card[32];
@@ -102,10 +104,28 @@ int count = 0;
 
 int set_dds_frequency(int dds_chip, int clock, unsigned int frequency){
 
-  if (dds_chip == 0){
-    
+  int return_code = RETURN_ERROR;
+  int command;
 
+  sprintf(debug_text,"set_dds_frequency: dds_chip:%d clock:%d frequency:%d", dds_chip, clock, frequency);
+  debug(debug_text,DEBUG_LEVEL_FREQUENT_NOISY);
+
+  char frequency_char[16];
+  sprintf(frequency_char,"%d",frequency);
+
+
+  if (dds_chip == 0){
+  	if (clock == 2){
+  		command = AVR_COMMAND_SET_FREQ_DDS2;
+  	} else if (clock == 1){
+  		command = AVR_COMMAND_SET_FREQ_DDS1;
+  	} else {
+  		command = AVR_COMMAND_SET_FREQ_DDS0;
+  	}
+    return_code = send_avr_bus_command(command,frequency_char);
   }
+
+  return return_code;
 
 }
 
@@ -115,7 +135,7 @@ int set_dds_frequency(int dds_chip, int clock, unsigned int frequency){
 void radio_tune_to(unsigned int frequency){
 
   sprintf(debug_text,"radio_tune_to: setting radio to freq:%d", frequency);
-  debug(debug_text,1);
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
   set_dds_frequency(0, 2, frequency + bfo_frequency - 24000 + TUNING_SHIFT);
 
@@ -131,7 +151,7 @@ void fft_init(){
 
 	int mem_needed;
 
-	debug("fft_init: called",1);
+	debug("fft_init: called",DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 	fflush(stdout);
 
@@ -430,7 +450,7 @@ struct rx *add_rx(int frequency, short mode, int bpf_low, int bpf_high){
 	//the tuning can go up and down only by 22 KHz from the center_freq
 
   sprintf(debug_text,"add_rx: called: frequency:%d mode:%d bpf_low:%d bpf_high: %d", frequency, mode, bpf_low, bpf_high);
-	debug(debug_text,1);
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 	struct rx *r = malloc(sizeof(struct rx));
 	r->low_hz = bpf_low;
@@ -972,7 +992,7 @@ void sdr_modulation_update(int32_t *samples, int count, double scale_up){
 
 void setup_sdr(){
 
-	debug("setup_sdr: called",1);
+	debug("setup_sdr: called",DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 	fft_init();
 	vfo_init_phase_table();
@@ -986,7 +1006,6 @@ void setup_sdr(){
   tx_list->tuned_bin = 512;
 	tx_init(7000000, MODE_LSB, -3000, -300);
 
-
 	setup_audio_codec(AUDIO_CARD_NAME);
 	sound_thread_start(SOUND_THREAD_START_DEVICE);
 
@@ -995,7 +1014,7 @@ void setup_sdr(){
 	vfo_start(&tone_a, 700, 0);
 	vfo_start(&tone_b, 1900, 0);
 
-	debug("setup_sdr: complete",1);
+	debug("setup_sdr: complete",DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 }
 
@@ -1244,7 +1263,7 @@ int sdr_request(char *request, char *response){
 	else {
   	strcpy(response, "error");
 		sprintf(debug_text,"sdr_request: request error: %s", request);
-	  debug(debug_text,255);	
+	  debug(debug_text,DEBUG_LEVEL_STDERR);	
 	  return -1;	
   }
 
