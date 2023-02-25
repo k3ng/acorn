@@ -23,6 +23,8 @@
 
   To test run:
 
+    sudo ./tcpserver
+
     telnet localhost 8888
 
 
@@ -37,7 +39,7 @@
 #include<arpa/inet.h>	
 #include<unistd.h>
 #include<pthread.h>
-
+#include "acorn.h"
 #include "debug.h"
 
 
@@ -48,15 +50,6 @@
 #if !defined(COMPILING_EVERYTHING)
 
   int shutdown_flag = 0;
-
-  // void debug(char *debug_text_in, int debug_text_level){
-
-  //   printf(debug_text_in);
-  //   printf("\r\n");
-  //   fflush(stdout);
-
-  // }
-
 
   struct tcpserver_parms_struct{
 
@@ -143,7 +136,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         debug(debug_text,1); 
         close(client_sock);    
         free(passed_tcp_connection_handler_parms);
-        return 0;  
+        return RETURN_NO_ERROR;  
       } else if(!strcmp(client_message,"shutdown")){
         sprintf(client_message,"shutting down!\r\n");
         write(client_sock, client_message, strlen(client_message));  
@@ -152,7 +145,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         close(client_sock);    
         free(passed_tcp_connection_handler_parms);      
         shutdown_flag = 1;
-        return 0;        
+        return RETURN_NO_ERROR;        
       } else if(!strcmp(client_message,"hi")){
         sprintf(client_message,"hi from tcp_connection_handler!\r\n");
         write(client_sock, client_message, strlen(client_message));
@@ -192,7 +185,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
   free(passed_tcp_connection_handler_parms);
 
-	return 0;
+	return RETURN_NO_ERROR;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -265,7 +258,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
     if (pthread_create(&tcp_connection_handler_thread, NULL, tcp_connection_handler, (void*) tcp_connection_handler_parms) < 0) {
       sprintf(debug_text,"tcpserver_main_thread: client_sock:%d port:%d could not create thread", client_sock, tcpserver_parms.tcpport);
       debug(debug_text,255);       
-			//return 0;
+			//return RETURN_NO_ERROR;
 		} else {
       sprintf(debug_text,"tcpserver_main_thread: client_sock:%d port:%d tcp_connection_handler launched", client_sock, tcpserver_parms.tcpport);
       debug(debug_text,1);
@@ -286,6 +279,8 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 
   int main(int argc, char *argv[]){
 
+    debug_level = 255;
+
     struct tcpserver_parms_struct *tcpserver_parms;
 
     tcpserver_parms = malloc(sizeof(tcpserver_parms));
@@ -297,8 +292,10 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 
     if (pthread_create(&tcpserver_thread_1, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
       debug("main: could not create tcpserver_main_thread",255);
-      return 1;
+      return RETURN_ERROR;
     }
+  
+    sleep(1);
 
     tcpserver_parms->tcpport = 8889;
 
@@ -306,8 +303,10 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 
     if (pthread_create(&tcpserver_thread_2, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
       debug("main: could not create tcpserver_main_thread",255);
-      return 1;
+      return RETURN_ERROR;
     }    
+
+    sleep(1);
 
     tcpserver_parms->tcpport = 8890;
 
@@ -315,7 +314,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 
     if (pthread_create(&tcpserver_thread_3, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
       debug("main: could not create tcpserver_main_thread",255);
-      return 1;
+      return RETURN_ERROR;
     }    
 
     while(1){sleep(30);};

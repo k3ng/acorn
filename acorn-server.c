@@ -52,6 +52,7 @@
 // #include <wiringSerial.h>
 // #include <sys/stat.h>
 
+#include "acorn.h"
 #include "acorn-server.h"
 #include "debug.h"
 #include "ini.h"
@@ -572,8 +573,6 @@ int main(int argc, char* argv[]) {
 
   setup_sdr();
 
-  //change_setting("vfo_a_freq", ACTION_UPDATE, "7040000");
-
   char dummy_char[100];
 
   sdr_request("tx=0",dummy_char);
@@ -591,6 +590,6 @@ int main(int argc, char* argv[]) {
 
 	wind_things_down();
   
-  return 0;
+  return RETURN_NO_ERROR;
 
 }

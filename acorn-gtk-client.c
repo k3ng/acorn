@@ -34,6 +34,7 @@ Based on works of Ashar Fahran, VU2ESE, and others.
 #include <errno.h>
 #include <cairo.h>
 #include <wiringPi.h>
+#include "acorn.h"
 #include "acorn-gtk-client.h"
 #include "debug.h"
 #include "ini.h"

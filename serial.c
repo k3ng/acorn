@@ -25,7 +25,7 @@
 
   Standalone compile with:
 
-    gcc -g -o serial serial.c -pthread
+    gcc -g -o serial debug.c serial.c -pthread
 
   The standalone compilation tests the connection to the AVR on /dev/ttyS0 by sending the p (poll) command in a loop.
 
@@ -42,7 +42,10 @@
 #include <string.h>
 #include <termios.h>
 #include <pthread.h>
+#include "acorn.h"
+#include "debug.h"
 #include "serial.h"
+
 
 
 // ---------------------------------------------------------------------------------------
@@ -57,7 +60,7 @@ struct serial_buffer_struct{
   struct serial_buffer_struct* next_serial_buffer;  // pointer to the next serial buffer
 };
 
-struct serial_buffer_struct *serial_buffer_first = NULL; //may have to declare extern in serial.h?
+struct serial_buffer_struct *serial_buffer_first = NULL; //TODO: may have to declare extern in serial.h?
 
 
 // ---------------------------------------------------------------------------------------
@@ -65,21 +68,12 @@ struct serial_buffer_struct *serial_buffer_first = NULL; //may have to declare e
 
 #if !defined(COMPILING_EVERYTHING)
 
-  
+   
   int shutdown_flag = 0;
-
-
-  void debug(char *debug_text_in, int debug_text_level){
-
-    printf(debug_text_in);
-    printf("\r\n");
-    fflush(stdout);
-
-  }
 
 #else
 
-  #include "acorn.h"
+  #include "acorn_server.h"
 
 #endif //COMPILING_EVERYTHING
 
@@ -100,13 +94,13 @@ int send_out_serial_port(char *whichone,char *stuff_to_send){
     if ((!strcmp(whichone,serial_buffer_temp->portname)) || (!strcmp(whichone,temp_char_fd))){ 
       // found a match, add stuff_to_add to the buffer
       write (serial_buffer_temp->fd, stuff_to_send, strlen(stuff_to_send));
-      return 1;
+      return RETURN_AFFIRMATIVE;
     } else {
       if (serial_buffer_temp->next_serial_buffer != NULL){
          serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
       } else {
         // no match
-        return -1;
+        return RETURN_ERROR;
       }
     }
   }
@@ -136,15 +130,16 @@ int add_to_serial_incoming_buffer(char *whichone,char *stuff_to_add){
         }
         usleep(5);
       }      
-      strcat(serial_buffer_temp->incoming_buffer,stuff_to_add);
+      // C is just so much fun with ways to shoot yourself in the foot with buffer overruns
+      strncat(serial_buffer_temp->incoming_buffer,stuff_to_add,SERIAL_PORT_INCOMING_BUFFER_SIZE-strlen(serial_buffer_temp->incoming_buffer)-1);
       serial_buffer_temp->incoming_buffer_spin_lock = 0;
-      return 1;
+      return RETURN_AFFIRMATIVE;
     } else {
       if (serial_buffer_temp->next_serial_buffer != NULL){
          serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
       } else {
         // no match
-        return -1;
+        return RETURN_ERROR;
       }
     }
   }
@@ -175,7 +170,7 @@ int bytes_in_incoming_buffer(char *whichone){
          serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
       } else {
         // no match
-        return -1;
+        return RETURN_ERROR;
       }
     }
   }
@@ -211,7 +206,7 @@ int get_from_serial_incoming_buffer_everything(char *whichone,char *stuff_to_get
         strcpy(stuff_to_get,serial_buffer_temp->incoming_buffer);
         strcpy(serial_buffer_temp->incoming_buffer,"");       // clear the buffer
         serial_buffer_temp->incoming_buffer_spin_lock = 0;  // unlock the spin lock
-        return 1;
+        return RETURN_AFFIRMATIVE;
       } else {
         return 0;
       }
@@ -220,7 +215,7 @@ int get_from_serial_incoming_buffer_everything(char *whichone,char *stuff_to_get
          serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
       } else {
         // no match
-        return -1;
+        return RETURN_ERROR;
       }
     }
   }
@@ -273,7 +268,7 @@ int get_from_serial_incoming_buffer_one_line(char *whichone,char *stuff_to_get){
           strcpy(serial_buffer_temp->incoming_buffer, serial_buffer_temp->incoming_buffer+1);
         }
         serial_buffer_temp->incoming_buffer_spin_lock = 0;  // unlock the spin lock
-        return 1;
+        return RETURN_AFFIRMATIVE;
       } else {
         return 0;
       }
@@ -282,7 +277,7 @@ int get_from_serial_incoming_buffer_one_line(char *whichone,char *stuff_to_get){
          serial_buffer_temp = serial_buffer_temp->next_serial_buffer;  // get the next serial port buffer
       } else {
         // no match
-        return -1;
+        return RETURN_ERROR;
       }
     }
   }
@@ -337,14 +332,14 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
   if (fd < 1){
     sprintf(debug_text,"setup_serial_port: error %d opening %s: %s", errno, portname, strerror (errno));
     debug(debug_text,255);
-    return -1;
+    return RETURN_ERROR;
   }
 
   struct termios tty;
   if (tcgetattr (fd, &tty) != 0){
     sprintf(debug_text,"setup_serial_port: error %d from tcgetattr", errno);
     debug(debug_text,255);    
-    return -1;
+    return RETURN_ERROR;
   }
 
   cfsetospeed (&tty, speed);
@@ -372,7 +367,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
   if (tcsetattr (fd, TCSANOW, &tty) != 0){
     sprintf(debug_text,"setup_serial_port: error %d from tcsetattr", errno);
     debug(debug_text,255);     
-    return -1;
+    return RETURN_ERROR;
   }
 
 
@@ -450,7 +445,8 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 //         }
 //         usleep(5);
 //       }      
-//       strcat(serial_buffer.incoming_buffer,buffer);
+//       // C is just so much fun with ways to shoot yourself in the foot with buffer overruns
+//       strncat(serial_buffer_temp->incoming_buffer,stuff_to_add,SERIAL_PORT_INCOMING_BUFFER_SIZE-strlen(serial_buffer_temp->incoming_buffer)-1);
 //       serial_buffer.incoming_buffer_spin_lock = 0; // unlock
 //     }
 //     usleep (1000);
@@ -485,14 +481,14 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 //   if (fd < 1){
 //     sprintf(debug_text,"setup_serial_port: error %d opening %s: %s", errno, portname, strerror (errno));
 //     debug(debug_text,255);
-//     return -1;
+//     return RETURN_ERROR;
 //   }
 
 //   struct termios tty;
 //   if (tcgetattr (fd, &tty) != 0){
 //     sprintf(debug_text,"setup_serial_port: error %d from tcgetattr", errno);
 //     debug(debug_text,255);    
-//     return -1;
+//     return RETURN_ERROR;
 //   }
 
 //   cfsetospeed (&tty, speed);
@@ -520,7 +516,7 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 //   if (tcsetattr (fd, TCSANOW, &tty) != 0){
 //     sprintf(debug_text,"setup_serial_port: error %d from tcsetattr", errno);
 //     debug(debug_text,255);     
-//     return -1;
+//     return RETURN_ERROR;
 //   }
 
 
@@ -554,10 +550,10 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 // ---------------------------------------------------------------------------------------
 
 
-#if !defined(COMPILING_EVERYTHING)
+#if !defined(COMPILING_EVERYTHING) && !defined(COMPILING_AVR)
 
 
-  void main(){
+  int main(){
 
 
     char *portname = "/dev/ttyS0";
@@ -606,7 +602,9 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
     char str[16];
 
-    while(1){
+    int loops = 10;
+
+    while(loops-- > 0){
 
       // send commands to the AVR on /dev/ttyS0 and get responses back
 
@@ -635,6 +633,8 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 
 
     }
+
+    return RETURN_NO_ERROR;
 
   }
 

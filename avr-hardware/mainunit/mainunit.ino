@@ -664,10 +664,14 @@ void check_serial(){
 
       if (incoming_serial_buffer[0] == 'p'){
         Serial.print(incoming_serial_buffer);  // send along any other devices that were before us on the serial ring
+
         Serial.print(UNIT_TYPE);
         Serial.print(":");
         Serial.print(CODE_VERSION);
         Serial.println("$");
+
+        //Serial.println("test_unit_1:202301161301$test_unit_2:202402161302$test_unit_3:202503161303$");
+
       } else if (incoming_serial_buffer[0] == 'a'){ 
         Serial.println("aOK");
         set_clk_freq(0,atol(command_argument(incoming_serial_buffer)));
