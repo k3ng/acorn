@@ -9,6 +9,7 @@
 
 #define VERSION_STRING "2023.02.20.2156"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
+//#define HARDCODE_DEBUG_LEVEL 8
 
 #if defined(CODEC_WM8731)
 	#define AUDIO_CARD_ELEMENT_RX_VOL "Master"

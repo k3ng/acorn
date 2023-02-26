@@ -18,7 +18,6 @@
 
 */
 
-// #define HARDCODE_DEBUG_LEVEL 8   // use this for troubleshooting to bypass having to do a command line parm
 
 #include <unistd.h>
 #include <stdio.h>
@@ -373,40 +372,32 @@ int read_ini_file_into_settings(){
 // ---------------------------------------------------------------------------------------
 
 
-
-
 void read_command_line_arguments(int argc, char* argv[]) {
-
-  #if !defined(HARDCODE_DEBUG_LEVEL)
 
     int x = 0;
 
     while (argc--){
       if (!strcmp(argv[x], "-d")){
-        if (argc){
-          
-            debug_level = atoi(argv[x+1]);
-            sprintf(debug_text,"read_command_line_arguments: debug_level: %d", debug_level);
-            debug(debug_text,3);
-        }
+        debug_level = atoi(argv[x+1]);
+        sprintf(debug_text,"read_command_line_arguments: debug_level:%d", debug_level);
+        debug(debug_text,DEBUG_LEVEL_MANDATORY_NON_ERROR);
       }
       x++;
     }
 
-  #else
+  #if defined(HARDCODE_DEBUG_LEVEL)
 
     debug_level = HARDCODE_DEBUG_LEVEL;
-    sprintf(debug_text,"read_command_line_arguments: debug_level hardcoded to: %d", debug_level);
-    debug(debug_text,0);     
+    sprintf(debug_text,"read_command_line_arguments: debug_level hardcoded to:%d", debug_level);
+    debug(debug_text,DEBUG_LEVEL_MANDATORY_NON_ERROR);     
          
   #endif
-
 
 }
 
 // ---------------------------------------------------------------------------------------
 
-// these are dropped in to satisfy modems.c for the moment - Goody K3NG
+// TODO: these are dropped in to satisfy modems.c for the moment
 
 
 int get_tx_data_byte(char *c){

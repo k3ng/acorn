@@ -206,6 +206,8 @@ int	console_selected_line = -1;
 
 int console_silence_flag = 0;
 
+char server_address_and_port[64];
+
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -4185,7 +4187,7 @@ gboolean ui_tick(gpointer gook){
 
 void initialize_user_interface(int argc, char *argv[]){
  
-  gtk_init( &argc, &argv );
+  gtk_init(&argc,&argv);
 
 	//we are using two deprecated functions here
 	//if anyone has a hack around them, do submit it
@@ -5152,9 +5154,9 @@ void initialize_modulation_display(){
 // ---------------------------------------------------------------------------------------
 
 
-void initial_initialization(){
+void do_initial_initialization(){
 
-	sprintf(debug_text,"main: %s",VERSION_STRING);
+	sprintf(debug_text,"do_initial_initialization: %s",VERSION_STRING);
 	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 	active_layout = main_controls;
 
@@ -5162,6 +5164,8 @@ void initial_initialization(){
 	unlink("/home/pi/acorn/ft8tx_float.raw");
 	call_wipe();
 	strcpy(sent_exchange, "");
+
+  strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
 
 }
 
@@ -5201,11 +5205,48 @@ void initialize_more_stuff(){
 
 // ---------------------------------------------------------------------------------------
 
+
+void read_command_line_arguments(int argc, char* argv[]) {
+
+  
+  int x = 0;
+
+  while (argc--){
+  	//if (argc){
+      if (!strcmp(argv[x], "-d")){        
+        debug_level = atoi(argv[x+1]);
+        sprintf(debug_text,"read_command_line_arguments: debug_level:%d", debug_level);
+        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+      }
+      if (!strcmp(argv[x], "-s")){
+        strcpy(server_address_and_port,argv[x+1]);
+        sprintf(debug_text,"read_command_line_arguments: server_address_and_port:%s", server_address_and_port);
+        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+      }
+    //}    
+    x++;
+  }
+
+  #if defined(HARDCODE_DEBUG_LEVEL)
+
+    debug_level = HARDCODE_DEBUG_LEVEL;
+    sprintf(debug_text,"read_command_line_arguments: debug_level hardcoded to:%d", debug_level);
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);     
+         
+  #endif
+
+
+}
+
+// ---------------------------------------------------------------------------------------
+
 int main(int argc, char* argv[]){
 
-  initial_initialization();
+  read_command_line_arguments(argc,argv);
 
-	initialize_user_interface(argc, argv);
+  do_initial_initialization();
+
+	initialize_user_interface(argc,argv);
 
 	initialize_hardware();
 
