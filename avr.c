@@ -295,7 +295,7 @@ int send_avr_bus_command(int command,char *arguments){
   }
 
   sprintf(debug_text,"send_avr_bus_command: command:%d args:%s",command,arguments);
-  debug(debug_text,DEBUG_LEVEL_SOMEWHST_NOISY_INFORMATIVE);
+  debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
 
   strcpy(tempchar,"");
 

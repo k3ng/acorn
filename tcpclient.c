@@ -5,6 +5,8 @@
 
     gcc -g -o tcpclient debug.c tcpclient.c -pthread
 
+  ./tcpclient 127.0.0.1:8888  
+
 */
 
 #include <stdio.h>

@@ -1,8 +1,8 @@
 /*
 
-acorn-gtk-client
+	acorn-gtk-client
 
-Based on works of Ashar Fahran, VU2ESE, and others.
+	Based on works of Ashar Fahran, VU2ESE, and others.
 
 
 */
@@ -38,6 +38,7 @@ Based on works of Ashar Fahran, VU2ESE, and others.
 #include "acorn-gtk-client.h"
 #include "debug.h"
 #include "ini.h"
+#include "tcpclient.h"
 //#include "hamlib.h"
 //#include "remote.h"
 //#include "wsjtx.h"
@@ -203,7 +204,11 @@ static struct console_line console_stream[MAX_CONSOLE_LINES];
 int console_current_line = 0;
 int	console_selected_line = -1;
 
+int console_silence_flag = 0;
 
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
 
 
 void set_ui(int id);
@@ -770,7 +775,7 @@ int set_field(char *id, char *value){
 // log is a special field that essentially is a like text
 // on a terminal
 
-void console_init(){
+void initialize_console(){
 	for (int i =0;  i < MAX_CONSOLE_LINES; i++){
 		console_stream[i].text[0] = 0;
 		console_stream[i].style = console_style;
@@ -780,7 +785,7 @@ void console_init(){
 // ---------------------------------------------------------------------------------------
 
 
-int console_init_next_line(){
+int initialize_console_next_line(){
 	console_current_line++;
 	if (console_current_line == MAX_CONSOLE_LINES)
 		console_current_line = console_style;
@@ -793,7 +798,7 @@ int console_init_next_line(){
 
 
 void write_console(int style, char *text){
-	char directory[200];	//dangerous, find the MAX_PATH and replace 200 with it
+	char directory[PATH_MAX];
 	char *path = getenv("HOME");
 	strcpy(directory, path);
 	strcat(directory, "/acorn/data/display_log.txt");
@@ -803,7 +808,7 @@ void write_console(int style, char *text){
 	if (style != console_style){
 		console_style = style;
 		if (strlen(console_stream[console_current_line].text)> 0)
-			console_init_next_line();	
+			initialize_console_next_line();	
 		console_stream[console_current_line].style = style;
 		switch(style){
 			case_FONT_LOG_RX:
@@ -830,13 +835,13 @@ void write_console(int style, char *text){
 	while(*text){
 		char c = *text;
 		if (c == '\n')
-			console_init_next_line();
+			initialize_console_next_line();
 		else if (c < 128 && c >= ' '){
 			char *p = console_stream[console_current_line].text;
 			int len = strlen(p);
 			if(len >= console_cols - 1){
 				//start a fresh line
-				console_init_next_line();
+				initialize_console_next_line();
 				p = console_stream[console_current_line].text;
 				len = 0;
 			}
@@ -1026,7 +1031,7 @@ static int mode_id(char *mode_str){
 
 static void save_user_settings(int forced){
 	static int last_save_at = 0;
-	char file_path[200];	//dangerous, find the MAX_PATH and replace 200 with it
+	char file_path[PATH_MAX];
 
 	//attempt to save settings only if it has been 30 seconds since the 
 	//last time the settings were saved
@@ -1121,8 +1126,8 @@ static int user_settings_handler(void* user, const char* section,
 			char request[100], response[100];
 			sprintf(request, "sidetone=%d",sidetone);  
 			send_command_to_server(request, response);
-			sprintf(request, "sidetone is set to %d Hz\n", sidetone);
-			write_console(FONT_LOG, request);
+			// sprintf(request, "sidetone is set to %d Hz\n", sidetone);
+			// write_console(FONT_LOG, request);
 		}
 		//contesting
 		else if (!strcmp(name, "sent_exchange"))
@@ -1262,7 +1267,7 @@ void sdr_modulation_update(int32_t *samples, int count, double scale_up){
 // GdkPixbuf *waterfall_pixbuf;
 // guint8 *waterfall_map;
 
-// void init_waterfall(){
+// void initialize_waterfall(){
 // 	struct field *f = get_field("waterfall");
 
 // 	//this will store the db values of waterfall
@@ -1701,7 +1706,7 @@ guint8 *waterfall_map;
 
 // ---------------------------------------------------------------------------------------
 
-void init_waterfall(){
+void initialize_waterfall(){
 
 	struct field *f = get_field("waterfall");
 
@@ -1897,7 +1902,7 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
     }
     update_field(f_spectrum);
     update_field(f_waterfall);
-    init_waterfall();
+    initialize_waterfall();
     redraw_flag++;
     return;
   }
@@ -2899,7 +2904,8 @@ int do_kbd(struct field *f, cairo_t *gfx, int event, int a, int b, int c){
 // ---------------------------------------------------------------------------------------
 
 void write_call_log(){
-	char fullpath[200];	//dangerous, find the MAX_PATH and replace 200 with it
+
+	char fullpath[PATH_MAX];
 
 	char *path = getenv("HOME");
 	sprintf(fullpath, "%s/acorn/data/logbook.txt", path); 
@@ -3868,7 +3874,7 @@ void wake_up_the_screen(){
 
 // ---------------------------------------------------------------------------------------
 
-void hw_init(){
+void initialize_hardware(){
 	wiringPiSetup();
 	init_gpio_pins();
 
@@ -4095,44 +4101,45 @@ gboolean ui_tick(gpointer gook){
     
 
     // take care of some initialization right away, after GTK is running
-    int static run_once = 0;
-    if (!run_once){
-      char buff[100];
-      console_init();
-      write_console(FONT_LOG, VERSION_STRING);  
-      write_console(FONT_LOG, "\r\nEnter \\help for help\r\n");
-      if (strcmp(mycallsign, "N0BDY")){
-        sprintf(buff, "\nWelcome %s your grid is %s\n", mycallsign, mygrid);
-        write_console(FONT_LOG, buff);
-      }
-      else {
-        write_console(FONT_LOG,
-        "Set your callsign with '\\callsign [yourcallsign]'\r\n"
-        "Set your 6 letter grid with '\\grid [yourgrid]'\r\n"
-        );
-      }
-      set_field("#text_in", "");
-      f = get_field("spectrum_display_height");
-      set_spectrum_display_height(atoi(f->value));   
+    //TODO
+    // int static run_once = 0;
+    // if (!run_once){
+    //   char buff[100];
+    //   initialize_console();
+    //   write_console(FONT_LOG, VERSION_STRING);  
+    //   write_console(FONT_LOG, "\r\nEnter \\help for help\r\n");
+    //   if (strcmp(mycallsign, "N0BDY")){
+    //     sprintf(buff, "\nWelcome %s your grid is %s\n", mycallsign, mygrid);
+    //     write_console(FONT_LOG, buff);
+    //   }
+    //   else {
+    //     write_console(FONT_LOG,
+    //     "Set your callsign with '\\callsign [yourcallsign]'\r\n"
+    //     "Set your 6 letter grid with '\\grid [yourgrid]'\r\n"
+    //     );
+    //   }
+    //   set_field("#text_in", "");
+    //   f = get_field("spectrum_display_height");
+    //   set_spectrum_display_height(atoi(f->value));   
          
-      int not_synchronized = 0;
-      FILE *pf = popen("chronyc tracking", "r");
-      while(fgets(buff, sizeof(buff), pf)) {
-        if(strstr(buff, "Not synchronised")){
-          not_synchronized = 1; 
-        }
-      }
-      fclose(pf);
+    //   int not_synchronized = 0;
+    //   FILE *pf = popen("chronyc tracking", "r");
+    //   while(fgets(buff, sizeof(buff), pf)) {
+    //     if(strstr(buff, "Not synchronised")){
+    //       not_synchronized = 1; 
+    //     }
+    //   }
+    //   fclose(pf);
 
-      if (not_synchronized){
-        write_console(FONT_LOG,
-        "Enter the precise UTC time using \\utc command\n"
-        "ex: \\utc 2022/09/15 23:34:00\n"
-        "Hit enter for the command at the exact time\n");
-      }
+    //   if (not_synchronized){
+    //     write_console(FONT_LOG,
+    //     "Enter the precise UTC time using \\utc command\n"
+    //     "ex: \\utc 2022/09/15 23:34:00\n"
+    //     "Hit enter for the command at the exact time\n");
+    //   }
 
-      run_once = 1;
-    }
+    //   run_once = 1;
+    // }
 
 
   } // end of stuff executed every 100 mS
@@ -4176,7 +4183,7 @@ gboolean ui_tick(gpointer gook){
 
 // ---------------------------------------------------------------------------------------
 
-void ui_init(int argc, char *argv[]){
+void initialize_user_interface(int argc, char *argv[]){
  
   gtk_init( &argc, &argv );
 
@@ -4574,7 +4581,7 @@ void do_cmd(char *cmd){
 		change_band(request);		
 	}
 	else if (!strcmp(request, "#record=ON")){
-		char fullpath[200];	//dangerous, find the MAX_PATH and replace 200 with it
+		char fullpath[PATH_MAX];
 
 		char *path = getenv("HOME");
 		time(&record_start);
@@ -4585,13 +4592,17 @@ void do_cmd(char *cmd){
 		char request[300], response[100];
 		sprintf(request, "record=%s", fullpath);
 		send_command_to_server(request, response);
-		write_console(FONT_LOG, "Recording ");
-		write_console(FONT_LOG, fullpath);
-		write_console(FONT_LOG, "\n");
+		if (!console_silence_flag){
+			write_console(FONT_LOG, "Recording ");
+			write_console(FONT_LOG, fullpath);
+			write_console(FONT_LOG, "\n");
+		}
 	}
 	else if (!strcmp(request, "#record=OFF")){
 		send_command_to_server("record", "off");
-		write_console(FONT_LOG, "Recording stopped\n");
+		if (!console_silence_flag){
+		  write_console(FONT_LOG, "Recording stopped\n");
+		}
 		record_start = 0;
 	}
 	else if (!strcmp(request, "#mfqrz") && strlen(contact_callsign) > 0)
@@ -4660,7 +4671,7 @@ void cmd_exec(char *cmd){
 		execute_app(fullpath);
 	}
 	else if (!strcmp(exec, "clear")){
-		console_init();
+		initialize_console();
 		redraw_flag++;
 	}
 	else if(!strcmp(exec, "macro")){
@@ -4761,7 +4772,7 @@ void cmd_exec(char *cmd){
   }
 
   else if ((!strcmp(exec, "help")) || (!strcmp(exec, "?"))){
-  	console_init();
+  	initialize_console();
     write_console(FONT_LOG, 
       "Help\r\n\r\n"
       "\\audio\r\n"
@@ -4792,7 +4803,7 @@ void cmd_exec(char *cmd){
   }
 
   else if (!strcmp(exec, "h2")){ 
-    console_init();
+    initialize_console();
     write_console(FONT_LOG,
       "Help - Page 2\r\n\r\n"
       "\\exit\r\n"
@@ -5033,33 +5044,13 @@ float frequency_calibration(){
 
 }
 
-
 // ---------------------------------------------------------------------------------------
 
-int main( int argc, char* argv[] ) {
 
-	puts(VERSION_STRING);
-	active_layout = main_controls;
-
-	//unlink any pending ft8 transmission
-	unlink("/home/pi/acorn/ft8tx_float.raw");
-	call_wipe();
-	strcpy(sent_exchange, "");
-
-	ui_init(argc, argv);
-	hw_init();
-	console_init();
+void initialize_settings(){
 
 	struct field *f;
 	f = active_layout;
-
-	//initialize the modulation display
-
-	tx_mod_max = get_field("spectrum")->width;
-	tx_mod_buff = malloc(sizeof(int32_t) * tx_mod_max);
-	memset(tx_mod_buff, 0, sizeof(int32_t) * tx_mod_max);
-	tx_mod_index = 0;
-	init_waterfall();
 
 	//set the radio to some decent defaults
 	do_cmd("r1:freq=7100000");
@@ -5073,7 +5064,7 @@ int main( int argc, char* argv[] ) {
 	current_macro[0] = 0;
 	vfo_a_freq = 14000000;
 	vfo_b_freq = 7000000;
-	
+
 	f = get_field("spectrum");
 	update_field(f);
 	//set_volume(20000000);
@@ -5085,7 +5076,10 @@ int main( int argc, char* argv[] ) {
 	set_field("r1:gain", "41");
 	set_field("r1:volume", "85");
 
-	char directory[200];	//dangerous, find the MAX_PATH and replace 200 with it
+  
+  console_silence_flag = 1;
+
+	char directory[PATH_MAX];
 	char *path = getenv("HOME");
 	strcpy(directory, path);
 	strcat(directory, INI_FILE);
@@ -5093,37 +5087,101 @@ int main( int argc, char* argv[] ) {
   	sprintf(debug_text,"Unable to load ");
   	strcat(debug_text, path);
   	strcat(debug_text, INI_FILE);
-    debug(debug_text,255);
+    debug(debug_text,DEBUG_LEVEL_STDERR);
   }
 
-	if (strlen(current_macro))
+  console_silence_flag = 0;
+
+
+	if (strlen(current_macro)){
 		macro_load(current_macro);
+	}
 	char buff[1000];
 
 	//now set the frequency of operation and more to vfo_a
   sprintf(buff, "%d", vfo_a_freq);
   set_field("r1:freq", buff);
 
-	console_init();
+  settings_updated = 0;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void write_initial_console_messages(){
+
+  write_console(FONT_LOG,APP_NAME);
+  write_console(FONT_LOG," Version ");
 	write_console(FONT_LOG, VERSION_STRING);
   write_console(FONT_LOG, "\r\nEnter \\help for help\r\n");
 
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void write_additional_console_messages(){
+
+  char buff[1000];
+
+
+
 	if (strcmp(mycallsign, "N0BDY")){
-		sprintf(buff, "\nWelcome %s your grid is %s\n", mycallsign, mygrid);
+		sprintf(buff, "\n%s your grid is %s\n", mycallsign, mygrid);
 		write_console(FONT_LOG, buff);
-	}
-	else 
+	} else {
 		write_console(FONT_LOG, "Set your with '\\callsign [yourcallsign]'\n"
 		"Set your 6 letter grid with '\\grid [yourgrid]\n");
-
+	}
 	set_field("#text_in", "");
+}
 
-	// you don't want to save the recently loaded settings
-	settings_updated = 0;
+// ---------------------------------------------------------------------------------------
+
+
+void initialize_modulation_display(){
+
+	tx_mod_max = get_field("spectrum")->width;
+	tx_mod_buff = malloc(sizeof(int32_t) * tx_mod_max);
+	memset(tx_mod_buff, 0, sizeof(int32_t) * tx_mod_max);
+	tx_mod_index = 0;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
+void initial_initialization(){
+
+	sprintf(debug_text,"main: %s",VERSION_STRING);
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+	active_layout = main_controls;
+
+	//unlink any pending ft8 transmission
+	unlink("/home/pi/acorn/ft8tx_float.raw");
+	call_wipe();
+	strcpy(sent_exchange, "");
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+void initialize_server_connection(){
+
+  write_console(FONT_LOG, "\r\nEstablishing server connection...\r\n");
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+void initialize_more_stuff(){
+
+
   //hamlib_start();
 	//remote_start();
 
-	int not_synchronized = 0;
+	// int not_synchronized = 0;
 	// FILE *pf = popen("chronyc tracking", "r");
 	// while(fgets(buff, sizeof(buff), pf)) 
 	// 	if(strstr(buff, "Not synchronised"))
@@ -5139,8 +5197,37 @@ int main( int argc, char* argv[] ) {
 	//rtc_read();
 	//printf("done!\n");
 
+}
+
+// ---------------------------------------------------------------------------------------
+
+int main(int argc, char* argv[]){
+
+  initial_initialization();
+
+	initialize_user_interface(argc, argv);
+
+	initialize_hardware();
+
+	initialize_console();
+
+	write_initial_console_messages();
+
+  initialize_modulation_display();
+
+	initialize_waterfall();
+
+	initialize_server_connection();
+
+	initialize_settings();
+
+  write_additional_console_messages();
+
+  initialize_more_stuff();	
+
   gtk_main();
   
-  return 0;
+  return RETURN_NO_ERROR;
+
 }
 

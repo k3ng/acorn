@@ -20,20 +20,20 @@ fi
 if [ "$F" = "acorn-gtk-client" ]; then
   VERSION=`grep VERSION_STRING acorn-gtk-client.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
-  gcc -g -o $F debug.c ini.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
 fi
 
 
 if [ "$F" = "test" ]; then
-  echo "compiling serial"
+  echo "test compiling serial"
   gcc -g -o serial debug.c serial.c -pthread
-  echo "compiling avr"
+  echo "test compiling avr"
   gcc -D COMPILING_AVR -g -o avr serial.c debug.c avr.c -pthread  
-  echo "compiling tcpclient"
+  echo "test compiling tcpclient"
   gcc -g -o tcpclient debug.c tcpclient.c -pthread
-  echo "compiling tcpserver"
+  echo "test compiling tcpserver"
   gcc -g -o tcpserver debug.c tcpserver.c -pthread
-  echo "compiling vfo"
+  echo "test compiling vfo"
   gcc -g -o vfo vfo.c -lm
 
   F=""
@@ -49,7 +49,7 @@ if [[ $F = "" ]]; then
   F="acorn-gtk-client"
   VERSION=`grep VERSION_STRING acorn-gtk-client.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
-  gcc -g -o $F debug.c ini.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
 fi
 
 
