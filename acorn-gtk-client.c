@@ -208,6 +208,8 @@ int console_silence_flag = 0;
 
 char server_address_and_port[64];
 
+int initialize_or_reestablish_server_connection();
+
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -800,11 +802,15 @@ int initialize_console_next_line(){
 
 
 void write_console(int style, char *text){
+
 	char directory[PATH_MAX];
 	char *path = getenv("HOME");
 	strcpy(directory, path);
 	strcat(directory, "/acorn/data/display_log.txt");
 	FILE *pf = fopen(directory, "a");
+
+  // printf(text);
+  // printf("\r\n");
 
 	//move to a new line if the style has changed
 	if (style != console_style){
@@ -825,10 +831,11 @@ void write_console(int style, char *text){
 		}
 	}
 
-	if (strlen(text) == 0)
+	if (strlen(text) == 0){
 		return;
+  }
 
-	//write to the scroll
+	//write to the display_log file
 	fwrite(text, strlen(text), 1, pf);
 	fclose(pf);
 
@@ -836,14 +843,14 @@ void write_console(int style, char *text){
 
 	while(*text){
 		char c = *text;
-		if (c == '\n')
+		if (c == '\n'){
 			initialize_console_next_line();
-		else if (c < 128 && c >= ' '){
+    } else if (c < 128 && c >= ' '){
 			char *p = console_stream[console_current_line].text;
 			int len = strlen(p);
 			if(len >= console_cols - 1){
 				//start a fresh line
-				initialize_console_next_line();
+		//		initialize_console_next_line();
 				p = console_stream[console_current_line].text;
 				len = 0;
 			}
@@ -855,6 +862,7 @@ void write_console(int style, char *text){
 		text++;	
 	}
 	redraw_flag++;
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -4018,6 +4026,8 @@ gboolean ui_tick(gpointer gook){
 
 	if (ticks == 100){  // execute this stuff every 100 mS
 
+		initialize_or_reestablish_server_connection();
+
 		struct field *f = get_field("spectrum");
 		update_field(f);	//move this each time the spectrum watefall index is moved
 		f = get_field("waterfall");
@@ -4963,7 +4973,6 @@ void cmd_exec(char *cmd){
 		}	
 	#endif //if defined(INCLUDE_REBOOT_AND_SHUTDOWN_COMMANDS)
 
-//zzzzzz
   else if (!strcmp(exec, "sdh")){
     if (((atoi(args)) >= 0) && ((atoi(args)) <= 100)){
       set_spectrum_display_height(atoi(args));
@@ -5130,8 +5139,8 @@ void write_additional_console_messages(){
 
 
 	if (strcmp(mycallsign, "N0BDY")){
-		sprintf(buff, "\n%s your grid is %s\n", mycallsign, mygrid);
-		write_console(FONT_LOG, buff);
+		// sprintf(buff, "\n%s your grid is %s\n", mycallsign, mygrid);
+		// write_console(FONT_LOG, buff);
 	} else {
 		write_console(FONT_LOG, "Set your with '\\callsign [yourcallsign]'\n"
 		"Set your 6 letter grid with '\\grid [yourgrid]\n");
@@ -5161,19 +5170,86 @@ void do_initial_initialization(){
 	active_layout = main_controls;
 
 	//unlink any pending ft8 transmission
+  //TODO: better way of locating this file
 	unlink("/home/pi/acorn/ft8tx_float.raw");
 	call_wipe();
 	strcpy(sent_exchange, "");
 
-  strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
+  
 
 }
 
 // ---------------------------------------------------------------------------------------
 
-void initialize_server_connection(){
+int initialize_or_reestablish_server_connection(){
 
-  write_console(FONT_LOG, "\r\nEstablishing server connection...\r\n");
+
+  #define SERVER_CONNECTION_UNINITIALIZED 0
+  #define SERVER_CONNECTION_ESTABLISHING 1
+  #define SERVER_CONNECTION_ESTABLISHED 2
+  #define SERVER_CONNECTION_ERROR 3
+
+  static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+  static int connected = 0;
+  static int tcpclient_handle = 0;
+  static char previous_server_address_and_port[64];
+
+  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
+    //TODO: check on the health of the link
+    return RETURN_NO_ERROR;
+  }
+
+  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
+
+	  // strtok() writes a 0 to where it finds a character, mangling the string
+	  char temp_char[32];
+	  strcpy(temp_char,server_address_and_port);
+	  if (!strtok(temp_char,":")){
+	    strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
+	  }
+
+    tcpclient_handle = tcpclient_open(server_address_and_port);
+
+    if (tcpclient_handle > 0){
+		  write_console(FONT_LOG,"\r\nEstablishing server connection to\r\n");
+		  write_console(FONT_LOG,server_address_and_port);
+		  write_console(FONT_LOG,"\r\n");    	
+      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
+    } else {
+		  write_console(FONT_LOG,"\r\nError attempting to establish server connection to\r\n");
+		  write_console(FONT_LOG,server_address_and_port);
+		  write_console(FONT_LOG,"\r\n");    	
+      server_connection_state = SERVER_CONNECTION_ERROR;
+      strcpy(previous_server_address_and_port,server_address_and_port);
+    }   
+  } // SERVER_CONNECTION_UNINITIALIZED
+
+
+
+  if (server_connection_state == SERVER_CONNECTION_ESTABLISHING){
+
+    connected = tcpclient_connected(tcpclient_handle);
+
+    if (connected > 0){
+    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
+    	write_console(FONT_LOG,"\r\nServer connection established!\r\n");
+    	debug("initialize_or_reestablish_server_connection: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
+    } else {
+
+    	// TODO: timeout attempt and retry
+    }
+  } // SERVER_CONNECTION_ESTABLISHING
+
+
+
+  // if we're stuck in an error state and the server address has been change, try it again
+  if (server_connection_state == SERVER_CONNECTION_ERROR){
+    if (strcmp(previous_server_address_and_port,server_address_and_port)){
+      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+    }
+  } //SERVER_CONNECTION_ERROR
+
+
 
 }
 
@@ -5257,8 +5333,6 @@ int main(int argc, char* argv[]){
   initialize_modulation_display();
 
 	initialize_waterfall();
-
-	initialize_server_connection();
 
 	initialize_settings();
 

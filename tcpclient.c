@@ -120,7 +120,7 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 	}	
 
 	sprintf(debug_text,"tcpclient_thread_function: finding %s:%s", host_name, port);
-	debug(debug_text,1);
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
   memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
   serverAddr.sin_family = AF_INET;
@@ -132,17 +132,18 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
 	tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
 
-  tcpclient_handle_tcp_sock_array[tcpclient_parms.tcpclient_handle] = tcp_sock;
-
-
   if (connect(tcp_sock,(struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
 		sprintf(debug_text,"tcpclient_thread_function: failed to connect to %s", host_name);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);
 		close(tcp_sock);
 
-    tcpclient_handle_tcp_sock_array[tcpclient_parms.tcpclient_handle] = -1;
+    tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = -1;
 		return NULL;
-   }
+  } else {
+    tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = tcp_sock;
+    sprintf(debug_text,"tcpclient_thread_function: connected to %s tcp_sock:%d", host_name,tcp_sock);
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);    
+  }
 
 	int e;
 	while((e = recv(tcp_sock, buff, sizeof(buff), 0)) >= 0){
@@ -153,13 +154,14 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 	    debug(debug_text,3);
 
       // TODO: put in a buffer
-			printf(buff);
+			
+      //printf(buff);
 
 
 		}
 	}
 	close(tcp_sock);
-  tcpclient_handle_tcp_sock_array[tcpclient_parms.tcpclient_handle] = -1;	
+  tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = -1;	
 
 }
 
@@ -174,19 +176,19 @@ int tcpclient_write(int tcpclient_handle, char *text){
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
 		sprintf(debug_text,"tcpclient_write: invalid tcpclient_handle:%d", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
-		return -1;
+		return RETURN_ERROR;
 	}
 
-  tcp_sock = tcpclient_handle_tcp_sock_array[tcpclient_handle];
+  tcp_sock = tcpclient_handle_sock[tcpclient_handle];
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d connection is closed", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
-		return -1;
+		return RETURN_ERROR;
 	}
 
 	sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d sending:%s", tcpclient_handle, text);
-  debug(debug_text,1);	
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);	
 	send (tcp_sock, text, strlen(text), 0);
 
 }
@@ -199,25 +201,25 @@ int tcpclient_close(int tcpclient_handle){
   int tcp_sock = 0;
 
 	sprintf(debug_text,"tcpclient_close: closing tcpclient_handle:%d",tcpclient_handle);
-	debug(debug_text,2);
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
 		sprintf(debug_text,"tcpclient_close: invalid tcpclient_handle:%d", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
-		return -1;
+		return RETURN_ERROR;
 	}
 
-  tcp_sock = tcpclient_handle_tcp_sock_array[tcpclient_handle];
+  tcp_sock = tcpclient_handle_sock[tcpclient_handle];
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_close: invalid tcpclient_handle:%d connection already closed", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
-		return -1;
+		return RETURN_ERROR;
 	}
 
 	close(tcp_sock);
-	tcpclient_handle_tcp_sock_array[tcpclient_handle] = -1; // -1 = disconnected slot
+	tcpclient_handle_sock[tcpclient_handle] = -1; // -1 = disconnected slot
 
 }
 
@@ -233,7 +235,7 @@ int tcpclient_open(char *server){
 
   if (!run_once){
 	  for (int x = 0;x<MAX_TCPCLIENTS;x++){
-	  	tcpclient_handle_tcp_sock_array[x] = -1;
+	  	tcpclient_handle_sock[x] = -1;
 	  }
   	run_once = 1;
   }
@@ -245,26 +247,28 @@ int tcpclient_open(char *server){
   int assigned_slot = 0;
 
   for (x = 1;x < MAX_TCPCLIENTS-1;x++){
-  	if (tcpclient_handle_tcp_sock_array[x] == -1){
+  	if (tcpclient_handle_sock[x] == -1){
   		assigned_slot = x;
       x = MAX_TCPCLIENTS;
   	}
   }
 
+
+
   if (assigned_slot == 0){
-			sprintf(debug_text,"tcpclient_open: out of tcpclient_handles");
-			debug(debug_text,DEBUG_LEVEL_STDERR);
-		  return -1;	  	
-  }
+		sprintf(debug_text,"tcpclient_open: out of tcpclient_handles");
+		debug(debug_text,DEBUG_LEVEL_STDERR);
+	  return RETURN_ERROR;	
+  }  	
 
   tcpclient_parms = malloc(sizeof(tcpclient_parms));
   tcpclient_parms->server = server;
   tcpclient_parms->tcpclient_handle = assigned_slot;
 
-  tcpclient_handle_tcp_sock_array[assigned_slot] = -2; // -2 means connecting
+  tcpclient_handle_sock[assigned_slot] = -2; // -2 means connecting
 
 	sprintf(debug_text,"tcpclient_open: launching thread for:%s tcpclient_handle:%d",tcpclient_parms->server,tcpclient_parms->tcpclient_handle);
-	debug(debug_text,2);  
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);  
 
   pthread_t tcpclient_thread;
 
@@ -279,17 +283,15 @@ int tcpclient_open(char *server){
 
 int tcpclient_connected(int tcpclient_handle){
 
-
   if ((tcpclient_handle > (MAX_TCPCLIENTS-1)) || (tcpclient_handle < 1)){
-    return -1;
+    return RETURN_ERROR;
   }
 
-  if (tcpclient_handle_tcp_sock_array[tcpclient_handle] > 0){
+  if (tcpclient_handle_sock[tcpclient_handle] > 0){
   	return 1;
   }
 
   return 0;
-
 
 }
 
@@ -301,6 +303,11 @@ int tcpclient_connected(int tcpclient_handle){
 #if !defined(COMPILING_EVERYTHING)
 
 	int main(int argc, char *argv[]){
+
+    if (argc < 2){
+      printf("usage: tcpclient ip_address:port\r\n\nexample: tcpclient 127.0.0.1:8888\r\n");
+      return RETURN_ERROR;
+    }
 
 		for (int x = 0;x < (MAX_TCPCLIENTS+5);x++) {
       connection_handle[x] = 0;
