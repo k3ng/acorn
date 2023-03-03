@@ -33,11 +33,22 @@
 #include "tcpclient.h"
 
 
-char debug_text[64];
-
 #if !defined(COMPILING_EVERYTHING)
   int connection_handle[MAX_TCPCLIENTS+5];
 #endif
+
+struct tcpclient_parms_struct{
+  char *server;
+  int tcpclient_handle;
+};
+
+struct tcpclient_struct{
+  int tcpsock;
+  char incoming_buffer[TCPCLIENT_BUFFER_SIZE];
+  int incoming_buffer_head;
+  int incoming_buffer_tail;
+} tcpclient[MAX_TCPCLIENTS];
+
 
 
 
@@ -50,8 +61,7 @@ long get_address(char *host){
 
 	int i, dotcount=0;
 	char *p = host;
-	struct hostent		*pent;
-	/* struct sockaddr_in	addr; */ /* see the note on portabilit at the end of the routine */
+	struct hostent *pent;
 
   // does this look like an IP address?
 	while (*p){
@@ -137,41 +147,62 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 	  debug(debug_text,DEBUG_LEVEL_STDERR);
 		close(tcp_sock);
 
-    tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = -1;
+    tcpclient[tcpclient_parms.tcpclient_handle].tcpsock = TCPCLIENT_UNALLOCATED;
 		return NULL;
   } else {
-    tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = tcp_sock;
+    tcpclient[tcpclient_parms.tcpclient_handle].tcpsock = tcp_sock;
     sprintf(debug_text,"tcpclient_thread_function: connected to %s tcp_sock:%d", host_name,tcp_sock);
     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);    
   }
 
-	int e;
-	while((e = recv(tcp_sock, buff, sizeof(buff), 0)) >= 0){
-		if (e > 0){
-			buff[e] = 0;
+	int bytes_received;
+  int x = 0;
 
-		  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d received:%s", tcpclient_parms.tcpclient_handle,buff);
-	    debug(debug_text,3);
+	while((bytes_received = recv(tcp_sock, buff, sizeof(buff), 0)) >= 0){
+		if (bytes_received > 0){
+//zzzzzz
+  		buff[bytes_received] = 0;
 
-      // TODO: put in a buffer
-			
-      //printf(buff);
+  	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d received:%s", tcpclient_parms.tcpclient_handle,buff);
+      debug(debug_text,3);
 
+      x = 0;
 
-		}
+  		while (bytes_received--){
+        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) &&
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == 0)) ||
+
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) ||
+
+            ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head < tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) &&
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail-1))) &&
+
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != TCPCLIENT_BUFFER_SIZE) ) {
+              tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer[tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head] = buff[x];
+              x++;
+              tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head++;
+              if((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = TCPCLIENT_BUFFER_SIZE) && 
+                (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail != 0)){
+                tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = 0;
+              }
+        }
+		  }
+    }
 	}
 	close(tcp_sock);
-  tcpclient_handle_sock[tcpclient_parms.tcpclient_handle] = -1;	
+  tcpclient[tcpclient_parms.tcpclient_handle].tcpsock = TCPCLIENT_UNALLOCATED;	
 
 }
 
 // ---------------------------------------------------------------------------------------
 
 
-int tcpclient_write(int tcpclient_handle, char *text){
+int tcpclient_write_text(int tcpclient_handle, char *text){
 
 
   int tcp_sock = 0;
+
+  int return_code;
 
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
 		sprintf(debug_text,"tcpclient_write: invalid tcpclient_handle:%d", tcpclient_handle);
@@ -179,7 +210,7 @@ int tcpclient_write(int tcpclient_handle, char *text){
 		return RETURN_ERROR;
 	}
 
-  tcp_sock = tcpclient_handle_sock[tcpclient_handle];
+  tcp_sock = tcpclient[tcpclient_handle].tcpsock;
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d connection is closed", tcpclient_handle);
@@ -189,7 +220,8 @@ int tcpclient_write(int tcpclient_handle, char *text){
 
 	sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d sending:%s", tcpclient_handle, text);
   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);	
-	send (tcp_sock, text, strlen(text), 0);
+	return_code = send(tcp_sock, text, strlen(text), 0);
+  return return_code;
 
 }
 
@@ -210,7 +242,7 @@ int tcpclient_close(int tcpclient_handle){
 		return RETURN_ERROR;
 	}
 
-  tcp_sock = tcpclient_handle_sock[tcpclient_handle];
+  tcp_sock = tcpclient[tcpclient_handle].tcpsock;
 
 	if (tcp_sock < 1){
 		sprintf(debug_text,"tcpclient_close: invalid tcpclient_handle:%d connection already closed", tcpclient_handle);
@@ -219,8 +251,7 @@ int tcpclient_close(int tcpclient_handle){
 	}
 
 	close(tcp_sock);
-	tcpclient_handle_sock[tcpclient_handle] = -1; // -1 = disconnected slot
-
+	tcpclient[tcpclient_handle].tcpsock = TCPCLIENT_UNALLOCATED;
 }
 
 
@@ -235,7 +266,8 @@ int tcpclient_open(char *server){
 
   if (!run_once){
 	  for (int x = 0;x<MAX_TCPCLIENTS;x++){
-	  	tcpclient_handle_sock[x] = -1;
+	  	tcpclient[x].tcpsock = TCPCLIENT_UNALLOCATED;
+      strcpy(tcpclient[x].incoming_buffer,"");
 	  }
   	run_once = 1;
   }
@@ -247,7 +279,7 @@ int tcpclient_open(char *server){
   int assigned_slot = 0;
 
   for (x = 1;x < MAX_TCPCLIENTS-1;x++){
-  	if (tcpclient_handle_sock[x] == -1){
+  	if (tcpclient[x].tcpsock == TCPCLIENT_UNALLOCATED){
   		assigned_slot = x;
       x = MAX_TCPCLIENTS;
   	}
@@ -265,7 +297,9 @@ int tcpclient_open(char *server){
   tcpclient_parms->server = server;
   tcpclient_parms->tcpclient_handle = assigned_slot;
 
-  tcpclient_handle_sock[assigned_slot] = -2; // -2 means connecting
+  tcpclient[assigned_slot].tcpsock = TCPCLIENT_CONNECTING;
+  tcpclient[assigned_slot].incoming_buffer_head = 0;
+  tcpclient[assigned_slot].incoming_buffer_tail = 0;
 
 	sprintf(debug_text,"tcpclient_open: launching thread for:%s tcpclient_handle:%d",tcpclient_parms->server,tcpclient_parms->tcpclient_handle);
 	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);  
@@ -287,13 +321,66 @@ int tcpclient_connected(int tcpclient_handle){
     return RETURN_ERROR;
   }
 
-  if (tcpclient_handle_sock[tcpclient_handle] > 0){
+  if (tcpclient[tcpclient_handle].tcpsock > 0){
   	return 1;
   }
 
   return 0;
 
 }
+
+// ---------------------------------------------------------------------------------------
+
+
+int tcpclient_incoming_bytes(int tcpclient_handle){
+
+  // return tcpclient[tcpclient_handle].incoming_buffer_bytes;
+
+  if (tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
+    return 0;
+  }
+
+  if (tcpclient[tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_handle].incoming_buffer_tail){
+    return tcpclient[tcpclient_handle].incoming_buffer_head - tcpclient[tcpclient_handle].incoming_buffer_tail;
+  } else {
+    return (TCPCLIENT_BUFFER_SIZE - tcpclient[tcpclient_handle].incoming_buffer_tail) + tcpclient[tcpclient_handle].incoming_buffer_head;
+  }
+
+}
+
+
+// ---------------------------------------------------------------------------------------
+
+
+int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
+
+
+
+  // is the incoming buffer empty?
+  if((tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail) &&
+            (tcpclient[tcpclient_handle].incoming_buffer_head == 0)) {
+  }
+
+
+  int return_value = 0;
+  int x = 0;
+
+  while((bytes > 0) && (tcpclient[tcpclient_handle].incoming_buffer_tail != tcpclient[tcpclient_handle].incoming_buffer_head)){
+    buffer[x] = tcpclient[tcpclient_handle].incoming_buffer[tcpclient[tcpclient_handle].incoming_buffer_tail];
+    tcpclient[tcpclient_handle].incoming_buffer_tail++;
+    x++;
+    return_value++;
+    bytes--;
+    if ( tcpclient[tcpclient_handle].incoming_buffer_tail == TCPCLIENT_BUFFER_SIZE ) {
+      tcpclient[tcpclient_handle].incoming_buffer_tail = 0;
+    }
+  }
+
+
+  return return_value; 
+
+}
+
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -334,7 +421,7 @@ int tcpclient_connected(int tcpclient_handle){
 
     for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
     	if (connection_handle[x] > 0){
-        tcpclient_write(connection_handle[x],"hello\r");
+        tcpclient_write_text(connection_handle[x],"hello\r");
         usleep(50000);  
       }
 		}
@@ -342,7 +429,7 @@ int tcpclient_connected(int tcpclient_handle){
 
     for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
     	if (connection_handle[x] > 0){
-        tcpclient_write(connection_handle[x],"help\r");
+        tcpclient_write_text(connection_handle[x],"help\r");
         usleep(50000);  
       }
 		}			

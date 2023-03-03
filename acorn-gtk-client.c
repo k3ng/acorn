@@ -5208,7 +5208,7 @@ int initialize_or_reestablish_server_connection(){
 	    strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
 	  }
 
-    tcpclient_handle = tcpclient_open(server_address_and_port);
+    tcpclient_handle = tcpclient_open(server_address_and_port,TCPCLIENT_TEXT_MODE);
 
     if (tcpclient_handle > 0){
 		  write_console(FONT_LOG,"\r\nEstablishing server connection to\r\n");
