@@ -163,14 +163,14 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 //zzzzzz
   		buff[bytes_received] = 0;
 
-  	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d received:%s", tcpclient_parms.tcpclient_handle,buff);
+  	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d\r\n\treceived:%s$", tcpclient_parms.tcpclient_handle,bytes_received,buff);
       debug(debug_text,3);
+      fflush(stdout);
 
       x = 0;
 
   		while (bytes_received--){
-        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) &&
-            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == 0)) ||
+        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail)) ||
 
             (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) ||
 
@@ -181,11 +181,14 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer[tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head] = buff[x];
               x++;
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head++;
-              if((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = TCPCLIENT_BUFFER_SIZE) && 
+              if((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == TCPCLIENT_BUFFER_SIZE) && 
                 (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail != 0)){
                 tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = 0;
               }
         }
+      // sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d head:%d tail:%d", tcpclient_parms.tcpclient_handle,bytes_received,
+      //   tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head, tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail);
+      // debug(debug_text,3);        
 		  }
     }
 	}
@@ -359,6 +362,7 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
   // is the incoming buffer empty?
   if((tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail) &&
             (tcpclient[tcpclient_handle].incoming_buffer_head == 0)) {
+    return 0;
   }
 
 
@@ -400,46 +404,76 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
       connection_handle[x] = 0;
 		}
     
-    debug_level = 255;
+    debug_level = 0;
+
+    int temp;
+
+    char tempchar[200];
+
+    temp = tcpclient_open(argv[1]);
+    connection_handle[0] = temp;
+    if (connection_handle[0] > 0){
+      while(!tcpclient_connected(connection_handle[0])){
+        usleep(10000);  
+      }
+    }
+
+    sleep(1);
+    // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
+    temp = tcpclient_read(connection_handle[0], 200, tempchar);
+    tempchar[temp] = 0;
+    // printf("main: tcpclient_read return:%d",temp);
+    printf("\r\n$%s$\r\n",tempchar);
+
+// printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
+
+    tcpclient_write_text(connection_handle[0],"hello\r");
+
+    sleep(1);
+    // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
+    temp = tcpclient_read(connection_handle[0], 200, tempchar);
+    tempchar[temp] = 0;
+    // printf("main: tcpclient_read return:%d",temp);
+    printf("\r\n$%s$\r\n",tempchar);
 
 
     // fire up a bunch of connections
 
-    int temp;
+    
 
-    for (int x = 0;x < (MAX_TCPCLIENTS-1);x++) {
-	    temp = tcpclient_open(argv[1]);
-	    connection_handle[x] = temp;
-	    if (connection_handle[x] > 0){
-			  while(!tcpclient_connected(connection_handle[x])){
-				  usleep(10000);	
-			  }
-			} else {
-				x = 255;
-			}
-		}    
+    // for (int x = 0;x < (MAX_TCPCLIENTS-1);x++) {
+	  //   temp = tcpclient_open(argv[1]);
+	  //   connection_handle[x] = temp;
+	  //   if (connection_handle[x] > 0){
+		// 	  while(!tcpclient_connected(connection_handle[x])){
+		// 		  usleep(10000);	
+		// 	  }
+		// 	} else {
+		// 		x = 255;
+		// 	}
+		// }    
 
-    for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
-    	if (connection_handle[x] > 0){
-        tcpclient_write_text(connection_handle[x],"hello\r");
-        usleep(50000);  
-      }
-		}
+    // for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
+    // 	if (connection_handle[x] > 0){
+    //     tcpclient_write_text(connection_handle[x],"hello\r");
+    //     usleep(50000);  
+    //   }
+		// }
 			
 
-    for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
-    	if (connection_handle[x] > 0){
-        tcpclient_write_text(connection_handle[x],"help\r");
-        usleep(50000);  
-      }
-		}			
+    // for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
+    // 	if (connection_handle[x] > 0){
+    //     tcpclient_write_text(connection_handle[x],"help\r");
+    //     usleep(50000);  
+    //   }
+		// }			
 
 		
-    for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
-    	if (connection_handle[x] > 0){
-        tcpclient_close(connection_handle[x]);
-      }
-		}  
+    // for (int x = 0;x < (MAX_TCPCLIENTS+5);x++){
+    // 	if (connection_handle[x] > 0){
+    //     tcpclient_close(connection_handle[x]);
+    //   }
+		// }  
 
 
 		sleep(3);

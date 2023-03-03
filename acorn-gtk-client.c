@@ -5334,7 +5334,7 @@ int main(int argc, char* argv[]){
 
 	initialize_waterfall();
 
-	initialize_settings();
+	// initialize_settings();
 
   write_additional_console_messages();
 

@@ -4,7 +4,7 @@
 #define _tcpclient_h_
 
 #define MAX_TCPCLIENTS 16
-#define TCPCLIENT_BUFFER_SIZE 256
+#define TCPCLIENT_BUFFER_SIZE 64
 
 #define TCPCLIENT_UNALLOCATED -1
 #define TCPCLIENT_CONNECTING -2
