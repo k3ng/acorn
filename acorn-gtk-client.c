@@ -46,7 +46,6 @@
 
 
 
-char debug_text[64];
 
 float fft_bins[MAX_BINS];
 
@@ -101,7 +100,7 @@ void modem_abort();
 void ft8_setmode(int config);
 void modem_poll(int mode);
 void modem_set_pitch(int pitch);
-void send_command_to_server(char *request, char *response);
+int send_command_to_server(char *buffer,char *response);
 void ft8_tx(char *message, int freq);
 void ft8_interpret(char *received, char *transmit);
 void remote_write(char *message);
@@ -208,7 +207,8 @@ int console_silence_flag = 0;
 
 char server_address_and_port[64];
 
-int initialize_or_reestablish_server_connection();
+int server_control_connection(int action, char *buffer, int bytes);
+void initialize_settings();
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -692,7 +692,6 @@ void modem_abort(){}
 void ft8_setmode(int config){}
 void modem_poll(int mode){}
 void modem_set_pitch(int pitch){}
-void send_command_to_server(char *request, char *response){}
 void ft8_tx(char *message, int freq){}
 void ft8_interpret(char *received, char *transmit){}
 static inline float const cnrmf(const complex float x){}
@@ -4024,9 +4023,19 @@ gboolean ui_tick(gpointer gook){
     //write_console(FONT_LOG, message);
 	}
 
+  int server_control_connection_return_code;
+  static int initialize_settings_run_once = 0;
+
 	if (ticks == 100){  // execute this stuff every 100 mS
 
-		initialize_or_reestablish_server_connection();
+		server_control_connection_return_code = server_control_connection(SERVICE,"",0);
+
+    if ((server_control_connection_return_code == SERVER_CONNECTION_ESTABLISHED) && (!initialize_settings_run_once)){
+
+		  initialize_settings();
+		  initialize_settings_run_once = 1;
+
+		}
 
 		struct field *f = get_field("spectrum");
 		update_field(f);	//move this each time the spectrum watefall index is moved
@@ -5060,6 +5069,9 @@ float frequency_calibration(){
 
 void initialize_settings(){
 
+
+	debug("initialize_settings: called",DEBUG_LEVEL_BASIC_INFORMATIVE);
+
 	struct field *f;
 	f = active_layout;
 
@@ -5181,75 +5193,109 @@ void do_initial_initialization(){
 
 // ---------------------------------------------------------------------------------------
 
-int initialize_or_reestablish_server_connection(){
+
+int send_command_to_server(char *buffer,char *response){
+
+  char temp_char[TCP_CLIENT_INCOMING_BUFFER_SIZE];
+
+  sprintf(temp_char,"%s\r",buffer);
+
+  sprintf(debug_text,"send_command_to_server:%s$",temp_char);
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+
+  int return_code = server_control_connection(SEND_DATA, temp_char, strlen(temp_char));
+
+  return return_code;
 
 
-  #define SERVER_CONNECTION_UNINITIALIZED 0
-  #define SERVER_CONNECTION_ESTABLISHING 1
-  #define SERVER_CONNECTION_ESTABLISHED 2
-  #define SERVER_CONNECTION_ERROR 3
+}
+
+// ---------------------------------------------------------------------------------------
+
+int server_control_connection(int action, char *buffer, int bytes){
+
 
   static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
   static int connected = 0;
   static int tcpclient_handle = 0;
   static char previous_server_address_and_port[64];
+  int return_code;
 
-  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
-    //TODO: check on the health of the link
-    return RETURN_NO_ERROR;
-  }
+  if (action == SERVICE){
 
-  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
-
-	  // strtok() writes a 0 to where it finds a character, mangling the string
-	  char temp_char[32];
-	  strcpy(temp_char,server_address_and_port);
-	  if (!strtok(temp_char,":")){
-	    strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
+	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
+	    //TODO: check on the health of the link
+	    //TODO: service incoming buffer
+	    tcpclient_clear_incoming_buffer(tcpclient_handle);
+	    return SERVER_CONNECTION_ESTABLISHED;
 	  }
 
-    tcpclient_handle = tcpclient_open(server_address_and_port,TCPCLIENT_TEXT_MODE);
+	  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
 
-    if (tcpclient_handle > 0){
-		  write_console(FONT_LOG,"\r\nEstablishing server connection to\r\n");
-		  write_console(FONT_LOG,server_address_and_port);
-		  write_console(FONT_LOG,"\r\n");    	
-      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
-    } else {
-		  write_console(FONT_LOG,"\r\nError attempting to establish server connection to\r\n");
-		  write_console(FONT_LOG,server_address_and_port);
-		  write_console(FONT_LOG,"\r\n");    	
-      server_connection_state = SERVER_CONNECTION_ERROR;
-      strcpy(previous_server_address_and_port,server_address_and_port);
-    }   
-  } // SERVER_CONNECTION_UNINITIALIZED
+		  // strtok() writes a 0 to where it finds a character, mangling the string
+		  char temp_char[32];
+		  strcpy(temp_char,server_address_and_port);
+		  if (!strtok(temp_char,":")){
+		    strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
+		  }
 
+	    tcpclient_handle = tcpclient_open(server_address_and_port);
 
-
-  if (server_connection_state == SERVER_CONNECTION_ESTABLISHING){
-
-    connected = tcpclient_connected(tcpclient_handle);
-
-    if (connected > 0){
-    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
-    	write_console(FONT_LOG,"\r\nServer connection established!\r\n");
-    	debug("initialize_or_reestablish_server_connection: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
-    } else {
-
-    	// TODO: timeout attempt and retry
-    }
-  } // SERVER_CONNECTION_ESTABLISHING
+	    if (tcpclient_handle > 0){
+			  write_console(FONT_LOG,"\r\nEstablishing server connection to\r\n");
+			  write_console(FONT_LOG,server_address_and_port);
+			  write_console(FONT_LOG,"\r\n");    	
+	      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
+	    } else {
+			  write_console(FONT_LOG,"\r\nError attempting to establish server connection to\r\n");
+			  write_console(FONT_LOG,server_address_and_port);
+			  write_console(FONT_LOG,"\r\n");    	
+	      server_connection_state = SERVER_CONNECTION_ERROR;
+	      strcpy(previous_server_address_and_port,server_address_and_port);
+	    }   
+	  } // SERVER_CONNECTION_UNINITIALIZED
 
 
 
-  // if we're stuck in an error state and the server address has been change, try it again
-  if (server_connection_state == SERVER_CONNECTION_ERROR){
-    if (strcmp(previous_server_address_and_port,server_address_and_port)){
-      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
-    }
-  } //SERVER_CONNECTION_ERROR
+	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHING){
+
+	    connected = tcpclient_connected(tcpclient_handle);
+
+	    if (connected > 0){
+	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
+	    	write_console(FONT_LOG,"\r\nServer connection established!\r\n");
+	    	debug("server_control_connection: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
+	    } else {
+
+	    	// TODO: timeout attempt and retry
+	    }
+	  } // SERVER_CONNECTION_ESTABLISHING
 
 
+	  // if we're stuck in an error state and the server address has been changed, try it again
+	  if (server_connection_state == SERVER_CONNECTION_ERROR){
+	    if (strcmp(previous_server_address_and_port,server_address_and_port)){
+	      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+	    }
+	  } //SERVER_CONNECTION_ERROR
+
+
+  } // if (action == SERVICE)
+
+  if (action == RETURN_SERVER_LINK_STATE){
+    return server_connection_state;
+  }
+
+  if (action == SEND_DATA){
+  	if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
+  		sprintf(debug_text,"server_control_connection: SEND_DATA:%s$",buffer);
+      debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+      return_code = tcpclient_write(tcpclient_handle, buffer, bytes);
+	    return return_code;
+	  } else {
+	  	return RETURN_NO_CONNECTION;
+	  }
+  } //if (action == SEND_DATA)
 
 }
 

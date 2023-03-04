@@ -275,7 +275,6 @@ int get_from_serial_incoming_buffer_one_line(char *whichone,char *stuff_to_get){
 // ---------------------------------------------------------------------------------------
 void *serial_incoming_thread(void *passed_fd){
 
-  char debug_text[100];
   char buffer[3];
   int fd = *(int*)passed_fd;
   char temp_fd[16];
@@ -313,7 +312,6 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
   */
 
   int *new_fd;
-  char debug_text[100]; 
 
   int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
   if (fd < 1){
@@ -403,7 +401,6 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 // void *serial_incoming_thread(){
 
 
-//   char debug_text[100];
 //   char buffer[3];
 
 //   sprintf(debug_text,"serial_incoming_thread: fd:%d launched",serial_buffer.fd);
@@ -462,7 +459,6 @@ int setup_serial_port(char *portname, int speed, int parity, int should_block){
 //   */
 
 //   int *new_fd;
-//   char debug_text[100]; 
 
 //   int fd = open(portname, O_RDWR | O_NOCTTY | O_SYNC);
 //   if (fd < 1){

@@ -95,16 +95,15 @@ void *avr_incoming_serial_processor(void *passed_serial_processor_parms){
 
     if (get_from_serial_incoming_buffer_one_line(serial_processor_parms.serial_port,incoming_line)){
 
-
-      sprintf(debug_text,"avr_incoming_serial_processor: received:%s",incoming_line);
-      debug(debug_text,3);
-
-      // trim leading \r \n - not sure why we're getting them
-      if ((incoming_line[0] == '\r') || (incoming_line[0] == '\n')){
+      //trim leading \r \n - not sure why we're getting them
+      while ((incoming_line[0] == '\r') || (incoming_line[0] == '\n')){
         strcpy(tempchar,incoming_line+1);
         strcpy(incoming_line,tempchar);
       }
     
+      sprintf(debug_text,"avr_incoming_serial_processor: received:%s",incoming_line);
+      debug(debug_text,3);
+
       switch(incoming_line[0]){
         case 'a':
           strcpy(command_responses[AVR_COMMAND_SET_FREQ_DDS0].response,incoming_line+1);

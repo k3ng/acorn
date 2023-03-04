@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <time.h>
 #include "acorn-server.h"
+#include "debug.h"
 #include "sdr.h"
 #include "sound.h"
 #include "acorn.h"

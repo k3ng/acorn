@@ -17,7 +17,7 @@
 
 
 */
-
+#include "debug.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -33,6 +33,14 @@
 #include <wiringPi.h>
 #include <pthread.h>
 #include <signal.h>
+#include "acorn.h"
+#include "acorn-server.h"
+
+#include "ini.h"
+#include "avr.h"
+#include "sdr.h"
+#include "sound.h"
+#include "tcpserver.h"
 
 // #include <linux/fb.h>
 // #include <sys/types.h>
@@ -51,22 +59,9 @@
 // #include <wiringSerial.h>
 // #include <sys/stat.h>
 
-#include "acorn.h"
-#include "acorn-server.h"
-#include "debug.h"
-#include "ini.h"
-#include "avr.h"
-#include "sdr.h"
-#include "sound.h"
-#include "tcpserver.h"
-
-
 // #include "hamlib.h"
 // #include "remote.h"
 // #include "wsjtx.h"
-
-
-
 
 // Variables ------------------------------------------------------------------------------
 
@@ -196,7 +191,7 @@ void signal_handler(int sig){
   signal(sig, SIG_IGN);
   signal(SIGINT, signal_handler);
 
-  debug("\r\n\r\n\r\n\r\nsignal_handler: caught signal, shutting down",DEBUG_LEVEL_BASIC_INFORMATIVE);
+  debug("signal_handler: caught signal, shutting down",DEBUG_LEVEL_BASIC_INFORMATIVE);
 
   shutdown_flag = 1;
 

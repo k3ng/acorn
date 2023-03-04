@@ -74,9 +74,6 @@ PIN_PI_BAND3: 70 cm
 void isr_enc1();
 void isr_enc2();
 
-void debug(char *debug_text, int debug_text_level);
-
-char debug_text[64];
 
 int shutdown_flag;
 

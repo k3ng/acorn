@@ -40,6 +40,7 @@
 #include<unistd.h>
 #include<pthread.h>
 #include "acorn.h"
+#include "tcpserver.h"
 #include "debug.h"
 
 
@@ -48,6 +49,8 @@
 
 
 #if !defined(COMPILING_EVERYTHING)
+
+  #define ECHO_BACK_COMMANDS
 
   int shutdown_flag = 0;
 
@@ -78,12 +81,8 @@
 
 
 
-// char debug_text[64];
-
-
 
 // ---------------------------------------------------------------------------------------
-
 
 
 void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
@@ -91,7 +90,11 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
   /*
 
-       This handles the connection for each client
+    This handles the connection for each incoming client
+
+    When bytes have been received, tcp_connection_handler_parms.command_handler is
+    called. The received bytes are passed to the command handler, and the response
+    that comes back from the command handler is sent back to the tcp client.
 
   */
 
@@ -104,7 +107,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 	char client_message_temp[34], client_message[34], sdr_response[1000], debug_text[100];
 
   sprintf(debug_text,"tcp_connection_handler: starting client_sock:%d", client_sock);
-  debug(debug_text,1);
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 	
 	char *message = "acorn ready!\n";
 	write(client_sock, message, strlen(message));
@@ -114,10 +117,17 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
     read_size = recv(client_sock, client_message_temp, 32, 0);
     if (read_size > 0){
       strncpy(client_message,client_message_temp,read_size);
-      //echo the message back to client
-      // sprintf(debug_text,"tcp_connection_handler: client_sock:%d msg:%s strlen:%d read_size:%d", client_sock, client_message, strlen(client_message), read_size);
-      // debug(debug_text,3);
-      write(client_sock, client_message, read_size);
+      
+      sprintf(debug_text,"tcp_connection_handler: client_sock:%d msg:%s strlen:%d read_size:%d", client_sock, client_message, strlen(client_message), read_size);
+      debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+
+      #if defined(ECHO_BACK_COMMANDS)
+        //echo the message back to client
+        write(client_sock, client_message, read_size);
+      #endif
+
+
+//  TODO: detect \r and call handler when that has arrived
 
       // yank off the carriage return and whatever
       char *return_character = strchr(client_message, '\r');
@@ -132,7 +142,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
       // handle some telnet commands right here
       if (!strcmp(client_message,"quit")){  
         sprintf(debug_text,"tcp_connection_handler: client quit client_sock: %d", client_sock);
-        debug(debug_text,1); 
+        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
         close(client_sock);    
         free(passed_tcp_connection_handler_parms);
         return RETURN_NO_ERROR;  
@@ -140,7 +150,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         sprintf(client_message,"shutting down!\r\n");
         write(client_sock, client_message, strlen(client_message));  
         sprintf(debug_text,"tcp_connection_handler: client shutdown client_sock: %d", client_sock);
-        debug(debug_text,1); 
+        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
         close(client_sock);    
         free(passed_tcp_connection_handler_parms);      
         shutdown_flag = 1;
@@ -171,7 +181,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 	
 	if(read_size == 0){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client disconnected client_sock: %d", client_sock);
-    debug(debug_text,1);    
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);    
 	} else if(read_size == -1){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: recv failed client_sock: %d", client_sock);
     debug(debug_text,DEBUG_LEVEL_STDERR);       
@@ -179,7 +189,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 		
 
   sprintf(debug_text,"tcp_connection_handler: exiting client_sock:%d", client_sock);
-  debug(debug_text,1);
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 
   free(passed_tcp_connection_handler_parms);
@@ -197,7 +207,6 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
 	struct sockaddr_in server, client;
   char ipAddress[INET_ADDRSTRLEN];
   int bind_successful = 0;
-  char debug_text[100];
 	
   while (!bind_successful){
   	// create socket

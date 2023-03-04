@@ -3,7 +3,8 @@
 
 #define _tcpserver_h_
 
-void *tcp_connection_handler(void *socket_desc);
+#define TCP_SERVER_INCOMING_BUFFER_SIZE 1024
+
 void *tcpserver_main_thread();
 
 #endif //!defined(_tcpserver_h_)

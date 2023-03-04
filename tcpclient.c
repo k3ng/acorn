@@ -44,7 +44,7 @@ struct tcpclient_parms_struct{
 
 struct tcpclient_struct{
   int tcpsock;
-  char incoming_buffer[TCPCLIENT_BUFFER_SIZE];
+  char incoming_buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE];
   int incoming_buffer_head;
   int incoming_buffer_tail;
 } tcpclient[MAX_TCPCLIENTS];
@@ -177,11 +177,11 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
             ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head < tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) &&
             (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail-1))) &&
 
-            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != TCPCLIENT_BUFFER_SIZE) ) {
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != TCP_CLIENT_INCOMING_BUFFER_SIZE) ) {
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer[tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head] = buff[x];
               x++;
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head++;
-              if((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == TCPCLIENT_BUFFER_SIZE) && 
+              if((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == TCP_CLIENT_INCOMING_BUFFER_SIZE) && 
                 (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail != 0)){
                 tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = 0;
               }
@@ -202,13 +202,23 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
 int tcpclient_write_text(int tcpclient_handle, char *text){
 
+  /*
+
+    Sends 0 terminated char string _text_
+
+    Return code is from tcp send return code or RETURN_ERROR if
+    there is a tcpclient_handle issue or the requested tcpclient_handle
+    connection is closed
+
+  */
+
 
   int tcp_sock = 0;
 
   int return_code;
 
 	if ((tcpclient_handle < 1) || (tcpclient_handle >= MAX_TCPCLIENTS)) {
-		sprintf(debug_text,"tcpclient_write: invalid tcpclient_handle:%d", tcpclient_handle);
+		sprintf(debug_text,"tcpclient_write_text: invalid tcpclient_handle:%d", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return RETURN_ERROR;
 	}
@@ -216,17 +226,56 @@ int tcpclient_write_text(int tcpclient_handle, char *text){
   tcp_sock = tcpclient[tcpclient_handle].tcpsock;
 
 	if (tcp_sock < 1){
-		sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d connection is closed", tcpclient_handle);
+		sprintf(debug_text,"tcpclient_write_text: tcpclient_handle:%d connection is closed", tcpclient_handle);
 	  debug(debug_text,DEBUG_LEVEL_STDERR);		
 		return RETURN_ERROR;
 	}
 
-	sprintf(debug_text,"tcpclient_write: tcpclient_handle:%d sending:%s", tcpclient_handle, text);
+	sprintf(debug_text,"tcpclient_write_text: tcpclient_handle:%d sending:%s", tcpclient_handle, text);
   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);	
 	return_code = send(tcp_sock, text, strlen(text), 0);
   return return_code;
 
 }
+
+// ---------------------------------------------------------------------------------------
+
+
+int tcpclient_write(int tcpclient_handle, char *buffer, int bytes){
+
+
+  /*
+
+    Sends _bytes_ number of bytes from _buffer_
+
+    _buffer_ does not need to be 0 terminated
+
+  */
+
+
+  char temp_buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE+1];
+
+  strncpy(temp_buffer,buffer,bytes);
+
+  temp_buffer[bytes] = 0;
+
+  int return_code = tcpclient_write_text(tcpclient_handle, temp_buffer);
+
+  return return_code;  
+
+}
+
+
+// ---------------------------------------------------------------------------------------
+
+
+void tcpclient_clear_incoming_buffer(int tcpclient_handle){
+
+  tcpclient[tcpclient_handle].incoming_buffer_head = 0;
+  tcpclient[tcpclient_handle].incoming_buffer_tail = 0;
+
+}
+
 
 // ---------------------------------------------------------------------------------------
 
@@ -320,6 +369,14 @@ int tcpclient_open(char *server){
 
 int tcpclient_connected(int tcpclient_handle){
 
+
+  /* 
+
+    Returns 1 if connection is up, 0 if not, and RETURN_ERROR if an invalid tcpclient_handle
+    was used
+
+  */
+
   if ((tcpclient_handle > (MAX_TCPCLIENTS-1)) || (tcpclient_handle < 1)){
     return RETURN_ERROR;
   }
@@ -337,8 +394,14 @@ int tcpclient_connected(int tcpclient_handle){
 
 int tcpclient_incoming_bytes(int tcpclient_handle){
 
-  // return tcpclient[tcpclient_handle].incoming_buffer_bytes;
+  /*
 
+    Returns number of bytes in the circular buffer
+
+  */
+
+
+  
   if (tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
     return 0;
   }
@@ -346,7 +409,7 @@ int tcpclient_incoming_bytes(int tcpclient_handle){
   if (tcpclient[tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_handle].incoming_buffer_tail){
     return tcpclient[tcpclient_handle].incoming_buffer_head - tcpclient[tcpclient_handle].incoming_buffer_tail;
   } else {
-    return (TCPCLIENT_BUFFER_SIZE - tcpclient[tcpclient_handle].incoming_buffer_tail) + tcpclient[tcpclient_handle].incoming_buffer_head;
+    return (TCP_CLIENT_INCOMING_BUFFER_SIZE - tcpclient[tcpclient_handle].incoming_buffer_tail) + tcpclient[tcpclient_handle].incoming_buffer_head;
   }
 
 }
@@ -358,6 +421,12 @@ int tcpclient_incoming_bytes(int tcpclient_handle){
 int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
 
 
+  /*
+
+    Returns up to request number of _bytes_ that are in the incoming buffer
+    into _buffer_.  Return code is actual number of bytes returned.
+
+  */
 
   // is the incoming buffer empty?
   if((tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail) &&
@@ -375,7 +444,7 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
     x++;
     return_value++;
     bytes--;
-    if ( tcpclient[tcpclient_handle].incoming_buffer_tail == TCPCLIENT_BUFFER_SIZE ) {
+    if ( tcpclient[tcpclient_handle].incoming_buffer_tail == TCP_CLIENT_INCOMING_BUFFER_SIZE ) {
       tcpclient[tcpclient_handle].incoming_buffer_tail = 0;
     }
   }
@@ -428,13 +497,23 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
 // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
 
     tcpclient_write_text(connection_handle[0],"hello\r");
-
     sleep(1);
     // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
     temp = tcpclient_read(connection_handle[0], 200, tempchar);
     tempchar[temp] = 0;
     // printf("main: tcpclient_read return:%d",temp);
     printf("\r\n$%s$\r\n",tempchar);
+
+    strcpy(tempchar,"r1:freq=14000000\r");
+    tcpclient_write(connection_handle[0],tempchar,strlen(tempchar));
+    sleep(1);
+    // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
+    temp = tcpclient_read(connection_handle[0], 200, tempchar);
+    tempchar[temp] = 0;
+    // printf("main: tcpclient_read return:%d",temp);
+    printf("\r\n$%s$\r\n",tempchar);
+
+
 
 
     // fire up a bunch of connections
