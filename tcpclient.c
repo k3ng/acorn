@@ -201,7 +201,6 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
 // ---------------------------------------------------------------------------------------
 
-
 int tcpclient_write_text(int tcpclient_handle, char *text){
 
   /*
