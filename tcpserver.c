@@ -98,13 +98,21 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
   */
 
+  #define TCP_RECV_CHUNK 128
+
   int connection_active = 1;
 
   struct tcp_connection_handler_parms_struct tcp_connection_handler_parms = *(struct tcp_connection_handler_parms_struct*)passed_tcp_connection_handler_parms;
   int client_sock = tcp_connection_handler_parms.client_sock;
 
-	int read_size;
-	char client_message_temp[34], client_message[34], sdr_response[1000], debug_text[100];
+	int bytes_received;
+	char tempchar[TCP_RECV_CHUNK+1];
+  char client_message[TCP_RECV_CHUNK+1];
+  char command_handler_response[TCP_SERVER_INCOMING_BUFFER_SIZE];
+
+  char incoming_buffer[TCP_SERVER_INCOMING_BUFFER_SIZE];
+  int incoming_buffer_head;
+  int incoming_buffer_tail;
 
   sprintf(debug_text,"tcp_connection_handler: starting client_sock:%d", client_sock);
   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
@@ -112,77 +120,155 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 	char *message = "acorn ready!\n";
 	write(client_sock, message, strlen(message));
 
+  int x;
+  int carriage_return_flag;
 
   while(connection_active && !shutdown_flag){
-    read_size = recv(client_sock, client_message_temp, 32, 0);
-    if (read_size > 0){
-      strncpy(client_message,client_message_temp,read_size);
+
+
+
+    bytes_received = recv(client_sock, client_message, TCP_RECV_CHUNK, 0); // this is blocking
+    if (bytes_received > 0){
       
-      sprintf(debug_text,"tcp_connection_handler: client_sock:%d msg:%s strlen:%d read_size:%d", client_sock, client_message, strlen(client_message), read_size);
+      strncpy(tempchar,client_message,bytes_received);
+
+      sprintf(debug_text,"tcp_connection_handler: client_sock:%d bytes_received:%d msg:%s$", client_sock, bytes_received, tempchar);
       debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
 
       #if defined(ECHO_BACK_COMMANDS)
-        //echo the message back to client
-        write(client_sock, client_message, read_size);
+        //echo the message back to client if standalone compiled
+        write(client_sock, client_message, bytes_received);
       #endif
 
+      x = 0;
+      
+      // put received data into circular buffer
+      while (bytes_received--){
+        if( (incoming_buffer_head == 0 && incoming_buffer_tail == 0) ||
 
-//  TODO: detect \r and call handler when that has arrived
+            (incoming_buffer_head > incoming_buffer_tail) ||
 
-      // yank off the carriage return and whatever
-      char *return_character = strchr(client_message, '\r');
-      if (return_character){
-        int number_of_command_characters = return_character - client_message;
-        strcpy(client_message_temp,client_message);
-        strncpy(client_message, client_message_temp, number_of_command_characters);
-        client_message[number_of_command_characters] = 0;
+            ((incoming_buffer_head < incoming_buffer_tail) &&
+            (incoming_buffer_head != (incoming_buffer_tail-1))) &&
+
+            (incoming_buffer_head < TCP_SERVER_INCOMING_BUFFER_SIZE) ) {
+              if(client_message[x] != '\n'){ // strip newlines
+                incoming_buffer[incoming_buffer_head] = client_message[x];
+                incoming_buffer_head++;
+              }
+              x++;
+              if((incoming_buffer_head == TCP_SERVER_INCOMING_BUFFER_SIZE) && 
+                (incoming_buffer_tail != 0)){
+                incoming_buffer_head = 0;
+              }
+        } 
+      } //while (bytes_received--){
+
+      
+
+      // check for carriage returns in the buffer
+      x = incoming_buffer_tail;
+      carriage_return_flag = 0;
+      while(x != incoming_buffer_head){
+        if(incoming_buffer[x] == '\r'){
+          carriage_return_flag++; 
+        }
+        x++;
+        if (x == TCP_SERVER_INCOMING_BUFFER_SIZE){
+          x = 0;
+        }
       }
 
-
-      // handle some telnet commands right here
-      if (!strcmp(client_message,"quit")){  
-        sprintf(debug_text,"tcp_connection_handler: client quit client_sock: %d", client_sock);
-        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
-        close(client_sock);    
-        free(passed_tcp_connection_handler_parms);
-        return RETURN_NO_ERROR;  
-      } else if(!strcmp(client_message,"shutdown")){
-        sprintf(client_message,"shutting down!\r\n");
-        write(client_sock, client_message, strlen(client_message));  
-        sprintf(debug_text,"tcp_connection_handler: client shutdown client_sock: %d", client_sock);
-        debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
-        close(client_sock);    
-        free(passed_tcp_connection_handler_parms);      
-        shutdown_flag = 1;
-        return RETURN_NO_ERROR;        
-      } else if(!strcmp(client_message,"hi")){
-        sprintf(client_message,"hi from tcp_connection_handler!\r\n");
-        write(client_sock, client_message, strlen(client_message));
-      } else {  
-        // other commands go to the passed command handler
-        #if defined(COMPILING_EVERYTHING)
-
-          tcp_connection_handler_parms.command_handler(client_message, sdr_response); 
-
-          //sprintf(client_message,"%s\r\n",sdr_response);
-          // write(client_sock, client_message, strlen(client_message));
-          write(client_sock, sdr_response, strlen(sdr_response));
-          write(client_sock, "\r\n", 2);
-        #endif
+      x = incoming_buffer_tail;
+      sprintf(debug_text,"tcp_connection_handler: buffer:");
+      while(x != incoming_buffer_head){
+        sprintf(tempchar,"%c",incoming_buffer[x]);
+        strcat(debug_text,tempchar);        
+        x++;
+        if (x == TCP_SERVER_INCOMING_BUFFER_SIZE){
+          x = 0;
+        }
       }
-      strcpy(sdr_response,"");
-      strcpy(client_message_temp,"");
-      strcpy(client_message,"");
-    } else {
-      connection_active = 0;
+      strcat(debug_text,"$");
+      debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+
+
+      // process the complete commands we have in the incoming buffer
+      while ((carriage_return_flag > 0) && (incoming_buffer_head != incoming_buffer_tail) && !(incoming_buffer_head == 0 && incoming_buffer_tail == 0)){
+
+        //pull client_message out of circular buffer
+
+        carriage_return_flag--;
+        x = 0;
+        int got_a_line = 0;
+
+        while((got_a_line == 0) && (incoming_buffer_tail != incoming_buffer_head)){
+          if (incoming_buffer[incoming_buffer_tail] == '\r'){
+            got_a_line = 1;
+          } else {
+            client_message[x] = incoming_buffer[incoming_buffer_tail];
+          }
+          incoming_buffer_tail++;
+          x++;
+          if (incoming_buffer_tail == TCP_SERVER_INCOMING_BUFFER_SIZE) {
+            incoming_buffer_tail = 0;
+          }
+        }
+
+        if (incoming_buffer_tail == incoming_buffer_head){
+          incoming_buffer_head = 0;
+          incoming_buffer_tail = 0;
+        }
+
+        // zero terminate it and get rid of carriage return
+        client_message[x-1] = 0;
+
+        sprintf(debug_text,"tcp_connection_handler: pulled from circular buffer client_sock:%d msg:%s$", client_sock, client_message);
+        debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+
+        // handle some telnet commands right here
+        if (!strcmp(client_message,"quit")){  
+          sprintf(debug_text,"tcp_connection_handler: client quit client_sock: %d", client_sock);
+          debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
+          close(client_sock);    
+          free(passed_tcp_connection_handler_parms);
+          return RETURN_NO_ERROR;  
+        } else if(!strcmp(client_message,"shutdown")){
+          sprintf(client_message,"shutting down!\r\n");
+          write(client_sock, client_message, strlen(client_message));  
+          sprintf(debug_text,"tcp_connection_handler: client shutdown client_sock: %d", client_sock);
+          debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
+          close(client_sock);    
+          free(passed_tcp_connection_handler_parms);      
+          shutdown_flag = 1;
+          return RETURN_NO_ERROR;        
+        } else if(!strcmp(client_message,"hi")){
+          sprintf(client_message,"hi from tcp_connection_handler!\r\n");
+          write(client_sock, client_message, strlen(client_message));
+        } else {  
+          // other commands go to the passed command handler
+          #if defined(COMPILING_EVERYTHING)
+
+            tcp_connection_handler_parms.command_handler(client_message, command_handler_response); 
+
+            //sprintf(client_message,"%s\r\n",command_handler_response);
+            // write(client_sock, client_message, strlen(client_message));
+            write(client_sock, command_handler_response, strlen(command_handler_response));
+            write(client_sock, "\r\n", 2);
+          #endif
+        }
+        strcpy(command_handler_response,"");
+        strcpy(client_message,"");
+        strcpy(client_message,"");
+      } // process the complete commands we have in the incoming buffer
     }
-  }
+  } //while(connection_active && !shutdown_flag)
 
 	
-	if(read_size == 0){
+	if(bytes_received == 0){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client disconnected client_sock: %d", client_sock);
     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);    
-	} else if(read_size == -1){
+	} else if(bytes_received == -1){
     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: recv failed client_sock: %d", client_sock);
     debug(debug_text,DEBUG_LEVEL_STDERR);       
 	}
@@ -196,6 +282,150 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
 	return RETURN_NO_ERROR;
 }
+
+
+// void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
+
+
+//   /*
+
+//     This handles the connection for each incoming client
+
+//     When bytes have been received, tcp_connection_handler_parms.command_handler is
+//     called. The received bytes are passed to the command handler, and the response
+//     that comes back from the command handler is sent back to the tcp client.
+
+//   */
+
+//   int connection_active = 1;
+
+//   struct tcp_connection_handler_parms_struct tcp_connection_handler_parms = *(struct tcp_connection_handler_parms_struct*)passed_tcp_connection_handler_parms;
+//   int client_sock = tcp_connection_handler_parms.client_sock;
+
+//   int bytes_received;
+//   char client_message_temp[34], client_message[34], command_handler_response[TCP_SERVER_INCOMING_BUFFER_SIZE];
+
+//   char incoming_buffer[TCP_SERVER_INCOMING_BUFFER_SIZE];
+//   int incoming_buffer_head;
+//   int incoming_buffer_tail;
+
+//   sprintf(debug_text,"tcp_connection_handler: starting client_sock:%d", client_sock);
+//   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+  
+//   char *message = "acorn ready!\n";
+//   write(client_sock, message, strlen(message));
+
+//   int x;
+
+//   while(connection_active && !shutdown_flag){
+//     bytes_received = recv(client_sock, client_message_temp, 32, 0); // this is blocking
+//     if (bytes_received > 0){
+//       strncpy(client_message,client_message_temp,bytes_received);
+      
+//       sprintf(debug_text,"tcp_connection_handler: client_sock:%d msg:%s strlen:%d bytes_received:%d", client_sock, client_message, strlen(client_message), bytes_received);
+//       debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+
+//       #if defined(ECHO_BACK_COMMANDS)
+//         //echo the message back to client
+//         write(client_sock, client_message, bytes_received);
+//       #endif
+
+//       x = 0;
+
+//       while (bytes_received--){
+//         if( ((incoming_buffer_head == incoming_buffer_tail)) ||
+
+//             (incoming_buffer_head > incoming_buffer_tail) ||
+
+//             ((incoming_buffer_head < incoming_buffer_tail) &&
+//             (incoming_buffer_head != (incoming_buffer_tail-1))) &&
+
+//             (incoming_buffer_head != TCP_SERVER_INCOMING_BUFFER_SIZE) ) {
+//               incoming_buffer[incoming_buffer_head] = client_message_temp[x];
+//               x++;
+//               incoming_buffer_head++;
+//               if((incoming_buffer_head == TCP_SERVER_INCOMING_BUFFER_SIZE) && 
+//                 (incoming_buffer_tail != 0)){
+//                 incoming_buffer_head = 0;
+//               }
+//         }
+//       // sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d head:%d tail:%d", tcpclient_parms.tcpclient_handle,bytes_received,
+//       //   tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head, tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail);
+//       // debug(debug_text,3);        
+//       }
+
+
+
+// //  TODO: detect \r and call handler when that has arrived
+
+//       // yank off the carriage return and whatever
+//       char *return_character = strchr(client_message, '\r');
+//       if (return_character){
+//         int number_of_command_characters = return_character - client_message;
+//         strcpy(client_message_temp,client_message);
+//         strncpy(client_message, client_message_temp, number_of_command_characters);
+//         client_message[number_of_command_characters] = 0;
+//       }
+
+
+//       // handle some telnet commands right here
+//       if (!strcmp(client_message,"quit")){  
+//         sprintf(debug_text,"tcp_connection_handler: client quit client_sock: %d", client_sock);
+//         debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
+//         close(client_sock);    
+//         free(passed_tcp_connection_handler_parms);
+//         return RETURN_NO_ERROR;  
+//       } else if(!strcmp(client_message,"shutdown")){
+//         sprintf(client_message,"shutting down!\r\n");
+//         write(client_sock, client_message, strlen(client_message));  
+//         sprintf(debug_text,"tcp_connection_handler: client shutdown client_sock: %d", client_sock);
+//         debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
+//         close(client_sock);    
+//         free(passed_tcp_connection_handler_parms);      
+//         shutdown_flag = 1;
+//         return RETURN_NO_ERROR;        
+//       } else if(!strcmp(client_message,"hi")){
+//         sprintf(client_message,"hi from tcp_connection_handler!\r\n");
+//         write(client_sock, client_message, strlen(client_message));
+//       } else {  
+//         // other commands go to the passed command handler
+//         #if defined(COMPILING_EVERYTHING)
+
+//           tcp_connection_handler_parms.command_handler(client_message, command_handler_response); 
+
+//           //sprintf(client_message,"%s\r\n",command_handler_response);
+//           // write(client_sock, client_message, strlen(client_message));
+//           write(client_sock, command_handler_response, strlen(command_handler_response));
+//           write(client_sock, "\r\n", 2);
+//         #endif
+//       }
+//       strcpy(command_handler_response,"");
+//       strcpy(client_message_temp,"");
+//       strcpy(client_message,"");
+//     } else {
+//       connection_active = 0;
+//     }
+//   }
+
+  
+//   if(bytes_received == 0){
+//     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: client disconnected client_sock: %d", client_sock);
+//     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);    
+//   } else if(bytes_received == -1){
+//     sprintf(debug_text,"tcp_connection_handler: tcp_connection_handler: recv failed client_sock: %d", client_sock);
+//     debug(debug_text,DEBUG_LEVEL_STDERR);       
+//   }
+    
+
+//   sprintf(debug_text,"tcp_connection_handler: exiting client_sock:%d", client_sock);
+//   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+
+
+//   free(passed_tcp_connection_handler_parms);
+
+//   return RETURN_NO_ERROR;
+// }
+
 
 // ---------------------------------------------------------------------------------------
 

@@ -160,24 +160,26 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
 	while((bytes_received = recv(tcp_sock, buff, sizeof(buff), 0)) >= 0){
 		if (bytes_received > 0){
-//zzzzzz
+
   		buff[bytes_received] = 0;
 
-  	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d\r\n\treceived:%s$", tcpclient_parms.tcpclient_handle,bytes_received,buff);
+  	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d received:%s$", tcpclient_parms.tcpclient_handle,bytes_received,buff);
       debug(debug_text,3);
       fflush(stdout);
 
       x = 0;
 
+      // put received data into circular buffer
   		while (bytes_received--){
-        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail)) ||
+        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == 0 &&
+               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail == 0)) ||
 
             (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) ||
 
             ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head < tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) &&
             (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail-1))) &&
 
-            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head != TCP_CLIENT_INCOMING_BUFFER_SIZE) ) {
+            (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head < TCP_CLIENT_INCOMING_BUFFER_SIZE) ) {
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer[tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head] = buff[x];
               x++;
               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head++;
@@ -429,8 +431,7 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
   */
 
   // is the incoming buffer empty?
-  if((tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail) &&
-            (tcpclient[tcpclient_handle].incoming_buffer_head == 0)) {
+  if(tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
     return 0;
   }
 
