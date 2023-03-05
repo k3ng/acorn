@@ -125,8 +125,6 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
   while(connection_active && !shutdown_flag){
 
-
-
     bytes_received = recv(client_sock, client_message, TCP_RECV_CHUNK, 0); // this is blocking
     if (bytes_received > 0){
       

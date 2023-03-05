@@ -187,10 +187,7 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
                 (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail != 0)){
                 tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head = 0;
               }
-        }
-      // sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d head:%d tail:%d", tcpclient_parms.tcpclient_handle,bytes_received,
-      //   tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head, tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail);
-      // debug(debug_text,3);        
+        }     
 		  }
     }
 	}

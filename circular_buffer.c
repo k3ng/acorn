@@ -87,6 +87,17 @@ char circular_buffer_read(struct circular_buffer_struct *circular_buffer){
 
 }
 
+int search_buffer(struct circular_buffer_struct *circular_buffer,char search_byte){
+
+
+
+}
+
+char *get_line_from_circular_buffer(struct circular_buffer_struct *circular_buffer){
+
+
+}
+
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------

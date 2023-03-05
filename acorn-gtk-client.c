@@ -353,9 +353,14 @@ static int *tx_mod_buff = NULL;
 static int tx_mod_index = 0;
 static int tx_mod_max = 0;
 
+// TODO
+// char*mode_name[MAX_MODES] = {
+// 	"USB", "LSB", "CW", "CWR", "NBFM", "AM", "FT8", "PSK31", "RTTY", 
+// 	"DIGITAL", "2TONE" 
+// };
+
 char*mode_name[MAX_MODES] = {
-	"USB", "LSB", "CW", "CWR", "NBFM", "AM", "FT8", "PSK31", "RTTY", 
-	"DIGITAL", "2TONE" 
+	"USB", "LSB", "CW", "CWR", "2TONE"  
 };
 
 static int serial_fd = -1;
@@ -462,7 +467,8 @@ struct field main_controls[] = {
 	{ "r1:volume", NULL, 750, 330, 50, 50, "AUDIO", 40, "60", FIELD_NUMBER, FONT_FIELD_VALUE, 
 		FONT_SMALL_FIELD_VALUE, "", 0, 100, 1, ENABLED, 0,0,0,0,0},
 	{ "r1:mode", NULL, 500, 330, 50, 50, "MODE", 40, "USB", FIELD_SELECTION, FONT_FIELD_VALUE, 
-		FONT_SMALL_FIELD_VALUE, "USB/LSB/CW/CWR/FT8/PSK31/RTTY/DIGITAL/2TONE", 0,0, 0, ENABLED, 0,0,0,0,0},
+		FONT_SMALL_FIELD_VALUE, "USB/LSB/CW/CWR/2TONE", 0,0, 0, ENABLED, 0,0,0,0,0},
+		// TODO FONT_SMALL_FIELD_VALUE, "USB/LSB/CW/CWR/FT8/PSK31/RTTY/DIGITAL/2TONE", 0,0, 0, ENABLED, 0,0,0,0,0},
 	{ "r1:low", NULL, 550, 330, 50, 50, "LOW", 40, "300", FIELD_NUMBER, FONT_FIELD_VALUE, 
 		FONT_SMALL_FIELD_VALUE, "", 0,4000, 50, ENABLED, 0,0,0,0,0},
 	{ "r1:high", NULL, 600, 330, 50, 50, "HIGH", 40, "3000", FIELD_NUMBER, FONT_FIELD_VALUE, 
@@ -522,9 +528,9 @@ struct field main_controls[] = {
 	{"#text_in", do_text, 0, 340, WINDOW_X_SPLIT-2, 20, "text", 70, "text box", FIELD_TEXT, FONT_LOG, 
 		FONT_SMALL_FIELD_VALUE, "nothing valuable", 0,128,0, ENABLED, 0,0,0,0,0},
 
-	{"#close", NULL, 750, 430 ,50, 50, "CLOSE", 1, "", FIELD_BUTTON, FONT_FIELD_VALUE, 
+	{"#minimze", NULL, 750, 430 ,50, 50, "MIN", 1, "", FIELD_BUTTON, FONT_FIELD_VALUE, 
 		FONT_SMALL_FIELD_VALUE, "", 0,0,0, ENABLED, 0,0,0,0,0},
-	{"#off", NULL, 750, 0 ,50, 50, "OFF", 1, "", FIELD_BUTTON, FONT_FIELD_VALUE, 
+	{"#exit", NULL, 750, 0 ,50, 50, "EXIT", 1, "", FIELD_BUTTON, FONT_FIELD_VALUE, 
 		FONT_SMALL_FIELD_VALUE, "", 0,0,0, ENABLED, 0,0,0,0,0},
   
   // other settings - currently off screen
@@ -4524,9 +4530,9 @@ void do_cmd(char *cmd){
 	
 	strcpy(request, cmd);			//don't mangle the original, thank you
 
-	if (!strcmp(request, "#close"))
+	if (!strcmp(request, "#minimze"))
 		gtk_window_iconify(GTK_WINDOW(window));
-	else if (!strcmp(request, "#off")){
+	else if (!strcmp(request, "#exit")){
 		tx_off();
 		set_field("#record", "OFF");
 		save_user_settings(1);
