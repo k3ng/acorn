@@ -99,7 +99,8 @@ struct setting_struct setting[] =
 
 
 
-pthread_t tcpserver_thread;
+pthread_t control_tcpserver_thread;
+// pthread_t fft_tcpserver_thread;
 
 static long time_delta = 0;
 
@@ -520,13 +521,22 @@ void launch_tcp_server_threads(){
   struct tcpserver_parms_struct *tcpserver_parms;
 
   tcpserver_parms = malloc(sizeof(tcpserver_parms));
-  tcpserver_parms->tcpport = TCP_SERVER_RIG_COMMAND;
+  tcpserver_parms->tcpport = TCP_SERVER_PORT_RIG_COMMAND;
   tcpserver_parms->command_handler = &sdr_request;
 
-  if (pthread_create(&tcpserver_thread, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
-    sprintf(debug_text,"launch_tcp_server_threads: could not create tcpserver_thread port:%d",tcpserver_parms->tcpport);
+  if (pthread_create(&control_tcpserver_thread, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
+    sprintf(debug_text,"launch_tcp_server_threads: could not create control_tcpserver_thread port:%d",tcpserver_parms->tcpport);
     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
   }
+
+
+  // tcpserver_parms->tcpport = TCP_SERVER_PORT_FFT;
+  // tcpserver_parms->command_handler = &sdr_request;
+
+  // if (pthread_create(&fft_tcpserver_thread, NULL, tcpserver_main_thread, (void*) tcpserver_parms)){
+  //   sprintf(debug_text,"launch_tcp_server_threads: could not create fft_tcpserver_thread port:%d",tcpserver_parms->tcpport);
+  //   debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+  // }
 
 }
 

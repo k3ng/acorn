@@ -129,6 +129,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
     if (bytes_received > 0){
       
       strncpy(tempchar,client_message,bytes_received);
+      tempchar[bytes_received] = 0;
 
       sprintf(debug_text,"tcp_connection_handler: client_sock:%d bytes_received:%d msg:%s$", client_sock, bytes_received, tempchar);
       debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
@@ -139,7 +140,8 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
       #endif
 
       x = 0;
-      
+// printf("1\r\n");
+
       // put received data into circular buffer
       while (bytes_received--){
         if( (incoming_buffer_head == 0 && incoming_buffer_tail == 0) ||
@@ -162,7 +164,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         } 
       } //while (bytes_received--){
 
-      
+ // printf("check 2\r\n");     
 
       // check for carriage returns in the buffer
       x = incoming_buffer_tail;
@@ -445,7 +447,14 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
       exit;   
   	}
     sprintf(debug_text,"tcpserver_main_thread: socket created: %d", socket_desc);
-    debug(debug_text,1);   
+    debug(debug_text,1);  
+
+    const int enable = 1;
+    if (setsockopt(socket_desc, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0){
+      debug("tcpserver_main_thread: setsockopt(SO_REUSEADDR) failed",DEBUG_LEVEL_STDERR);
+    }
+
+
   	
   	// prepare the sockaddr_in structure
   	server.sin_family = AF_INET;
@@ -465,7 +474,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
   }
 
   sprintf(debug_text,"tcpserver_main_thread: socket:%d bind done",socket_desc);
-  debug(debug_text,1);   
+  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);   
 	
 	listen(socket_desc, 3);
 	
@@ -478,7 +487,7 @@ void *tcpserver_main_thread(void *passed_tcpserver_parms){
     inet_ntop(AF_INET, &(client.sin_addr.s_addr), ipAddress, INET_ADDRSTRLEN);
 
     sprintf(debug_text,"tcpserver_main_thread: socket:%d port:%d connection accepted from %s", socket_desc, tcpserver_parms.tcpport, ipAddress);
-    debug(debug_text,1); 
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE); 
 		
 		pthread_t tcp_connection_handler_thread;
 

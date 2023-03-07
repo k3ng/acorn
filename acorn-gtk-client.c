@@ -2038,6 +2038,11 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		palette[SPECTRUM_PLOT][1], palette[SPECTRUM_PLOT][2]);
 	cairo_move_to(gfx, f->x + f->width, f->y + grid_height);
 
+// static int do_once = 0;
+// if (do_once == 0){
+	printf("starting_bin:%d ending_bin:%d\r\n", starting_bin, ending_bin);
+//}
+
 	float x = 0;
 	int j = 0;
 	for (i = starting_bin; i <= ending_bin; i++){
