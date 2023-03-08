@@ -187,7 +187,7 @@ int initialize_avr_bus(){
 
   /* poll the AVR bus
 
-     example format: ptest_unit_1:202301161301$test_unit_2:202402161302$test_unit_3:202503161303$
+    example format: ptest_unit_1:202301161301$test_unit_2:202402161302$test_unit_3:202503161303$
 
   */
 

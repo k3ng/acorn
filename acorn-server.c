@@ -483,6 +483,10 @@ time_t time_system(){
 void start_things_up(int argc, char* argv[]){
 
 
+  if (geteuid() != 0) {
+    fprintf(stderr, "App needs to be run as root.  Hint: use sudo...\n\r");
+    exit(RETURN_ERROR);
+  }
 
   read_command_line_arguments(argc, argv);
 

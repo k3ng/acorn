@@ -91,8 +91,8 @@ for the transmission. The data required is the same!
 #endif
 
 #if defined(CODEC_IQAUDIO_CODEC_ZERO)
-  #define SOUND_THREAD_START_DEVICE "default"
-  #define AUDIO_CARD_NAME "default"
+  #define SOUND_THREAD_START_DEVICE "sysdefault"
+  #define AUDIO_CARD_NAME "sysdefault"
 #endif 
 
 
