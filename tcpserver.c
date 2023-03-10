@@ -140,7 +140,6 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
       #endif
 
       x = 0;
-// printf("1\r\n");
 
       // put received data into circular buffer
       while (bytes_received--){
@@ -163,8 +162,6 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
               }
         } 
       } //while (bytes_received--){
-
- // printf("check 2\r\n");     
 
       // check for carriage returns in the buffer
       x = incoming_buffer_tail;
