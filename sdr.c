@@ -1031,6 +1031,8 @@ int sdr_request(char *request, char *response){
 
     Commands:
 
+      TODO: redo these commands
+
 		  stat:tx=                                         : query tx status
 		  r1:freq=<frequency>
 		  r1:mode=<LSB,CW,CWR,2TONE,FT8,PSK31,RTTY,USB>
@@ -1047,6 +1049,7 @@ int sdr_request(char *request, char *response){
 		  sidetone=# (0 =< # <= 100)
 		  mod=<MIC,LINE>
 		  tx_compress=#
+		  fft start finish
 
   */
 
@@ -1061,6 +1064,8 @@ int sdr_request(char *request, char *response){
 		strcpy(response, "hello from sdr_request!");
 		return 1;
 	}
+
+
 
 
   if (!strcmp(request, "help")){
@@ -1085,10 +1090,50 @@ int sdr_request(char *request, char *response){
 		return 1;
 	}
 
+  int number_of_command_characters = 0;
+
+  struct arguments_struct {
+  	char argument[16];
+  } arg[4];
+
+  // do we have a space delimited command?  (command(arg[0]) arg[1] arg[2] arg[3]...)
+  char *space_character = strchr(request,' '); //TODO: get rid of the space check when we go to all space delimited commands
+  if (space_character){
+	  char *token;
+	  token = strtok(request," ");
+	  int x = 0;
+	  while((token != NULL) && (x < 4)){
+	    sprintf(arg[x].argument,"%s", token);
+	    token = strtok(NULL," ");
+	    x++;
+	  }
+
+    if (!strcmp(arg[0].argument, "fft")){
+	  	strcpy(command,"");
+	  	strcpy(response,"");
+	  	int start = atoi(arg[1].argument);
+	  	int finish = atoi(arg[2].argument);
+	  	if ((start >= 0) && (finish <= MAX_BINS)){
+		  	for (int i = start;i <= finish;i++){
+		  		sprintf(command,"%f\n",fft_bins[i]);
+		      strcat(response,command);
+		  	}
+		  	return RETURN_NO_ERROR;
+		  } else {	
+			  strcpy(response, "error");
+        return RETURN_ERROR;
+			}  
+		} // if (!strcmp(arg[0].argument, "fft"))
+
+	} //if (space_character){
+
+
+
+
 
   // parse out command and command_argument (command=command_argument)
 	char *equal_character = strchr(request, '=');
-	int number_of_command_characters = equal_character - request;
+	number_of_command_characters = equal_character - request;
 	if (!equal_character){
 		strcpy(response, "error");
 		return -1;

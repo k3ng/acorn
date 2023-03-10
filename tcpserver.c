@@ -108,7 +108,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 	int bytes_received;
 	char tempchar[TCP_RECV_CHUNK+1];
   char client_message[TCP_RECV_CHUNK+1];
-  char command_handler_response[TCP_SERVER_INCOMING_BUFFER_SIZE];
+  char command_handler_response[COMMAND_HANDLER_RESPONSE_SIZE];
 
   char incoming_buffer[TCP_SERVER_INCOMING_BUFFER_SIZE];
   int incoming_buffer_head;

@@ -2040,7 +2040,7 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 
 // static int do_once = 0;
 // if (do_once == 0){
-	printf("starting_bin:%d ending_bin:%d\r\n", starting_bin, ending_bin);
+	// printf("starting_bin:%d ending_bin:%d\r\n", starting_bin, ending_bin);
 //}
 
 	float x = 0;
