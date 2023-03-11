@@ -132,7 +132,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
       tempchar[bytes_received] = 0;
 
       sprintf(debug_text,"tcp_connection_handler: client_sock:%d bytes_received:%d msg:%s$", client_sock, bytes_received, tempchar);
-      debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+      debug(debug_text,DEBUG_LEVEL_CRAZY_VERBOSE);
 
       #if defined(ECHO_BACK_COMMANDS)
         //echo the message back to client if standalone compiled
@@ -187,7 +187,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         }
       }
       strcat(debug_text,"$");
-      debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+      debug(debug_text,DEBUG_LEVEL_FREQUENT_NOISY);
 
 
       // process the complete commands we have in the incoming buffer
@@ -221,7 +221,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
         client_message[x-1] = 0;
 
         sprintf(debug_text,"tcp_connection_handler: pulled from circular buffer client_sock:%d msg:%s$", client_sock, client_message);
-        debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
+        debug(debug_text,DEBUG_LEVEL_FREQUENT_NOISY);
 
         // handle some telnet commands right here
         if (!strcmp(client_message,"quit")){  

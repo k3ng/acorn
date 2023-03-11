@@ -6,7 +6,7 @@
 //#define HARDCODE_DEBUG_LEVEL 8
 #define DEFAULT_SERVER_IP_ADDRESS_COLON_PORT "127.0.0.1:8888"
 
-#define FFT_DATA_PULL_FREQUENCY_MS 1000
+#define FFT_DATA_PULL_FREQUENCY_MS 100
 
 #define EXCLUDE_ENCODER_CODE
 // #define EXCLUDE_SCALING_CODE
@@ -131,7 +131,6 @@
 #define CW_IAMBIC	1
 #define CW_KBD 2
 
-#define power2dB(x) (10*log10f(x))
 #define MAX_BINS 2048
 
 #define ENC1_A (13)

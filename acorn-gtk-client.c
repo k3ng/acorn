@@ -116,9 +116,6 @@ void redraw();
 int set_field(char *id, char *value);
 void clear_tx_text_buffer();
 extern int display_freq;
-
-
-
 void write_console(int style, char *text);
 int macro_load(char *filename);
 int macro_exec(int key, char *dest);
@@ -127,11 +124,6 @@ void macro_list();
 void update_log_ed();
 void write_call_log();
 time_t time_system();
-
-
-
-static inline float const cnrmf(const complex float x);
-
 
 float palette[][3] = {
 	{1,1,1}, 		// COLOR_SELECTED_TEXT
@@ -194,7 +186,7 @@ struct font_style font_table[] = {
 
 // The console is a series of lines
 
-static int 	console_cols = 50;
+static int console_cols = 50;
 
 //we use just one text list in our user interface
 
@@ -217,6 +209,9 @@ void initialize_settings();
 pthread_t fft_data_connection_pthread;
 int launch_fft_data_connection();
 
+int spectrum_display_starting_bin_hint = 0;
+int spectrum_display_ending_bin_hint = 0;
+
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -228,9 +223,7 @@ void set_ui(int id);
 		the field in focus will be changeable until it loses focus
 		hover will always be on the field in focus.
 		if the focus is -1,then hover works
-*/
 
-/*
 	Warning: The field selection is used for TOGGLE and SELECTION fields
 	each selection by the '/' should be unique. otherwise, the simple logic will
 	get confused 
@@ -707,7 +700,6 @@ void modem_poll(int mode){}
 void modem_set_pitch(int pitch){}
 void ft8_tx(char *message, int freq){}
 void ft8_interpret(char *received, char *transmit){}
-static inline float const cnrmf(const complex float x){}
 void remote_write(char *message){}
 int macro_exec(int key, char *dest){}
 void macro_list(){}
@@ -2039,6 +2031,9 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 	//int starting_bin = (3 * MAX_BINS)/4 - n_bins/2;
 	int ending_bin = starting_bin + n_bins; 
 
+  spectrum_display_starting_bin_hint = starting_bin;
+  spectrum_display_ending_bin_hint = ending_bin;
+
 	float x_step = (1.0 * f->width )/n_bins;
 
 	//start the plot
@@ -2046,10 +2041,10 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		palette[SPECTRUM_PLOT][1], palette[SPECTRUM_PLOT][2]);
 	cairo_move_to(gfx, f->x + f->width, f->y + grid_height);
 
-// static int do_once = 0;
-// if (do_once == 0){
-	// printf("starting_bin:%d ending_bin:%d\r\n", starting_bin, ending_bin);
-//}
+	// static int do_once = 0;
+	// if (do_once == 0){
+		// printf("starting_bin:%d ending_bin:%d\r\n", starting_bin, ending_bin);
+	//}
 
 	float x = 0;
 	int j = 0;
@@ -2060,11 +2055,11 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		// the bins are at lowest frequency (-ve frequency)
 		int offset = i;
 		offset = (offset - MAX_BINS/2);
-		//y axis is the power  in db of each bin, scaled to 80 db
-		y = ((power2dB(cnrmf(fft_bins[i])) + waterfall_offset) * f->height)/80; 
+		//y axis is the power in db of each bin, scaled to 80 db
+    y = ((10*log10f((crealf(fft_bins[i]) * crealf(fft_bins[i]) + cimagf(fft_bins[i]) * cimagf(fft_bins[i]))) + waterfall_offset) * f->height)/80;
 
 		// if ((i>1500) && (i<1510)){
-		printf("draw_spectrum: fft_bins[%d]=%f y=%d\r\n",i,fft_bins[i],y);
+		// printf("draw_spectrum: waterfall_offset:%d f->height:%d fft_bins[%d]=%f y=%d\r\n",waterfall_offset,f->height,i,fft_bins[i],y);
 		// }
 //yyyyyyy
 
@@ -2075,15 +2070,15 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		if (y > f->height){
 			y = f->height - 1;
 		}
-		//the plot should be increase upwards
+		//the plot should be increasing upwards
 		cairo_line_to(gfx, f->x + f->width - (int)x, f->y + grid_height - y);
 
 		//fill the waterfall
-		for (int k = 0; k <= 1 + (int)x_step; k++)
+		for (int k = 0; k <= 1 + (int)x_step; k++){
 			wf[k + f->width - (int)x] = (y * 100)/grid_height;
+		}
 		x += x_step;
 	}
-	printf("draw_spectrum: end\r\n\r\n");
 	cairo_stroke(gfx);
  
   if (pitch >= f_spectrum->x){
@@ -5277,6 +5272,9 @@ void *fft_data_connection_thread(){
   int got_start = 0;
   int bin = 0;
   float tempfloat = 0;
+  int starting_bin = 0;
+  int ending_bin = 0;
+  // int cycle = 0;
 
   while (!shutdown_flag){
 
@@ -5292,7 +5290,19 @@ void *fft_data_connection_thread(){
 	  	}
 
       if (query_state == QUERY_IDLE){
-        return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
+
+        if (((spectrum_display_starting_bin_hint > 0) && (spectrum_display_ending_bin_hint > 0)) /*&& (cycle%10 != 0)*/){
+          starting_bin = spectrum_display_starting_bin_hint;
+          ending_bin = spectrum_display_ending_bin_hint;
+        } else {
+        	starting_bin = 0;
+        	ending_bin = MAX_BINS;
+        }
+
+        // cycle ++;
+        sprintf(buffer,"fft %d %d\r",starting_bin,ending_bin);
+        return_code = tcpclient_write_text(tcpclient_handle,buffer);
+        // return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
 	      if (return_code == RETURN_ERROR){
 	      	// something went wrong with the link to the server
 	      	tcpclient_close(tcpclient_handle);
@@ -5313,7 +5323,7 @@ void *fft_data_connection_thread(){
         timedout = 0;
         got_bytes = 0;
         got_start = 0;
-        bin = 0;
+        bin = starting_bin;
 
         while ((got_everything == 0) && (timedout == 0)){
           // check if we've been waiting too long
@@ -5587,6 +5597,8 @@ void read_command_line_arguments(int argc, char* argv[]) {
 
   
   int x = 0;
+
+  debug_level = 0;
 
   while (argc--){
   	//if (argc){

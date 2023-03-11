@@ -26,7 +26,7 @@ static int tx_shift = 512;
 
 FILE *pf_debug = NULL;
 
-float fft_bins[MAX_BINS]; // spectrum ampltiudes  
+float fft_bins[MAX_BINS]; // spectrum amplitudes  
 fftw_complex *fft_spectrum;
 fftw_plan plan_spectrum;
 float spectrum_window[MAX_BINS];
@@ -221,16 +221,18 @@ int mag2db(double mag){
 
 void set_spectrum_speed(int speed){
 	spectrum_speed = speed;
-	for (int i = 0; i < MAX_BINS; i++)
+	for (int i = 0; i < MAX_BINS; i++){
 		fft_bins[i] = 0;
+	}
 }
 
 // ---------------------------------------------------------------------------------------
 
 
 void spectrum_reset(){
-	for (int i = 0; i < MAX_BINS; i++)
+	for (int i = 0; i < MAX_BINS; i++){
 		fft_bins[i] = 0;
+	}
 }
 
 // ---------------------------------------------------------------------------------------
@@ -577,8 +579,9 @@ void rx_process(int32_t *input_rx,  int32_t *input_mic,
 	}
 
 	//STEP 1: first add the previous M samples to
-	for (i = 0; i < MAX_BINS/2; i++)
+	for (i = 0; i < MAX_BINS/2; i++){
 		fft_in[i]  = fft_m[i];
+	}
 
 	//STEP 2: then add the new set of samples
 	// m is the index into incoming samples, starting at zero

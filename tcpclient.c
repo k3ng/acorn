@@ -79,7 +79,7 @@ long get_address(char *host){
 	}
 
 	sprintf(debug_text,"get_address: looking up %s", host);
-  debug(debug_text,2);
+  debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	pent = gethostbyname(host);
 	if (!pent){
 		sprintf("get_address: failed to resolve %s", host);	
@@ -138,7 +138,7 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
   serverAddr.sin_addr.s_addr = get_address(host_name); 
 
 	sprintf(debug_text,"tcpclient_thread_function: opening %s:%s", host_name, port);
-	debug(debug_text,1);
+	debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
 
 	tcp_sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -164,7 +164,7 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
   		buff[bytes_received] = 0;
 
   	  sprintf(debug_text,"tcpclient_thread_function: tcpclient_handle:%d bytes_received:%d received:%s$", tcpclient_parms.tcpclient_handle,bytes_received,buff);
-      debug(debug_text,3);
+      debug(debug_text,DEBUG_LEVEL_CRAZY_VERBOSE);
       fflush(stdout);
 
       x = 0;

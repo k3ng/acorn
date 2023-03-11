@@ -3,6 +3,7 @@
 
 #define _acorn_server_h_
 
+// Codec settings are in sdr.h
 // #define CODEC_WM8731
 #define CODEC_IQAUDIO_CODEC_ZERO
 
@@ -10,15 +11,6 @@
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 //#define HARDCODE_DEBUG_LEVEL 8
 
-#if defined(CODEC_WM8731)
-	#define AUDIO_CARD_ELEMENT_RX_VOL "Master"
-	#define AUDIO_CARD_ELEMENT_RX_GAIN "Capture"
-#endif
-
-#if defined(CODEC_IQAUDIO_CODEC_ZERO)
-  #define AUDIO_CARD_ELEMENT_RX_VOL "Headphone"
-  #define AUDIO_CARD_ELEMENT_RX_GAIN "Aux"
-#endif
 
 #define MAX_SETTING_LENGTH 32
 
