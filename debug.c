@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "debug.h"
 
-int debug_level = 0;
+//int debug_level = 0;
 
 void debug(char *debug_text_in, int debug_text_level){
 

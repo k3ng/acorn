@@ -1899,6 +1899,7 @@ void set_spectrum_display_height(int height_percentage){
 // ---------------------------------------------------------------------------------------
 
 void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
+
 	int y, sub_division, i, grid_height, bw_high, bw_low, pitch;
 	float span;
 	struct field *f;
@@ -1975,10 +1976,10 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 	 	filter_start = f_spectrum->x + (f_spectrum->width/2) - 
 			((f_spectrum->width * (bw_high + spectrum_display_start_freq_adjustment))/(span * 1000)); 
 		if (filter_start < f_spectrum->x){
-	 	  filter_width = ((f_spectrum->width * (bw_high -bw_low))/(span * 1000)) - (f_spectrum->x - filter_start); 
+	 	  filter_width = ((f_spectrum->width * (bw_high - bw_low))/(span * 1000)) - (f_spectrum->x - filter_start); 
 			filter_start = f_spectrum->x;
     } else {
-	 	  filter_width = (f_spectrum->width * (bw_high -bw_low))/(span * 1000); 
+	 	  filter_width = (f_spectrum->width * (bw_high - bw_low))/(span * 1000); 
     }
 		if (filter_width + filter_start > f_spectrum->x + f_spectrum->width)
 			filter_width = f_spectrum->x + f_spectrum->width - filter_start;
@@ -2061,11 +2062,19 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		offset = (offset - MAX_BINS/2);
 		//y axis is the power  in db of each bin, scaled to 80 db
 		y = ((power2dB(cnrmf(fft_bins[i])) + waterfall_offset) * f->height)/80; 
+
+		// if ((i>1500) && (i<1510)){
+		printf("draw_spectrum: fft_bins[%d]=%f y=%d\r\n",i,fft_bins[i],y);
+		// }
+//yyyyyyy
+
 		// limit y inside the spectrum display box
-		if ( y <  0)
+		if (y < 0){
 			y = 0;
-		if (y > f->height)
+		}
+		if (y > f->height){
 			y = f->height - 1;
+		}
 		//the plot should be increase upwards
 		cairo_line_to(gfx, f->x + f->width - (int)x, f->y + grid_height - y);
 
@@ -2074,6 +2083,7 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 			wf[k + f->width - (int)x] = (y * 100)/grid_height;
 		x += x_step;
 	}
+	printf("draw_spectrum: end\r\n\r\n");
 	cairo_stroke(gfx);
  
   if (pitch >= f_spectrum->x){
@@ -4072,8 +4082,9 @@ gboolean ui_tick(gpointer gook){
 			}
 		#endif
 
-		if (record_start)
+		if (record_start){
 			update_field(get_field("#record"));
+		}
 
 		// alternate character from the softkeyboard upon long press
 		if (f_focus && focus_since + 500 < millis() 
@@ -5232,20 +5243,40 @@ int send_command_to_server(char *buffer,char *response){
 // ---------------------------------------------------------------------------------------
 
 
+void set_fft_bin(int bin,float tempfloat){
+
+  fft_bins[bin] = tempfloat;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+
 void *fft_data_connection_thread(){
 
 
   #define QUERY_IDLE 0
   #define QUERY_SENT 1
 
-  static int query_state = QUERY_IDLE;
-  static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
-  static int connected = 0;
-  static int tcpclient_handle = 0;
-  static char previous_server_address_and_port[64];
-  static int return_code = 0;
+  #define FFT_QUERY_TIMEOUT_MS 2000
+  #define FFT_QUERY_TIMEOUTS_RESET 5
+
+  int query_state = QUERY_IDLE;
+  int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+  int connected = 0;
+  int tcpclient_handle = 0;
+  char previous_server_address_and_port[64];
+  int return_code = 0;
   int bytes = 0;
   char buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE+1];
+  unsigned int query_time_millis = 0;
+  int query_timeouts = 0; 
+  int got_everything = 0;
+  int timedout = 0;
+  int got_bytes = 0;
+  int got_start = 0;
+  int bin = 0;
+  float tempfloat = 0;
 
   while (!shutdown_flag){
 
@@ -5253,29 +5284,76 @@ void *fft_data_connection_thread(){
 
 	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
 
+
+	  	if (query_timeouts >= FFT_QUERY_TIMEOUTS_RESET){
+        server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+        tcpclient_close(tcpclient_handle);
+        debug("fft_data_connection_thread: query timeouts exceeded, resetting",DEBUG_LEVEL_STDERR);
+	  	}
+
       if (query_state == QUERY_IDLE){
         return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
-        
 	      if (return_code == RETURN_ERROR){
 	      	// something went wrong with the link to the server
+	      	tcpclient_close(tcpclient_handle);
 	        server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
 	        debug("fft_data_connection_thread: server connection lost",DEBUG_LEVEL_STDERR);
 	        sleep(1);
 	      } else {
 	        query_state = QUERY_SENT;  
+	        query_time_millis = millis();
 	      }
+      } //SERVER_CONNECTION_ESTABLISHED
 
-      }
 
-// write tcpclient_read_search
 
       if (query_state == QUERY_SENT){
-        while (tcpclient_incoming_bytes(tcpclient_handle) > 0){
-          bytes = tcpclient_read(tcpclient_handle, TCP_CLIENT_INCOMING_BUFFER_SIZE, buffer);
-        }
 
-        //query_state = QUERY_IDLE; 
-      }
+        got_everything = 0;
+        timedout = 0;
+        got_bytes = 0;
+        got_start = 0;
+        bin = 0;
+
+        while ((got_everything == 0) && (timedout == 0)){
+          // check if we've been waiting too long
+	        if ((millis()-query_time_millis) > FFT_QUERY_TIMEOUT_MS){
+	        	timedout = 1;
+	        	query_timeouts++;
+	        	query_state = QUERY_IDLE;
+	        }
+
+	        if (tcpclient_incoming_bytes(tcpclient_handle) > 5){
+	          got_bytes = tcpclient_read_search(tcpclient_handle, '\n', buffer);
+						// printf("got_bytes:%d buffer:%s\r\n",got_bytes,buffer);
+	          if (got_bytes){
+			        if (got_start){
+			        	if (!strcmp(buffer,"<end>\n")){
+		              got_everything = 1;
+		              query_state = QUERY_IDLE;
+		              // printf("got <end>\r\n");
+		              // printf("bin:%d\r\n", bin);
+			        	} else {
+			        		if (bin < MAX_BINS){
+			        			tempfloat = atof(buffer);
+                    set_fft_bin(bin,tempfloat);
+                    // if ((bin>1500) && (bin<1510)){ //yyyyyy
+                    //   printf("\t\tfft_data_connection_thread: fft_bins[%d]=%f\r\n",bin,fft_bins[bin]);
+                    // }
+			        			bin++;
+			        		}
+			        	}
+			        } else {
+			        	if (!strcmp(buffer,"<start>\n")){
+		              got_start = 1;
+		              // printf("got <start>\r\n");
+			        	}
+			        }
+		        }
+          }
+
+	      } //while ((got_everything == 0) && (timedout == 0))
+      } //QUERY_SENT
 
 	  } // SERVER_CONNECTION_ESTABLISHED
 
@@ -5314,6 +5392,8 @@ void *fft_data_connection_thread(){
 	    if (connected > 0){
 	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
 	    	query_state = QUERY_IDLE;  
+	    	query_timeouts = 0;
+	    	query_time_millis = 0;
 	    	write_console(FONT_LOG,"\r\nFFT data server connection established!\r\n");
 	    	debug("fft_data_connection_thread: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
 	    } else {
@@ -5538,6 +5618,7 @@ void read_command_line_arguments(int argc, char* argv[]) {
 // ---------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[]){
+
 
   read_command_line_arguments(argc,argv);
 

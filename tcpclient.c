@@ -399,7 +399,7 @@ int tcpclient_incoming_bytes(int tcpclient_handle){
 
   */
 
-  printf("tcpclient_incoming_bytes: head:%d tail%d\r\n",tcpclient[tcpclient_handle].incoming_buffer_head,tcpclient[tcpclient_handle].incoming_buffer_tail);
+  // printf("tcpclient_incoming_bytes: head:%d tail%d\r\n",tcpclient[tcpclient_handle].incoming_buffer_head,tcpclient[tcpclient_handle].incoming_buffer_tail);
   
   if (tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
     return 0;
@@ -455,7 +455,7 @@ int tcpclient_read(int tcpclient_handle, int bytes_to_get, char *buffer){
 // ---------------------------------------------------------------------------------------
 
 
-int tcpclient_read_search(int tcpclient_handle, char *searchchar, char *buffer){
+int tcpclient_read_search(int tcpclient_handle, int searchchar, char *buffer){
 
 
   /*
@@ -475,12 +475,15 @@ int tcpclient_read_search(int tcpclient_handle, char *searchchar, char *buffer){
   int tail_temp = tcpclient[tcpclient_handle].incoming_buffer_tail;
 
   while((char_found == 0) && (tail_temp != tcpclient[tcpclient_handle].incoming_buffer_head) && (x < (TCP_CLIENT_INCOMING_BUFFER_SIZE-2))){
-    buffer[x] = tcpclient[tcpclient_handle].incoming_buffer[tcpclient[tcpclient_handle].incoming_buffer_tail];
+    buffer[x] = tcpclient[tcpclient_handle].incoming_buffer[tail_temp];
     buffer[x+1] = 0;
     tail_temp++;
-    x++;
-    if (!strcmp(buffer,searchchar)){
+    
+    // if (!strcmp(buffer,searchchar)){
+    if (buffer[x] == searchchar){
       char_found = 1;
+    } else {
+      x++;
     } 
       
     if ( tail_temp == TCP_CLIENT_INCOMING_BUFFER_SIZE ) {
@@ -536,7 +539,7 @@ int tcpclient_read_search(int tcpclient_handle, char *searchchar, char *buffer){
     // printf("main: tcpclient_read return:%d",temp);
     printf("\r\n$%s$\r\n",tempchar);
 
-// printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
+    // printf("head:%d tail%d\r\n",tcpclient[connection_handle[0]].incoming_buffer_head,tcpclient[connection_handle[0]].incoming_buffer_tail);
 
     tcpclient_write_text(connection_handle[0],"hello\r");
     sleep(1);

@@ -11,6 +11,9 @@
 
 
 
+void print_hex(int hex_in){
+  printf("print_hex:%#010x\r\n", hex_in); 
+}
 
 long linux_millis(){
     struct timespec _t;
