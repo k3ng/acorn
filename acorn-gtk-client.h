@@ -2,7 +2,6 @@
 
 #define _acorn_gtk_client_h_
 
-// #define VERSION_STRING "2023.02.19.1922"
 #define APP_NAME "Acorn"
 //#define HARDCODE_DEBUG_LEVEL 8
 #define DEFAULT_SERVER_IP_ADDRESS_COLON_PORT "127.0.0.1:8888"

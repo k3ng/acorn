@@ -1113,7 +1113,7 @@ int sdr_request(char *request, char *response){
 
     if (!strcmp(arg[0].argument, "fft")){
 	  	strcpy(command,"");
-	  	strcpy(response,"");
+	  	strcpy(response,"<start>\n");
 	  	int start = atoi(arg[1].argument);
 	  	int finish = atoi(arg[2].argument);
 	  	if ((start >= 0) && (finish <= MAX_BINS)){
@@ -1122,6 +1122,7 @@ int sdr_request(char *request, char *response){
 		  		// sprintf(command,"%d:%f\n",i,fft_bins[i]);
 		      safe_strcat(response,command,COMMAND_HANDLER_RESPONSE_SIZE);
 		  	}
+		  	strcat(response,"<end>\n");
 		  	return RETURN_NO_ERROR;
 		  } else {	
 			  strcpy(response, "error");

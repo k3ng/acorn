@@ -143,7 +143,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
       // put received data into circular buffer
       while (bytes_received--){
-        if( (incoming_buffer_head == 0 && incoming_buffer_tail == 0) ||
+        if( (incoming_buffer_head == incoming_buffer_tail) ||
 
             (incoming_buffer_head > incoming_buffer_tail) ||
 

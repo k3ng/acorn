@@ -7,7 +7,6 @@
 #define CODEC_IQAUDIO_CODEC_ZERO
 
 
-// #define VERSION_STRING "2023.02.20.2156"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 //#define HARDCODE_DEBUG_LEVEL 8
 

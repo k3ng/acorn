@@ -10,6 +10,7 @@ if [ -e ./developer.txt ]; then
   echo "#define VERSION_STRING \"$NOW.$DEVELOPER\"" > version.h
 fi
 
+VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
 
 if [ -e ./release_notes.txt ]; then
   echo -e "\r\n\r\n"
@@ -17,14 +18,12 @@ if [ -e ./release_notes.txt ]; then
 fi
 
 if [ "$F" = "acorn-server" ]; then
-  VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
   gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
 fi
 
 
 if [ "$F" = "acorn-gtk-client" ]; then
-  VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
   gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
 fi
@@ -48,12 +47,10 @@ fi
 
 if [[ $F = "" ]]; then
   F="acorn-server"
-  VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
   gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
 
   F="acorn-gtk-client"
-  VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
   echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
   gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
 fi

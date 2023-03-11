@@ -171,8 +171,8 @@ void *tcpclient_thread_function(void *passed_tcpclient_parms){
 
       // put received data into circular buffer
   		while (bytes_received--){
-        if( ((tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head == 0 &&
-               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail == 0)) ||
+        if( (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head ==
+               tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail ) ||
 
             (tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_head > tcpclient[tcpclient_parms.tcpclient_handle].incoming_buffer_tail) ||
 
@@ -399,7 +399,7 @@ int tcpclient_incoming_bytes(int tcpclient_handle){
 
   */
 
-
+  printf("tcpclient_incoming_bytes: head:%d tail%d\r\n",tcpclient[tcpclient_handle].incoming_buffer_head,tcpclient[tcpclient_handle].incoming_buffer_tail);
   
   if (tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
     return 0;

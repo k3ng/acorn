@@ -5234,13 +5234,18 @@ int send_command_to_server(char *buffer,char *response){
 
 void *fft_data_connection_thread(){
 
+
+  #define QUERY_IDLE 0
+  #define QUERY_SENT 1
+
+  static int query_state = QUERY_IDLE;
   static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
   static int connected = 0;
   static int tcpclient_handle = 0;
   static char previous_server_address_and_port[64];
   static int return_code = 0;
   int bytes = 0;
-  char buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE];
+  char buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE+1];
 
   while (!shutdown_flag){
 
@@ -5248,21 +5253,32 @@ void *fft_data_connection_thread(){
 
 	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
 
-
-      return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
-
-      if (return_code == RETURN_ERROR){
-      	// something went wrong with the link to the server
-        server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
-        debug("fft_data_connection_thread: server connection lost",DEBUG_LEVEL_STDERR);
-        sleep(1);
-      } else {
-        // tcpclient_clear_incoming_buffer(tcpclient_handle);
-        return_code = tcpclient_read(tcpclient_handle, bytes, buffer);
+      if (query_state == QUERY_IDLE){
+        return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
+        
+	      if (return_code == RETURN_ERROR){
+	      	// something went wrong with the link to the server
+	        server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+	        debug("fft_data_connection_thread: server connection lost",DEBUG_LEVEL_STDERR);
+	        sleep(1);
+	      } else {
+	        query_state = QUERY_SENT;  
+	      }
 
       }
 
-	  }
+// write tcpclient_read_search
+
+      if (query_state == QUERY_SENT){
+        while (tcpclient_incoming_bytes(tcpclient_handle) > 0){
+          bytes = tcpclient_read(tcpclient_handle, TCP_CLIENT_INCOMING_BUFFER_SIZE, buffer);
+        }
+
+        //query_state = QUERY_IDLE; 
+      }
+
+	  } // SERVER_CONNECTION_ESTABLISHED
+
 
 	  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
 
@@ -5297,6 +5313,7 @@ void *fft_data_connection_thread(){
 
 	    if (connected > 0){
 	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
+	    	query_state = QUERY_IDLE;  
 	    	write_console(FONT_LOG,"\r\nFFT data server connection established!\r\n");
 	    	debug("fft_data_connection_thread: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
 	    } else {
