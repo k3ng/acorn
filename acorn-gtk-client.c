@@ -39,6 +39,7 @@
 #include "debug.h"
 #include "ini.h"
 #include "tcpclient.h"
+#include "k3ng.h"
 //#include "hamlib.h"
 //#include "remote.h"
 //#include "wsjtx.h"
@@ -94,19 +95,22 @@ void wake_up_the_screen(void);
 #define WATERFALL_Y_ADJ 10
 //#define WINDOW_X_SPLIT (WINDOW_X-500)
 
+
+int send_command_to_server(char *buffer,char *response);
+
 //TODO : these are dummy functions right now
 void sound_input(int loop);
 void modem_abort();
 void ft8_setmode(int config);
 void modem_poll(int mode);
 void modem_set_pitch(int pitch);
-int send_command_to_server(char *buffer,char *response);
 void ft8_tx(char *message, int freq);
 void ft8_interpret(char *received, char *transmit);
 void remote_write(char *message);
 int macro_exec(int key, char *dest);
 void macro_list();
 int macro_load(char *filename);
+//******************************************end of dummy functions
 
 void redraw();
 int set_field(char *id, char *value);
@@ -209,6 +213,9 @@ char server_address_and_port[64];
 
 int server_control_connection(int action, char *buffer, int bytes);
 void initialize_settings();
+
+pthread_t fft_data_connection_pthread;
+int launch_fft_data_connection();
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -811,7 +818,7 @@ void write_console(int style, char *text){
 	char directory[PATH_MAX];
 	char *path = getenv("HOME");
 	strcpy(directory, path);
-	strcat(directory, "/acorn/data/display_log.txt");
+	safe_strcat(directory, "/acorn/data/display_log.txt", PATH_MAX);
 	FILE *pf = fopen(directory, "a");
 
   // printf(text);
@@ -1056,7 +1063,7 @@ static void save_user_settings(int forced){
 
 	char *path = getenv("HOME");
 	strcpy(file_path, path);
-	strcat(file_path, "/acorn/data/user_settings.ini");
+	safe_strcat(file_path, "/acorn/data/user_settings.ini",PATH_MAX);
 
 	//copy the current freq settings to the currently selected vfo
 	struct field *f_freq = get_field("r1:freq");
@@ -2115,24 +2122,24 @@ char* freq_with_separators(char* freq_str){
 
   sprintf(temp_string,"%d",f_mhz);
   strcpy(return_string,temp_string);
-  strcat(return_string,".");
+  safe_strcat(return_string,".",11);
   if (f_khz < 100){
-    strcat(return_string,"0");
+    safe_strcat(return_string,"0",11);
   }
   if (f_khz < 10){
-    strcat(return_string,"0");
+    safe_strcat(return_string,"0",11);
   }
   sprintf(temp_string,"%d",f_khz);
-  strcat(return_string,temp_string);
-  strcat(return_string,".");
+  safe_strcat(return_string,temp_string,11);
+  safe_strcat(return_string,".",11);
   if (f_hz < 100){
-    strcat(return_string,"0");
+    safe_strcat(return_string,"0",11);
   }
   if (f_hz < 10){
-    strcat(return_string,"0");
+    safe_strcat(return_string,"0",11);
   }
   sprintf(temp_string,"%d",f_hz);
-  strcat(return_string,temp_string);
+  safe_strcat(return_string,temp_string,11);
   return return_string;
 }
 
@@ -4045,6 +4052,7 @@ gboolean ui_tick(gpointer gook){
 
 		  initialize_settings();
 		  initialize_settings_run_once = 1;
+		  launch_fft_data_connection();
 
 		}
 
@@ -4861,19 +4869,19 @@ void cmd_exec(char *cmd){
     write_console(FONT_LOG, "Settings\r\n\r\n");
     char temp_string[100];
     sprintf(temp_string,"Reverse Scrolling: ");
-    strcat(temp_string,get_field("reverse_scrolling")->value);
+    safe_strcat(temp_string,get_field("reverse_scrolling")->value,100);
     write_console(FONT_LOG, temp_string);
     sprintf(temp_string,"\r\nTuning Acceleration: ");
-    strcat(temp_string,get_field("reverse_scrolling")->value);
+    safe_strcat(temp_string,get_field("reverse_scrolling")->value,100);
     write_console(FONT_LOG, temp_string);
     sprintf(temp_string,"\r\nTuning Acceleration Threshold 1: ");
-    strcat(temp_string,get_field("tuning_accel_thresh1")->value);
+    safe_strcat(temp_string,get_field("tuning_accel_thresh1")->value,100);
     write_console(FONT_LOG, temp_string);
     sprintf(temp_string,"\r\nTuning Acceleration Threshold 2: ");
-    strcat(temp_string,get_field("tuning_accel_thresh2")->value);
+    safe_strcat(temp_string,get_field("tuning_accel_thresh2")->value,100);
     write_console(FONT_LOG, temp_string);
     sprintf(temp_string,"\r\nMouse Pointer: ");
-    strcat(temp_string,get_field("mouse_pointer")->value);
+    safe_strcat(temp_string,get_field("mouse_pointer")->value,100);
     write_console(FONT_LOG, temp_string);
     write_console(FONT_LOG, "\r\n");
 
@@ -5223,8 +5231,146 @@ int send_command_to_server(char *buffer,char *response){
 
 // ---------------------------------------------------------------------------------------
 
+
+void *fft_data_connection_thread(){
+
+  static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+  static int connected = 0;
+  static int tcpclient_handle = 0;
+  static char previous_server_address_and_port[64];
+  static int return_code = 0;
+  int bytes = 0;
+  char buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE];
+
+  while (!shutdown_flag){
+
+
+
+	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
+
+
+      return_code = tcpclient_write_text(tcpclient_handle,"fft 0 2048\r");
+
+      if (return_code == RETURN_ERROR){
+      	// something went wrong with the link to the server
+        server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+        debug("fft_data_connection_thread: server connection lost",DEBUG_LEVEL_STDERR);
+        sleep(1);
+      } else {
+        // tcpclient_clear_incoming_buffer(tcpclient_handle);
+        return_code = tcpclient_read(tcpclient_handle, bytes, buffer);
+
+      }
+
+	  }
+
+	  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
+
+		  // strtok() writes a 0 to where it finds a character, mangling the string
+		  char temp_char[32];
+		  strcpy(temp_char,server_address_and_port);
+		  if (!strtok(temp_char,":")){
+		    strcpy(server_address_and_port,DEFAULT_SERVER_IP_ADDRESS_COLON_PORT);
+		  }
+
+	    tcpclient_handle = tcpclient_open(server_address_and_port);
+
+	    if (tcpclient_handle > 0){
+			  write_console(FONT_LOG,"\r\nEstablishing FFT data server connection to\r\n");
+			  write_console(FONT_LOG,server_address_and_port);
+			  write_console(FONT_LOG,"\r\n");    	
+	      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
+	    } else {
+			  write_console(FONT_LOG,"\r\nError attempting to establish FFT data server connection to\r\n");
+			  write_console(FONT_LOG,server_address_and_port);
+			  write_console(FONT_LOG,"\r\n");    	
+	      server_connection_state = SERVER_CONNECTION_ERROR;
+	      strcpy(previous_server_address_and_port,server_address_and_port);
+	    }   
+	  } // SERVER_CONNECTION_UNINITIALIZED
+
+
+
+	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHING){
+
+	    connected = tcpclient_connected(tcpclient_handle);
+
+	    if (connected > 0){
+	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
+	    	write_console(FONT_LOG,"\r\nFFT data server connection established!\r\n");
+	    	debug("fft_data_connection_thread: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
+	    } else {
+
+	    	// TODO: timeout attempt and retry
+	    }
+	  } // SERVER_CONNECTION_ESTABLISHING
+
+
+	  // if we're stuck in an error state and the server address has been changed, try it again
+	  if (server_connection_state == SERVER_CONNECTION_ERROR){
+	    if (strcmp(previous_server_address_and_port,server_address_and_port)){
+	      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
+	    }
+	    // TODO: timeout and retry
+	  } //SERVER_CONNECTION_ERROR
+
+
+    
+
+  	usleep(FFT_DATA_PULL_FREQUENCY_MS*1000);
+  }
+
+
+  return RETURN_NO_ERROR;
+
+}
+
+// ---------------------------------------------------------------------------------------
+
+int launch_fft_data_connection(){
+
+//zzzzzz
+
+
+
+
+  if (pthread_create(&fft_data_connection_pthread, NULL, fft_data_connection_thread, NULL)){
+    sprintf(debug_text,"launch_fft_data_connection: could not create fft_data_connection_thread");
+    debug(debug_text,DEBUG_LEVEL_STDERR);
+  }
+
+
+
+}
+
+
+// ---------------------------------------------------------------------------------------
+
 int server_control_connection(int action, char *buffer, int bytes){
 
+
+  /*
+
+    This manages the client to server control connection.
+
+      action:
+
+        RETURN_SERVER_LINK_STATE:
+          return link connection state:
+		        SERVER_CONNECTION_UNINITIALIZED
+						SERVER_CONNECTION_ESTABLISHING
+						SERVER_CONNECTION_ESTABLISHED
+						SERVER_CONNECTION_ERROR
+
+        SERVICE:
+          check on link state, change the state engine as necessary
+          service the incoming buffer
+
+        SEND_DATA:
+          send data to the server using passed buffer, bytes
+
+
+  */
 
   static int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
   static int connected = 0;
@@ -5235,7 +5381,7 @@ int server_control_connection(int action, char *buffer, int bytes){
   if (action == SERVICE){
 
 	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
-	    //TODO: check on the health of the link
+	    //TODO: check on the health of the link, restablish the connection if it goes down
 	    //TODO: service incoming buffer
 	    tcpclient_clear_incoming_buffer(tcpclient_handle);
 	    return SERVER_CONNECTION_ESTABLISHED;
@@ -5288,6 +5434,7 @@ int server_control_connection(int action, char *buffer, int bytes){
 	    if (strcmp(previous_server_address_and_port,server_address_and_port)){
 	      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
 	    }
+	    // TODO: timeout and retry
 	  } //SERVER_CONNECTION_ERROR
 
 

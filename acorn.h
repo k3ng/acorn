@@ -2,6 +2,8 @@
 
 #define _acorn_h_
 
+#include "version.h"
+
 #define RETURN_NO_ERROR 0
 #define RETURN_ERROR -1
 #define RETURN_AFFIRMATIVE 1

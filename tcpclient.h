@@ -4,7 +4,7 @@
 #define _tcpclient_h_
 
 #define MAX_TCPCLIENTS 16
-#define TCP_CLIENT_INCOMING_BUFFER_SIZE 64
+#define TCP_CLIENT_INCOMING_BUFFER_SIZE ((11*2048)+10)  // this is huge due to fft command (9 bytes per MAX_BINS)
 
 #define TCPCLIENT_UNALLOCATED -1
 #define TCPCLIENT_CONNECTING -2

@@ -1,10 +1,13 @@
+#if !defined(_acorn_gtk_client_h_)
 
+#define _acorn_gtk_client_h_
 
-#define VERSION_STRING "2023.02.19.1922"
+// #define VERSION_STRING "2023.02.19.1922"
 #define APP_NAME "Acorn"
 //#define HARDCODE_DEBUG_LEVEL 8
 #define DEFAULT_SERVER_IP_ADDRESS_COLON_PORT "127.0.0.1:8888"
 
+#define FFT_DATA_PULL_FREQUENCY_MS 1000
 
 #define EXCLUDE_ENCODER_CODE
 // #define EXCLUDE_SCALING_CODE
@@ -157,4 +160,6 @@
 #define SERVICE 0
 #define RETURN_SERVER_LINK_STATE 1
 #define SEND_DATA 2
+
+#endif //_acorn_gtk_client_h_
 

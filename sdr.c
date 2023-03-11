@@ -17,6 +17,8 @@
 #include "sound.h"
 #include "acorn.h"
 #include "avr.h"
+#include "k3ng.h"
+#include "tcpserver.h"
 
 
 //char audio_card[32];
@@ -1057,12 +1059,12 @@ int sdr_request(char *request, char *response){
 	char command[32], command_argument[32];
 
   sprintf(debug_text,"sdr_request: request:%s", request);
-  debug(debug_text,2);
+  debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
 
 
   if (!strcmp(request, "hello")){
 		strcpy(response, "hello from sdr_request!");
-		return 1;
+		return RETURN_NO_ERROR;
 	}
 
 
@@ -1085,9 +1087,10 @@ int sdr_request(char *request, char *response){
 										 "sidetone=# (0 =< # <= 100)\r\n"
 										 "mod=<MIC,LINE>\r\n"
 										 "tx_compress=#\r\n"
+										 "fft <start> <end>\r\n"
 			               );               
 
-		return 1;
+		return RETURN_NO_ERROR;
 	}
 
   int number_of_command_characters = 0;
@@ -1116,7 +1119,8 @@ int sdr_request(char *request, char *response){
 	  	if ((start >= 0) && (finish <= MAX_BINS)){
 		  	for (int i = start;i <= finish;i++){
 		  		sprintf(command,"%f\n",fft_bins[i]);
-		      strcat(response,command);
+		  		// sprintf(command,"%d:%f\n",i,fft_bins[i]);
+		      safe_strcat(response,command,COMMAND_HANDLER_RESPONSE_SIZE);
 		  	}
 		  	return RETURN_NO_ERROR;
 		  } else {	
@@ -1136,7 +1140,7 @@ int sdr_request(char *request, char *response){
 	number_of_command_characters = equal_character - request;
 	if (!equal_character){
 		strcpy(response, "error");
-		return -1;
+		return RETURN_ERROR;
 	}
 	strncpy(command, request, number_of_command_characters);
 	command[number_of_command_characters] = 0;
@@ -1313,6 +1317,6 @@ int sdr_request(char *request, char *response){
 	  return -1;	
   }
 
-  return 1;
+  return RETURN_NO_ERROR;
 
 }

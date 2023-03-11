@@ -7,7 +7,7 @@
 #define CODEC_IQAUDIO_CODEC_ZERO
 
 
-#define VERSION_STRING "2023.02.20.2156"
+// #define VERSION_STRING "2023.02.20.2156"
 #define SETTINGS_FILE "/acorn/user_settings.ini"
 //#define HARDCODE_DEBUG_LEVEL 8
 
@@ -51,7 +51,6 @@
 #define PIN_PI_BAND_HF 26 // physical pin 32 / GPIO12
 
 #define TCP_SERVER_PORT_RIG_COMMAND 8888
-// #define TCP_SERVER_PORT_FFT 8889
 
 #define SUPRESS_LOOPBACK_PCM_ERRORS
 
