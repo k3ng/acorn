@@ -417,7 +417,7 @@ int tcpclient_incoming_bytes(int tcpclient_handle){
 // ---------------------------------------------------------------------------------------
 
 
-int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
+int tcpclient_read(int tcpclient_handle, int bytes_to_get, char *buffer){
 
 
   /*
@@ -436,12 +436,12 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
   int return_value = 0;
   int x = 0;
 
-  while((bytes > 0) && (tcpclient[tcpclient_handle].incoming_buffer_tail != tcpclient[tcpclient_handle].incoming_buffer_head)){
+  while((bytes_to_get > 0) && (tcpclient[tcpclient_handle].incoming_buffer_tail != tcpclient[tcpclient_handle].incoming_buffer_head)){
     buffer[x] = tcpclient[tcpclient_handle].incoming_buffer[tcpclient[tcpclient_handle].incoming_buffer_tail];
     tcpclient[tcpclient_handle].incoming_buffer_tail++;
     x++;
     return_value++;
-    bytes--;
+    bytes_to_get--;
     if ( tcpclient[tcpclient_handle].incoming_buffer_tail == TCP_CLIENT_INCOMING_BUFFER_SIZE ) {
       tcpclient[tcpclient_handle].incoming_buffer_tail = 0;
     }
@@ -452,6 +452,50 @@ int tcpclient_read(int tcpclient_handle, int bytes, char *buffer){
 
 }
 
+// ---------------------------------------------------------------------------------------
+
+
+int tcpclient_read_search(int tcpclient_handle, char *searchchar, char *buffer){
+
+
+  /*
+
+    Returns chars in _buffer_ up to char searchchar.  Return code is actual number of bytes returned.
+
+  */
+
+  // is the incoming buffer empty?
+  if(tcpclient[tcpclient_handle].incoming_buffer_head == tcpclient[tcpclient_handle].incoming_buffer_tail){
+    return 0;
+  }
+
+
+  int x = 0;
+  int char_found = 0;
+  int tail_temp = tcpclient[tcpclient_handle].incoming_buffer_tail;
+
+  while((char_found == 0) && (tail_temp != tcpclient[tcpclient_handle].incoming_buffer_head) && (x < (TCP_CLIENT_INCOMING_BUFFER_SIZE-2))){
+    buffer[x] = tcpclient[tcpclient_handle].incoming_buffer[tcpclient[tcpclient_handle].incoming_buffer_tail];
+    buffer[x+1] = 0;
+    tail_temp++;
+    x++;
+    if (!strcmp(buffer,searchchar)){
+      char_found = 1;
+    } 
+      
+    if ( tail_temp == TCP_CLIENT_INCOMING_BUFFER_SIZE ) {
+      tail_temp = 0;
+    }
+  }
+
+  if (char_found){
+    tcpclient[tcpclient_handle].incoming_buffer_tail = tail_temp;
+    return x;
+  } else {
+    return 0;
+  }
+
+}
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------

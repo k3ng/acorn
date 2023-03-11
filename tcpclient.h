@@ -16,7 +16,8 @@ int tcpclient_close(int tcpclient_handle);
 int tcpclient_connected(int tcpclient_handle);
 
 int tcpclient_incoming_bytes(int tcpclient_handle);
-int tcpclient_read(int tcpclient_handle, int bytes, char *buffer);
+int tcpclient_read(int tcpclient_handle, int bytes_to_get, char *buffer);
+int tcpclient_read_search(int tcpclient_handle, char *searchchar, char *buffer);
 
 void tcpclient_clear_incoming_buffer(int tcpclient_handle);
 
