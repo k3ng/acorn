@@ -2064,7 +2064,6 @@ void draw_spectrum(struct field *f_spectrum, cairo_t *gfx){
 		// if ((i>1500) && (i<1510)){
 		// printf("draw_spectrum: waterfall_offset:%d f->height:%d fft_bins[%d]=%f y=%d\r\n",waterfall_offset,f->height,i,fft_bins[i],y);
 		// }
-//yyyyyyy
 
 		// limit y inside the spectrum display box
 		if (y < 0){
@@ -5258,8 +5257,6 @@ void *fft_data_connection_thread(){
   #define QUERY_IDLE 0
   #define QUERY_SENT 1
 
-  #define FFT_QUERY_TIMEOUT_MS 2000
-  #define FFT_QUERY_TIMEOUTS_RESET 5
 
   int query_state = QUERY_IDLE;
   int server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
@@ -5270,6 +5267,7 @@ void *fft_data_connection_thread(){
   int bytes = 0;
   char buffer[TCP_CLIENT_INCOMING_BUFFER_SIZE+1];
   unsigned int query_time_millis = 0;
+  unsigned int connection_initiation_time_millis = 0;
   int query_timeouts = 0; 
   int got_everything = 0;
   int timedout = 0;
@@ -5292,6 +5290,7 @@ void *fft_data_connection_thread(){
         server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
         tcpclient_close(tcpclient_handle);
         debug("fft_data_connection_thread: query timeouts exceeded, resetting",DEBUG_LEVEL_STDERR);
+        write_console(FONT_LOG,"\r\nFFT data server connection timeouts exceeded, resetting...\r\n");
 	  	}
 
       if (query_state == QUERY_IDLE){
@@ -5347,7 +5346,8 @@ void *fft_data_connection_thread(){
 		              got_everything = 1;
 		              query_state = QUERY_IDLE;
 		              // printf("got <end>\r\n");
-		              // printf("bin:%d\r\n", bin);
+		              sprintf(debug_text,"fft_data_connection_thread: received bins:%d", bin);
+		              debug(debug_text,DEBUG_LEVEL_SOMEWHAT_NOISY_INFORMATIVE);
 			        	} else {
 			        		if (bin < MAX_BINS){
 			        			tempfloat = atof(buffer);
@@ -5389,6 +5389,7 @@ void *fft_data_connection_thread(){
 			  write_console(FONT_LOG,server_address_and_port);
 			  write_console(FONT_LOG,"\r\n");    	
 	      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
+	      connection_initiation_time_millis = millis();
 	    } else {
 			  write_console(FONT_LOG,"\r\nError attempting to establish FFT data server connection to\r\n");
 			  write_console(FONT_LOG,server_address_and_port);
@@ -5412,18 +5413,21 @@ void *fft_data_connection_thread(){
 	    	write_console(FONT_LOG,"\r\nFFT data server connection established!\r\n");
 	    	debug("fft_data_connection_thread: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
 	    } else {
-
-	    	// TODO: timeout attempt and retry
+        if ((millis()-connection_initiation_time_millis) > FFT_CONNECTION_INIT_TIMEOUT_MS){
+          write_console(FONT_LOG,"\r\nFFT data server connection timeout...\r\n");
+          close(tcpclient_handle);
+          server_connection_state = SERVER_CONNECTION_ERROR;
+          connection_initiation_time_millis = millis();
+        }
 	    }
 	  } // SERVER_CONNECTION_ESTABLISHING
 
 
 	  // if we're stuck in an error state and the server address has been changed, try it again
 	  if (server_connection_state == SERVER_CONNECTION_ERROR){
-	    if (strcmp(previous_server_address_and_port,server_address_and_port)){
+	    if ((strcmp(previous_server_address_and_port,server_address_and_port)) || ((millis()-connection_initiation_time_millis) > FFT_CONNECTION_RETRY_TIME_MS)){
 	      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
 	    }
-	    // TODO: timeout and retry
 	  } //SERVER_CONNECTION_ERROR
 
 
@@ -5511,12 +5515,12 @@ int server_control_connection(int action, char *buffer, int bytes){
 	    tcpclient_handle = tcpclient_open(server_address_and_port);
 
 	    if (tcpclient_handle > 0){
-			  write_console(FONT_LOG,"\r\nEstablishing server connection to\r\n");
+			  write_console(FONT_LOG,"\r\nEstablishing server control connection to\r\n");
 			  write_console(FONT_LOG,server_address_and_port);
 			  write_console(FONT_LOG,"\r\n");    	
 	      server_connection_state = SERVER_CONNECTION_ESTABLISHING;	
 	    } else {
-			  write_console(FONT_LOG,"\r\nError attempting to establish server connection to\r\n");
+			  write_console(FONT_LOG,"\r\nError attempting to establish server control connection to\r\n");
 			  write_console(FONT_LOG,server_address_and_port);
 			  write_console(FONT_LOG,"\r\n");    	
 	      server_connection_state = SERVER_CONNECTION_ERROR;
@@ -5532,8 +5536,8 @@ int server_control_connection(int action, char *buffer, int bytes){
 
 	    if (connected > 0){
 	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
-	    	write_console(FONT_LOG,"\r\nServer connection established!\r\n");
-	    	debug("server_control_connection: server connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
+	    	write_console(FONT_LOG,"\r\nServer control connection established!\r\n");
+	    	debug("server_control_connection: server control connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
 	    } else {
 
 	    	// TODO: timeout attempt and retry

@@ -203,7 +203,7 @@ int tcpclient_write_text(int tcpclient_handle, char *text){
 
   /*
 
-    Sends 0 terminated char string _text_
+    Returns 0 terminated char *text
 
     Return code is from tcp send return code or RETURN_ERROR if
     there is a tcpclient_handle issue or the requested tcpclient_handle
@@ -231,7 +231,7 @@ int tcpclient_write_text(int tcpclient_handle, char *text){
 	}
 
 	sprintf(debug_text,"tcpclient_write_text: tcpclient_handle:%d sending:%s", tcpclient_handle, text);
-  debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);	
+  debug(debug_text,DEBUG_LEVEL_MORE_NOISY_INFORMATIVE);	
 	return_code = send(tcp_sock, text, strlen(text), 0);
   return return_code;
 
