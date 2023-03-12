@@ -108,6 +108,7 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 	int bytes_received;
 	char tempchar[TCP_RECV_CHUNK+1];
   char client_message[TCP_RECV_CHUNK+1];
+  char last_client_message[TCP_RECV_CHUNK+1];
   char command_handler_response[COMMAND_HANDLER_RESPONSE_SIZE];
 
   char incoming_buffer[TCP_SERVER_INCOMING_BUFFER_SIZE];
@@ -222,6 +223,13 @@ void *tcp_connection_handler(void *passed_tcp_connection_handler_parms){
 
         sprintf(debug_text,"tcp_connection_handler: pulled from circular buffer client_sock:%d msg:%s$", client_sock, client_message);
         debug(debug_text,DEBUG_LEVEL_FREQUENT_NOISY);
+
+        // space-return repeat last command
+        if (!strcmp(client_message," ")){
+          strcpy(client_message,last_client_message);
+        }
+
+        strcpy(last_client_message,client_message);
 
         // handle some telnet commands right here
         if (!strcmp(client_message,"quit")){  

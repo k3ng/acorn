@@ -964,22 +964,26 @@ void draw_field(GtkWidget *widget, cairo_t *gfx, struct field *f){
 		case FIELD_TOGGLE:
 			width = measure_text(gfx, f->label, FONT_FIELD_LABEL);
 			offset_x = f->width/2 - width/2;
-			draw_text(gfx, f->x + offset_x, f->y+5 ,  f->label, FONT_FIELD_LABEL);
+			draw_text(gfx, f->x + offset_x, f->y+(9*screen_height)/480 ,  f->label, FONT_FIELD_LABEL);
 			width = measure_text(gfx, f->value, f->font_index);
       if (width >= f->width){ // automatic button font downsizing
-        width = measure_text(gfx, f->value, f->alternate_font_index);
+        width = measure_text(gfx, f->value, f->alternate_font_index);    // downsized font
         offset_x = f->width/2 - width/2;
         if (!strlen(f->label)){     	
+          // draw_text(gfx, f->x + offset_x , f->y+((6*screen_height)/480), f->value, f->alternate_font_index);
           draw_text(gfx, f->x + offset_x , f->y+((6*screen_height)/480), f->value, f->alternate_font_index);
         } else {
           draw_text(gfx, f->x+offset_x , f->y+((25*screen_height)/480), f->value , f->alternate_font_index);
+          // draw_text(gfx, f->x+offset_x , f->y+((25*screen_height)/480), f->value , f->alternate_font_index);
         }
-      } else {
+      } else {            // non-downsided font 
         offset_x = f->width/2 - width/2;
         if (!strlen(f->label)){
           draw_text(gfx, f->x + offset_x , f->y+((6*screen_height)/480), f->value, f->font_index);
+          draw_text(gfx, f->x + offset_x , f->y+((9*screen_height)/480), f->value, f->font_index);
         } else {
           draw_text(gfx, f->x+offset_x , f->y+((25*screen_height)/480), f->value , f->font_index);
+          // draw_text(gfx, f->x+offset_x , f->y+((28*screen_height)/480), f->value , f->font_index);
         }
       }
       break;
@@ -993,10 +997,11 @@ void draw_field(GtkWidget *widget, cairo_t *gfx, struct field *f){
 				draw_text(gfx, offset_x,label_y, f->label, FONT_FIELD_LABEL);
 			} 
 			else {
-				if(width >= f->width+2)
+				if(width >= f->width+2){
 					value_font = FONT_SMALL_FIELD_VALUE;
-				else
+				} else {
 					value_font = FONT_FIELD_VALUE;
+				}
 				value_height = font_table[value_font].height;
 				label_y = f->y + ((f->height  - label_height  - value_height)/2);
 				draw_text(gfx, offset_x, label_y, f->label, FONT_FIELD_LABEL);
@@ -5492,15 +5497,41 @@ int server_control_connection(int action, char *buffer, int bytes){
   static int connected = 0;
   static int tcpclient_handle = 0;
   static char previous_server_address_and_port[64];
+  static unsigned int connection_initiation_time_millis = 0;
+  static unsigned int last_keepalive_sent_time_millis = 0;
+  static int send_data_errors = 0;
   int return_code;
+ 
 
   if (action == SERVICE){
 
 	  if (server_connection_state == SERVER_CONNECTION_ESTABLISHED){
-	    //TODO: check on the health of the link, restablish the connection if it goes down
-	    //TODO: service incoming buffer
-	    tcpclient_clear_incoming_buffer(tcpclient_handle);
-	    return SERVER_CONNECTION_ESTABLISHED;
+
+      if (send_data_errors > CONTROL_CONNECTION_SEND_DATA_ERRORS_RESET){
+      	close(tcpclient_handle);
+      	server_connection_state = SERVER_CONNECTION_ERROR;
+      	connection_initiation_time_millis = millis();
+      	write_console(FONT_LOG,"\r\nResetting control server connection.\r\n");
+      } else {
+        // TODO: process incoming data from server
+	      tcpclient_clear_incoming_buffer(tcpclient_handle);
+
+        if((millis()-last_keepalive_sent_time_millis) > CONTROL_CONNECTION_SEND_KEEPALIVE_MS){
+		      return_code = tcpclient_write(tcpclient_handle, "hi\r", bytes);
+		      if (return_code == RETURN_ERROR){
+		      	send_data_errors++;
+		      	write_console(FONT_LOG,"\r\nControl server send data error.\r\n");
+		      	last_keepalive_sent_time_millis = millis() - (CONTROL_CONNECTION_SEND_KEEPALIVE_MS / 3);
+		      	return RETURN_ERROR;
+		      } else {
+		      	last_keepalive_sent_time_millis = millis(); 
+		      }
+        }
+
+
+	    }
+
+	    return server_connection_state;
 	  }
 
 	  if (server_connection_state == SERVER_CONNECTION_UNINITIALIZED){
@@ -5513,6 +5544,7 @@ int server_control_connection(int action, char *buffer, int bytes){
 		  }
 
 	    tcpclient_handle = tcpclient_open(server_address_and_port);
+	    connection_initiation_time_millis = millis();
 
 	    if (tcpclient_handle > 0){
 			  write_console(FONT_LOG,"\r\nEstablishing server control connection to\r\n");
@@ -5536,22 +5568,27 @@ int server_control_connection(int action, char *buffer, int bytes){
 
 	    if (connected > 0){
 	    	server_connection_state = SERVER_CONNECTION_ESTABLISHED;
+	    	send_data_errors = 0;
 	    	write_console(FONT_LOG,"\r\nServer control connection established!\r\n");
 	    	debug("server_control_connection: server control connection established",DEBUG_LEVEL_BASIC_INFORMATIVE);
 	    } else {
-
-	    	// TODO: timeout attempt and retry
+        if ((millis()-connection_initiation_time_millis) > CONTROL_CONNECTION_INIT_TIMEOUT_MS){
+          write_console(FONT_LOG,"\r\nServer control connection timeout...\r\n");
+          close(tcpclient_handle);
+          server_connection_state = SERVER_CONNECTION_ERROR;
+          connection_initiation_time_millis = millis();
+        }
 	    }
 	  } // SERVER_CONNECTION_ESTABLISHING
 
 
 	  // if we're stuck in an error state and the server address has been changed, try it again
 	  if (server_connection_state == SERVER_CONNECTION_ERROR){
-	    if (strcmp(previous_server_address_and_port,server_address_and_port)){
+	    if ((strcmp(previous_server_address_and_port,server_address_and_port)) || ((millis()-connection_initiation_time_millis) > CONTROL_CONNECTION_RETRY_TIME_MS)){
 	      server_connection_state = SERVER_CONNECTION_UNINITIALIZED;
 	    }
-	    // TODO: timeout and retry
 	  } //SERVER_CONNECTION_ERROR
+
 
 
   } // if (action == SERVICE)
@@ -5565,6 +5602,12 @@ int server_control_connection(int action, char *buffer, int bytes){
   		sprintf(debug_text,"server_control_connection: SEND_DATA:%s$",buffer);
       debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
       return_code = tcpclient_write(tcpclient_handle, buffer, bytes);
+      if (return_code == RETURN_ERROR){
+      	send_data_errors++;
+      	write_console(FONT_LOG,"\r\nControl server send data error.\r\n");
+      } else {
+      	last_keepalive_sent_time_millis = millis(); // reset the keepalive timer
+      }
 	    return return_code;
 	  } else {
 	  	return RETURN_NO_CONNECTION;
