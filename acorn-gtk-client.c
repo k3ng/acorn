@@ -163,7 +163,8 @@ struct font_style {
 guint key_modifier = 0;
 
 struct font_style font_table[] = {
-	{FONT_FIELD_LABEL, 0, 1, 1, "Mono", 14, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
+	// {FONT_FIELD_LABEL, 0, 1, 0, "Mono", 14, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
+	{FONT_FIELD_LABEL, 0, 0.4, 0.67, "Mono", 14, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
 	{FONT_FIELD_VALUE, 1, 1, 1, "Mono", 14, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
 	{FONT_LARGE_FIELD, 0, 1, 1, "Mono", 14, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
 	{FONT_LARGE_VALUE, 1, 1, 1, "Arial", 24, CAIRO_FONT_WEIGHT_NORMAL, CAIRO_FONT_SLANT_NORMAL, 1},
@@ -919,10 +920,12 @@ void draw_field(GtkWidget *widget, cairo_t *gfx, struct field *f){
 	fill_rect(gfx, f->x, f->y, f->width,f->height, COLOR_BACKGROUND);
 	if (f_focus == f)
 		rect(gfx, f->x, f->y, f->width-1,f->height, COLOR_SELECTED_BOX, 2);
-	else if (f_hover == f)
-		rect(gfx, f->x, f->y, f->width,f->height, COLOR_SELECTED_BOX, 1);
-	else if (f->value_type != FIELD_STATIC)
-		rect(gfx, f->x, f->y, f->width,f->height, COLOR_CONTROL_BOX, 1);
+	#if !defined(NO_BUTTON_BORDERS)
+		else if (f_hover == f)
+			rect(gfx, f->x, f->y, f->width,f->height, COLOR_SELECTED_BOX, 1);
+		else if (f->value_type != FIELD_STATIC)
+			rect(gfx, f->x, f->y, f->width,f->height, COLOR_CONTROL_BOX, 1);
+	#endif
 
 	int width, offset_x, text_length, line_start, y, label_height, 
 		value_height, value_font;	
@@ -3186,10 +3189,12 @@ int do_record(struct field *f, cairo_t *gfx, int event, int a, int b, int c){
 
 		if (f_focus == f)
 			rect(gfx, f->x, f->y, f->width-1,f->height, COLOR_SELECTED_BOX, 2);
-		else if (f_hover == f)
-			rect(gfx, f->x, f->y, f->width,f->height, COLOR_SELECTED_BOX, 1);
-		else 
-			rect(gfx, f->x, f->y, f->width,f->height, COLOR_CONTROL_BOX, 1);
+		#if !defined(NO_BUTTON_BORDERS)
+			else if (f_hover == f)
+				rect(gfx, f->x, f->y, f->width,f->height, COLOR_SELECTED_BOX, 1);
+			else 
+				rect(gfx, f->x, f->y, f->width,f->height, COLOR_CONTROL_BOX, 1);
+		#endif
 
 		int width = measure_text(gfx, f->label, FONT_FIELD_LABEL);
 		int offset = f->width/2 - width/2;
