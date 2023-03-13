@@ -64,9 +64,11 @@ gcc -g -o sound debug.c sound.c -lasound -pthread
 #include <fftw3.h>
 #include <time.h>
 
+#include "acorn.h"
 #include "debug.h"
 #include "sound.h"
 #include "acorn-server.h"
+#include "sdr.h"
 
 
 #define LOOPBACK_CAPTURE "plughw:2,1"
@@ -135,6 +137,10 @@ int use_virtual_cable = 0;
 int supress_loopback_pcm_errors = 0;
 
 
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
+
 
 
 void q_empty(struct queue *p){
@@ -145,6 +151,9 @@ void q_empty(struct queue *p){
 	p->underflow = 0;
 	p->overflow = 0;
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 void q_init(struct queue *p, int length){
 
@@ -157,6 +166,9 @@ void q_init(struct queue *p, int length){
 	q_empty(p);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 int q_length(struct queue *p){
 
   if ( p->head >= p->tail)
@@ -165,6 +177,9 @@ int q_length(struct queue *p){
     return ((p->head + p->max_q) - p->tail);
 
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 int q_write(struct queue *p, int32_t w){
 
@@ -183,6 +198,9 @@ int q_write(struct queue *p, int32_t w){
 	return 0;
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 int32_t q_read(struct queue *p){
 
   int32_t data;
@@ -198,6 +216,8 @@ int32_t q_read(struct queue *p){
 
   return data;
 }
+
+// ---------------------------------------------------------------------------------------
 
 
 void setup_audio_codec(char *audio_card){
@@ -247,8 +267,13 @@ void setup_audio_codec(char *audio_card){
     // debug("setup_audio_codec: Mic",1);
     // sound_mixer(audio_card, "Mic", 0);
 
-		debug("setup_audio_codec: Aux",1);
-		sound_mixer(audio_card, "Aux", 0);    
+  // #define AUDIO_CARD_ELEMENT_RX_VOL "Headphone"
+  // #define AUDIO_CARD_ELEMENT_RX_GAIN "Aux"  
+
+    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_RX_GAIN);
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+		//debug("setup_audio_codec: Aux",1);
+		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_GAIN, 0);    
 
     //debug("setup_audio_codec: Mic Boost",1);
     //sound_mixer(audio_card, "Mic Boost", 0);
@@ -260,8 +285,10 @@ void setup_audio_codec(char *audio_card){
     // debug("setup_audio_codec: Speaker",1);   
     // sound_mixer(audio_card, "Speaker", 10);
 
-		debug("setup_audio_codec: Headphone",1);   
-		sound_mixer(audio_card, "Headphone", 10);
+    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_RX_VOL);
+    debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
+		// debug("setup_audio_codec: Headphone",1);   
+		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL, 10);
 
     //debug("setup_audio_codec: Master",1);   
     //sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL, 10);
@@ -319,37 +346,37 @@ void sound_mixer(char *card_name, char *element, int make_on){
     snd_mixer_elem_t* elem = snd_mixer_find_selem(handle, sid);
 
     sprintf(debug_text,"sound_mixer: card_name:%s element:%s make_on:%d elem:0x%08x",card_name, element, make_on, elem);
-    debug(debug_text,1);
+    debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
     if (elem){
-		  debug("sound_mixer: element found",2);
+		  debug("sound_mixer: element found",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	    //find out if the his element is capture side or plaback
 	    if(snd_mixer_selem_has_capture_switch(elem)){	
-	      debug("sound_mixer: this is a capture switch",2);  
+	      debug("sound_mixer: this is a capture switch",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);  
 		  	snd_mixer_selem_set_capture_switch_all(elem, make_on);
 			}
       else if (snd_mixer_selem_has_playback_switch(elem)){
-        debug("sound_mixer: this is a playback switch",2);
+        debug("sound_mixer: this is a playback switch",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   			snd_mixer_selem_set_playback_switch_all(elem, make_on);
   		}
       else if (snd_mixer_selem_has_playback_volume(elem)){
-        debug("sound_mixer: this is playback volume",2);
+        debug("sound_mixer: this is playback volume",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   			long volume = make_on;
       	snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
       	snd_mixer_selem_set_playback_volume_all(elem, volume * max / 100);
       }	
       else if (snd_mixer_selem_has_capture_volume(elem)){
-  	    debug("sound_mixer: this is a capture volume",2);
+  	    debug("sound_mixer: this is a capture volume",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   			long volume = make_on;
       	snd_mixer_selem_get_capture_volume_range(elem, &min, &max);
       	snd_mixer_selem_set_capture_volume_all(elem, volume * max / 100);
       }
   		else if (snd_mixer_selem_is_enumerated(elem)){
-  			debug("sound_mixer: this is an enumerated capture element",2);
+  			debug("sound_mixer: this is an enumerated capture element",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   			snd_mixer_selem_set_enum_item(elem, 0, make_on);
   		}
     } else {
-      debug("sound_mixer: element not found",255);
+      debug("sound_mixer: element not found",DEBUG_LEVEL_STDERR);
     }
     snd_mixer_close(handle);
 }
@@ -800,9 +827,12 @@ int last_second = 0;
 int nsamples = 0;
 int	played_samples = 0;
 
+// ---------------------------------------------------------------------------------------
+
+
 int sound_loop(){
 
-	int32_t		*line_in, *line_out, *data_in, *data_out, 
+  int32_t		*line_in, *line_out, *data_in, *data_out, 
 						*input_i, *output_i, *input_q, *output_q;
   int pcmreturn, i, j, loopreturn;
   short s1, s2;
@@ -990,6 +1020,8 @@ int sound_loop(){
   debug("sound_loop: ending sound thread",1);
 }
 
+// ---------------------------------------------------------------------------------------
+
 
 int loopback_loop(){
 	int32_t		*line_in, *line_out, *data_in, *data_out, 
@@ -1045,6 +1077,9 @@ int loopback_loop(){
   debug("loopback_loop: ending loopback thread",1);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 /*
 We process the sound in a background thread.
 It will call the user-supplied function sound_process()  
@@ -1080,6 +1115,9 @@ void *sound_thread_function(void *ptr){
 	sound_stop();
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void *loopback_thread_function(void *ptr){
 	struct sched_param sch;
 
@@ -1099,6 +1137,9 @@ void *loopback_thread_function(void *ptr){
 	sound_stop();
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 int sound_thread_start(char *device){
 
     sprintf(debug_text,"sound_thread_start: starting %s", device);
@@ -1111,10 +1152,16 @@ int sound_thread_start(char *device){
 	pthread_create( &loopback_thread, NULL, loopback_thread_function, (void*)device);
 }
 
+// ---------------------------------------------------------------------------------------
+
+
 void sound_thread_stop(){
 	debug("sound_thread_stop: called",1);
 	sound_thread_continue = 0;
 }
+
+// ---------------------------------------------------------------------------------------
+
 
 void sound_input(int loop){
   if (loop){
@@ -1125,6 +1172,9 @@ void sound_input(int loop){
 	}
 }
 
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------
 
 
 #if !defined(COMPILING_EVERYTHING)

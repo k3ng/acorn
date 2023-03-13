@@ -1736,8 +1736,8 @@ void initialize_waterfall(){
 	int wf_number_of_bytes = (MAX_BINS/2) * f->height * sizeof(int);
 	wf = malloc(wf_number_of_bytes);
 	if (!wf){
-		fprintf(stderr, "init_waterfall: Error: malloc failed on waterfall buffer\n");
-		exit(0);
+		debug("init_waterfall: Error: malloc failed on waterfall buffer",DEBUG_LEVEL_STDERR);
+		exit(RETURN_ERROR);
 	}
 	memset(wf, 0, wf_number_of_bytes);
 
