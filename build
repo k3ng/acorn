@@ -34,6 +34,8 @@ if [ "$F" = "test" ]; then
   gcc -g -o serial debug.c serial.c -pthread
   echo "test compiling avr"
   gcc -D COMPILING_AVR -g -o avr serial.c debug.c avr.c -pthread  
+  echo "test compiling sound"
+  gcc -g -o sound debug.c sound.c -lasound -pthread
   echo "test compiling tcpclient"
   gcc -g -o tcpclient debug.c tcpclient.c -pthread
   echo "test compiling tcpserver"
