@@ -9,6 +9,7 @@
 
 
 #define SETTINGS_FILE "/acorn/user_settings.ini"
+#define LOCK_FILE "/var/tmp/acorn-server.lock"
 //#define HARDCODE_DEBUG_LEVEL 8
 
 

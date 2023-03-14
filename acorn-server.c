@@ -13,7 +13,7 @@
 
   acorn-server
 
-    -d [#] : debug level 1-9; higher = more debugging messages
+    -d [#] : debug level 1-254; higher = more debugging messages
 
 
 */
@@ -86,7 +86,7 @@ int setting_change_handler_vfo(struct setting_struct *passed_setting, char *valu
 
 struct setting_struct setting[] =
   {
-
+     // TODO: settings to save
   	{"vfo_a_freq", setting_change_handler_vfo, "", "", TYPE_INTEGER, 0, 30000000, 0, 0},
   	{"vfo_b_freq", setting_change_handler_vfo, "", "", TYPE_INTEGER, 0, 30000000, 0, 0},
   	{"callsign", NULL, "", "", TYPE_INTEGER, 0, 30000000, 0, 0},
@@ -94,10 +94,6 @@ struct setting_struct setting[] =
     {"", NULL, "", "", TYPE_NULL, 0, 0, 0, 0}
 
   };
-
-
-
-
 
 
 pthread_t control_tcpserver_thread;
@@ -280,10 +276,6 @@ int change_setting_int(char *name, int value){
 
 int process_lock(int action){
 
-  // if action is OPEN_LOCK
-  //   0 is returned if there is a process already locking  
-  //   1 is returned if lock was established
-
 
   static int fd;
   static struct flock fl;
@@ -291,17 +283,17 @@ int process_lock(int action){
   if (action == OPEN_LOCK){
 
     // attempt to create a lock file
-    fd = open("/var/tmp/sbitx.lock", O_CREAT|O_RDWR, S_IRWXU);
+    fd = open(LOCK_FILE, O_CREAT|O_RDWR, S_IRWXU);
 
     if (errno == 13){
     	// lock file already exists
-      fd = open("/var/tmp/sbitx.lock", O_RDWR);
+      fd = open(LOCK_FILE, O_RDWR);
     }
 
     if (fd == -1){
       // we got some sort of problem, just return 1
       fprintf(stderr,"process_lock: Issue with lock file: Error:%d\r\n",errno);
-      return 1;
+      return RETURN_ERROR;
     }
 
     fl.l_type = F_WRLCK;
@@ -314,11 +306,11 @@ int process_lock(int action){
     if (fcntl(fd, F_SETLK, &fl) == -1){
       // it's already locked
       if ((errno == EACCES) || (errno == EAGAIN)){
-        return 0;
+        return RETURN_ERROR;
       }
     }
 
-    return 1;
+    return RETURN_NO_ERROR;
 
   } else if (action == CLOSE_LOCK){
     if (fd){
@@ -326,7 +318,7 @@ int process_lock(int action){
       fd = 0;
     }
   } else {
-    return -1;
+    return RETURN_ERROR;
   }
 
 } //process_lock()
@@ -497,9 +489,9 @@ void start_things_up(int argc, char* argv[]){
     debug("start_things_up: supressing loopback PCM error printing",DEBUG_LEVEL_BASIC_INFORMATIVE);
   #endif  
 
-  if (!process_lock(OPEN_LOCK)){
+  if (RETURN_ERROR == process_lock(OPEN_LOCK)){
     debug("start_things_up: there is another Acorn running.  Exiting.",DEBUG_LEVEL_STDERR);
-    exit(-1);
+    exit(RETURN_ERROR);
   }
 
   signal(SIGINT, signal_handler);

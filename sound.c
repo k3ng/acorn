@@ -162,6 +162,17 @@ int use_virtual_cable = 0;
 
 int supress_loopback_pcm_errors = 0;
 
+static int count = 0;
+static struct timespec gettime_now;
+static long int last_time = 0;
+static long int last_sec = 0;
+static int nframes = 0;
+int32_t resample_in[10000];
+int32_t resample_out[10000];
+
+int last_second = 0;
+int nsamples = 0;
+int played_samples = 0;
 
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
@@ -247,37 +258,38 @@ int32_t q_read(struct queue *p){
 
 
 void setup_audio_codec(char *audio_card){
+  
 	//strcpy(audio_card, AUDIO_CARD_NAME);
 
 	sprintf(debug_text,"setup_audio_codec: called audio_card:%s",audio_card);
-	debug(debug_text,1);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	//configure all the channels of the mixer
 
   #if defined(CODEC_WM8731)
 
-  	debug("setup_audio_codec: Input Mux",1);
+  	debug("setup_audio_codec: Input Mux",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Input Mux",CONTROL_DEFAULT, 0);
 
-  	debug("setup_audio_codec: Line",1);
+  	debug("setup_audio_codec: Line",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Line",CONTROL_DEFAULT, 1);
 
-    debug("setup_audio_codec: Mic",1);
+    debug("setup_audio_codec: Mic",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Mic",CONTROL_DEFAULT, 0);
 
-    debug("setup_audio_codec: Mic Boost",1);
+    debug("setup_audio_codec: Mic Boost",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Mic Boost",CONTROL_DEFAULT, 0);
 
-    debug("setup_audio_codec: Playback Deemphasis",1);
+    debug("setup_audio_codec: Playback Deemphasis",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Playback Deemphasis",CONTROL_DEFAULT, 0);
 
-    debug("setup_audio_codec: Master",1);   
+    debug("setup_audio_codec: Master",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);   
   	sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL,CONTROL_DEFAULT, 10);
 
-    debug("setup_audio_codec: Output Mixer HiFi",1);
+    debug("setup_audio_codec: Output Mixer HiFi",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Output Mixer HiFi",CONTROL_DEFAULT, 1);
 
-    debug("setup_audio_codec: Output Mixer Mic Sidetone",1);
+    debug("setup_audio_codec: Output Mixer Mic Sidetone",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Output Mixer Mic Sidetone",CONTROL_DEFAULT, 0);
 
   #endif //CODEC_WM8731
@@ -328,12 +340,12 @@ void sound_mixer(char *card_name, char *element, int control, int set_value){
     int elem_has_capture_volume;
     int elem_is_enumerated;
 
-// #define CONTROL_DEFAULT 0
-// #define CONTROL_CAPTURE_SWITCH_ALL 1
-// #define CONTROL_PLAYBACK_SWITCH_ALL 2
-// #define CONTROL_CAPTURE_VOLUME_ALL 3
-// #define CONTROL_PLAYBACK_VOLUME_ALL 4
-// #define CONTROL_ENUM_ITEM 5
+    // #define CONTROL_DEFAULT 0
+    // #define CONTROL_CAPTURE_SWITCH_ALL 1
+    // #define CONTROL_PLAYBACK_SWITCH_ALL 2
+    // #define CONTROL_CAPTURE_VOLUME_ALL 3
+    // #define CONTROL_PLAYBACK_VOLUME_ALL 4
+    // #define CONTROL_ENUM_ITEM 5
 
 
     if (elem){
@@ -440,26 +452,25 @@ void sound_mixer(char *card_name, char *element, int control, int set_value){
 // ---------------------------------------------------------------------------------------
 
 
-/* 
-
-this function should be called just once in the application process.
-Calling it frequently will result in more allocation of hw_params memory blocks
-without releasing them.
-The list of PCM devices available on any platform can be found by running
-	aplay -L 
-We have to pass the id of one of those devices to this function.
-The sequence of the alsa functions must be maintained for this to work consistently
-
-It returns a -1 if the device didn't open. The error message is on stderr.
-
-IMPORTANT:
-The sound is playback is carried on in a non-blocking way  
-
-*/
-
 int sound_start_play(char *device){
 
-	//found out the correct device through aplay -L (for pcm devices)
+  /* 
+
+  this function should be called just once in the application process.
+  Calling it frequently will result in more allocation of hw_params memory blocks
+  without releasing them.
+  The list of PCM devices available on any platform can be found by running
+  	aplay -L 
+  We have to pass the id of one of those devices to this function.
+  The sequence of the alsa functions must be maintained for this to work consistently
+
+  It returns a -1 if the device didn't open. The error message is on stderr.
+
+  IMPORTANT:
+  The sound is playback is carried on in a non-blocking way  
+
+  */
+
 
 	snd_pcm_hw_params_alloca(&hwparams);	//more alloc
 
@@ -484,14 +495,14 @@ int sound_start_play(char *device){
 	// set the pcm access to interleaved
 	e = snd_pcm_hw_params_set_access(pcm_play_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		debug("sound_start_play: error setting playback access",255);
+		debug("sound_start_play: error setting playback access",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(pcm_play_handle, hwparams, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		debug("sound_start_play: error setting plyaback format.",255);
+		debug("sound_start_play: error setting plyaback format.",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -501,7 +512,7 @@ int sound_start_play(char *device){
 	exact_rate = rate;
 	e = snd_pcm_hw_params_set_rate_near(pcm_play_handle, hwparams, &exact_rate, 0);
 	if ( e< 0) {
-		debug("sound_start_play: error setting playback rate",255);
+		debug("sound_start_play: error setting playback rate",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 	if (rate != exact_rate){
@@ -510,13 +521,13 @@ int sound_start_play(char *device){
 	}
 	else {
 		sprintf(debug_text,"sound_start_play: playback sampling rate is set to %d", exact_rate);
-		debug(debug_text,1);
+		debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	}
 
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(pcm_play_handle, hwparams, 2)) < 0) {
-		debug("sound_start_play: error setting playback channels",255);
+		debug("sound_start_play: error setting playback channels",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -525,7 +536,7 @@ int sound_start_play(char *device){
 	// period = frames transfered at a time (160 for voip, etc.)
 	// we use two periods per buffer.
 	if ((e = snd_pcm_hw_params_set_periods(pcm_play_handle, hwparams, n_periods_per_buffer, 0)) < 0) {
-		debug("sound_start_play: error setting playback periods",255);
+		debug("sound_start_play: error setting playback periods",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -536,16 +547,16 @@ int sound_start_play(char *device){
 	debug(debug_text,2);
 	e = snd_pcm_hw_params_set_buffer_size_near(pcm_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    debug("sound_start_play: error setting playback buffersize",255);
+		    debug("sound_start_play: error setting playback buffersize",DEBUG_LEVEL_STDERR);
 		    return RETURN_ERROR;
 	}
 
 	if (snd_pcm_hw_params(pcm_play_handle, hwparams) < 0) {
-		sprintf(debug_text,"sound_start_play: error setting playback HW params.\n");
+		sprintf(debug_text,"sound_start_play: error setting playback HW params");
 		debug(debug_text,DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
-	debug("sound_start_play: all hw params set to play sound",1);
+	debug("sound_start_play: all hw params set to play sound",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	return RETURN_NO_ERROR;
 }
@@ -555,11 +566,11 @@ int sound_start_play(char *device){
 
 int sound_start_loopback_capture(char *device){
 
-	debug("sound_start_loopback_capture: called",1);
+	debug("sound_start_loopback_capture: called",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	snd_pcm_hw_params_alloca(&hloop_params);
 	sprintf (debug_text,"sound_start_loopback_capture: opening audio tx stream to %s", device); 
-	debug(debug_text,1);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	int e = snd_pcm_open(&loopback_capture_handle, device, capture_stream, 0);
 	
 	if (e < 0) {
@@ -578,14 +589,14 @@ int sound_start_loopback_capture(char *device){
 
 	e = snd_pcm_hw_params_set_access(loopback_capture_handle, hloop_params, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		debug("sound_start_loopback_capture: error setting capture access",255);
+		debug("sound_start_loopback_capture: error setting capture access",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(loopback_capture_handle, hloop_params, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		debug("sound_start_loopback_capture: error setting loopback capture format",255);
+		debug("sound_start_loopback_capture: error setting loopback capture format",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -596,7 +607,7 @@ int sound_start_loopback_capture(char *device){
 	debug(debug_text,2);
 	e = snd_pcm_hw_params_set_rate_near(loopback_capture_handle, hloop_params, &exact_rate, 0);
 	if (e < 0) {
-		debug("sound_start_loopback_capture: error setting loopback capture rate",255);
+		debug("sound_start_loopback_capture: error setting loopback capture rate",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -607,7 +618,7 @@ int sound_start_loopback_capture(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(loopback_capture_handle, hloop_params, 2)) < 0) {
-		debug("sound_start_loopback_capture: error setting loopback capture channels",255);
+		debug("sound_start_loopback_capture: error setting loopback capture channels",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -616,7 +627,7 @@ int sound_start_loopback_capture(char *device){
 
 	/* Set number of periods. Periods used to be called fragments. */ 
 	if ((e = snd_pcm_hw_params_set_periods(loopback_capture_handle, hloop_params, n_periods_per_buffer, 0)) < 0) {
-		debug("sound_start_loopback_capture: error setting loopback capture periods",255);
+		debug("sound_start_loopback_capture: error setting loopback capture periods",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -625,7 +636,7 @@ int sound_start_loopback_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(loopback_capture_handle, hloop_params, &n_frames);
 	if (e < 0) {
-		    debug("sound_start_loopback_capture: error setting loopback capture buffersize",255);
+		    debug("sound_start_loopback_capture: error setting loopback capture buffersize",DEBUG_LEVEL_STDERR);
 		    return RETURN_ERROR;
 	}
 
@@ -633,7 +644,7 @@ int sound_start_loopback_capture(char *device){
 	debug(debug_text,2);
 
 	if (snd_pcm_hw_params(loopback_capture_handle, hloop_params) < 0) {
-		debug("sound_start_loopback_capture: error setting capture HW params",255);
+		debug("sound_start_loopback_capture: error setting capture HW params",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -649,30 +660,31 @@ int sound_start_loopback_capture(char *device){
 	}
 	
 	if ((e = snd_pcm_sw_params_set_start_threshold(loopback_capture_handle, sloop_params, 15)) < 0){
-		debug("sound_start_loopback_capture: unable to set threshold mode for loopback capture",255);
+		debug("sound_start_loopback_capture: unable to set threshold mode for loopback capture",DEBUG_LEVEL_STDERR);
 	} 
 	
 	if ((e = snd_pcm_sw_params_set_stop_threshold(loopback_capture_handle, sloop_params, 1)) < 0){
 
-		debug("sound_start_loopback_capture: unable to set stop threshold for loopback  capture",255);
+		debug("sound_start_loopback_capture: unable to set stop threshold for loopback  capture",DEBUG_LEVEL_STDERR);
 	}
 	return RETURN_NO_ERROR;
 }
 
 // ---------------------------------------------------------------------------------------
 
-
-/*
-
-The capture is opened in a blocking mode, the read function will block until 
-there are enough samples to return a block.
-This ensures that the blocks are returned in perfect timing with the codec's clock
-Once you process these captured samples and send them to the playback device, you
-just wait for the next block to arrive 
-
-*/
-
 int sound_start_capture(char *device){
+
+  /*
+
+  The capture is opened in a blocking mode, the read function will block until 
+  there are enough samples to return a block.
+  This ensures that the blocks are returned in perfect timing with the codec's clock
+  Once you process these captured samples and send them to the playback device, you
+  just wait for the next block to arrive 
+
+  */
+
+
 	snd_pcm_hw_params_alloca(&hwparams);
 
 	int e = snd_pcm_open(&pcm_capture_handle, device,  	capture_stream, 0);
@@ -697,14 +709,14 @@ int sound_start_capture(char *device){
 
 	e = snd_pcm_hw_params_set_access(pcm_capture_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if (e < 0) {
-		debug("sound_start_capture: error setting capture access",255);
+		debug("sound_start_capture: error setting capture access",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
   /* Set sample format */
 	e = snd_pcm_hw_params_set_format(pcm_capture_handle, hwparams, SND_PCM_FORMAT_S32_LE);
 	if (e < 0) {
-		debug("sound_start_capture, error setting capture format",255);
+		debug("sound_start_capture, error setting capture format",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -714,7 +726,7 @@ int sound_start_capture(char *device){
 	exact_rate = rate;
 	e = snd_pcm_hw_params_set_rate_near(pcm_capture_handle, hwparams, &exact_rate, 0);
 	if ( e< 0) {
-		debug("sound_start_capture: error setting capture rate",255);
+		debug("sound_start_capture: error setting capture rate",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -726,14 +738,14 @@ int sound_start_capture(char *device){
 
 	/* Set number of channels */
 	if ((e = snd_pcm_hw_params_set_channels(pcm_capture_handle, hwparams, 2)) < 0) {
-		debug("sound_start_capture: error setting capture channels",255);
+		debug("sound_start_capture: error setting capture channels",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
 
 	/* Set number of periods. Periods used to be called fragments. */ 
 	if ((e = snd_pcm_hw_params_set_periods(pcm_capture_handle, hwparams, n_periods_per_buffer, 0)) < 0) {
-		debug("sound_start_capture: error setting capture periods",255);
+		debug("sound_start_capture: error setting capture periods",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -743,12 +755,12 @@ int sound_start_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(pcm_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    debug("sound_start_capture: error setting capture buffersize",255);
+		    debug("sound_start_capture: error setting capture buffersize",DEBUG_LEVEL_STDERR);
 		    return RETURN_ERROR;
 	}
 
 	if (snd_pcm_hw_params(pcm_capture_handle, hwparams) < 0) {
-		debug("sound_start_capture: error setting capture HW params",255);
+		debug("sound_start_capture: error setting capture HW params",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 
@@ -759,7 +771,7 @@ int sound_start_capture(char *device){
 
 
 int sound_start_loopback_play(char *device){
-	//found out the correct device through aplay -L (for pcm devices)
+	
 
 	snd_pcm_hw_params_alloca(&hwparams);	//more alloc
 
@@ -871,11 +883,14 @@ int sound_start_loopback_play(char *device){
 // ---------------------------------------------------------------------------------------
 
 
-//check that we haven't free()-ed up the hwparams block
-//don't call this function at all until that is fixed
-//you don't have to call it anyway
+
 
 void sound_stop(){
+
+
+  //check that we haven't free()-ed up the hwparams block
+  //don't call this function at all until that is fixed
+  //you don't have to call it anyway
 
   debug("sound_stop: called",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
@@ -887,19 +902,7 @@ void sound_stop(){
 }
 
 
-// ---------------------------------------------------------------------------------------
 
-static int count = 0;
-static struct timespec gettime_now;
-static long int last_time = 0;
-static long int last_sec = 0;
-static int nframes = 0;
-int32_t	resample_in[10000];
-int32_t	resample_out[10000];
-
-int last_second = 0;
-int nsamples = 0;
-int	played_samples = 0;
 
 // ---------------------------------------------------------------------------------------
 
@@ -1091,13 +1094,14 @@ int sound_loop(){
   }  // while(sound_thread_continue && !shutdown_flag)
  
 	//fclose(pf);
-  debug("sound_loop: ending sound thread",1);
+  debug("sound_loop: ending sound thread",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 }
 
 // ---------------------------------------------------------------------------------------
 
 
 int loopback_loop(){
+
 	int32_t		*line_in, *line_out, *data_in, *data_out, 
 						*input_i, *output_i, *input_q, *output_q;
   int pcmreturn, i, j, loopreturn;
@@ -1154,11 +1158,17 @@ int loopback_loop(){
 // ---------------------------------------------------------------------------------------
 
 
-/*
-We process the sound in a background thread.
-It will call the user-supplied function sound_process()  
-*/
+
 void *sound_thread_function(void *ptr){
+
+
+  /*
+
+  We process the sound in a background thread.
+  It will call the user-supplied function sound_process() 
+
+  */
+
 	char *device = (char *)ptr;
 	struct sched_param sch;
 
@@ -1178,12 +1188,12 @@ void *sound_thread_function(void *ptr){
 		return NULL;
 	}
 
-//  printf("opening loopback on plughw:1,0 sound card\n");	
 	if(sound_start_loopback_play(LOOPBACK_PLAY)){
 		sprintf(debug_text,"sound_thread_function: error opening loopback play device");
 		debug(debug_text,DEBUG_LEVEL_STDERR);
 		return NULL;
 	}
+
 	sound_thread_continue = 1;
 	sound_loop();
 	sound_stop();
@@ -1216,8 +1226,8 @@ void *loopback_thread_function(void *ptr){
 
 int sound_thread_start(char *device){
 
-    sprintf(debug_text,"sound_thread_start: starting %s", device);
-    debug(debug_text,1);
+  sprintf(debug_text,"sound_thread_start: starting %s", device);
+  debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	q_init(&qloop, 10240);
  	qloop.stall = 1;
