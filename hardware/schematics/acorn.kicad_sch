@@ -20,7 +20,24 @@
     )
     (instances
       (project "acorn"
-        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "3"))
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 36.83 111.76) (size 101.6 50.8) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 057625ab-6bc7-4ff1-9dfc-e3554939841a)
+    (property "Sheetname" "TX - TR" (at 36.83 111.0484 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "TX-TR.kicad_sch" (at 36.83 163.1446 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "4"))
       )
     )
   )
@@ -37,7 +54,7 @@
     )
     (instances
       (project "acorn"
-        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "2"))
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "3"))
       )
     )
   )

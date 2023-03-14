@@ -3772,7 +3772,7 @@
   (symbol (lib_id "power:GND") (at 196.85 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0345a81b-9692-4126-adaf-22b0db992b71)
-    (property "Reference" "#GND044" (at 196.85 168.91 0)
+    (property "Reference" "#GND030" (at 196.85 168.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 196.85 167.64 0)
@@ -3788,7 +3788,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND044") (unit 1)
+          (reference "#GND030") (unit 1)
         )
       )
     )
@@ -3797,7 +3797,7 @@
   (symbol (lib_id "Device:R_US") (at 209.55 158.75 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0454630e-da6a-43a2-8888-953791a8bb59)
-    (property "Reference" "R32" (at 213.36 157.48 0)
+    (property "Reference" "R14" (at 213.36 157.48 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "3.3K" (at 213.36 160.02 0)
@@ -3814,7 +3814,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R32") (unit 1)
+          (reference "R14") (unit 1)
         )
       )
     )
@@ -3823,7 +3823,7 @@
   (symbol (lib_id "power:GND") (at 209.55 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 05c1f8e9-1c03-462c-9c0c-dc4dfc7112c0)
-    (property "Reference" "#GND046" (at 209.55 168.91 0)
+    (property "Reference" "#GND032" (at 209.55 168.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 209.55 167.64 0)
@@ -3839,7 +3839,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND046") (unit 1)
+          (reference "#GND032") (unit 1)
         )
       )
     )
@@ -3848,7 +3848,7 @@
   (symbol (lib_id "power:GND") (at 21.59 54.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 079f33bd-2eb4-4f37-92a1-c240650b64d8)
-    (property "Reference" "#GND010" (at 21.59 60.96 0)
+    (property "Reference" "#GND01" (at 21.59 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 21.59 59.69 0)
@@ -3864,7 +3864,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND010") (unit 1)
+          (reference "#GND01") (unit 1)
         )
       )
     )
@@ -3873,7 +3873,7 @@
   (symbol (lib_id "power:GND") (at 165.1 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0afcebc7-7eb9-498f-8a5a-3bd2cc39b1d3)
-    (property "Reference" "#GND038" (at 165.1 153.67 0)
+    (property "Reference" "#GND024" (at 165.1 153.67 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 165.1 152.4 0)
@@ -3889,7 +3889,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND038") (unit 1)
+          (reference "#GND024") (unit 1)
         )
       )
     )
@@ -3898,7 +3898,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 191.77 144.78 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 0b8a380e-ce94-4336-a5ec-70fb4c5ce699)
-    (property "Reference" "C23" (at 191.77 140.97 90)
+    (property "Reference" "C11" (at 191.77 140.97 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 191.77 138.43 90)
@@ -3915,7 +3915,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C23") (unit 1)
+          (reference "C11") (unit 1)
         )
       )
     )
@@ -3924,7 +3924,7 @@
   (symbol (lib_id "Device:R_US") (at 212.09 104.14 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0c44d768-7bb8-48a6-b9a0-3c11e846127a)
-    (property "Reference" "R33" (at 214.63 102.8699 0)
+    (property "Reference" "R15" (at 214.63 102.8699 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 214.63 105.4099 0)
@@ -3941,7 +3941,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R33") (unit 1)
+          (reference "R15") (unit 1)
         )
       )
     )
@@ -3950,7 +3950,7 @@
   (symbol (lib_id "Device:C_Small") (at 248.92 128.27 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 11fa23c6-fd86-4d99-b12d-5dd9b5635f73)
-    (property "Reference" "C33" (at 242.57 128.27 0)
+    (property "Reference" "C21" (at 242.57 128.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 241.3 130.81 0)
@@ -3967,7 +3967,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C33") (unit 1)
+          (reference "C21") (unit 1)
         )
       )
     )
@@ -3976,7 +3976,7 @@
   (symbol (lib_id "power:GND") (at 130.81 176.53 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 134aace7-bab4-499f-8b2a-8be7010db724)
-    (property "Reference" "#GND026" (at 130.81 182.88 0)
+    (property "Reference" "#GND017" (at 130.81 182.88 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 130.81 181.61 0)
@@ -3992,7 +3992,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND026") (unit 1)
+          (reference "#GND017") (unit 1)
         )
       )
     )
@@ -4001,7 +4001,7 @@
   (symbol (lib_id "power:GND") (at 248.92 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 16e22bc9-fe04-47c8-92be-ec7b751c4ce9)
-    (property "Reference" "#GND055" (at 248.92 137.16 0)
+    (property "Reference" "#GND041" (at 248.92 137.16 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 248.92 135.89 0)
@@ -4017,7 +4017,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND055") (unit 1)
+          (reference "#GND041") (unit 1)
         )
       )
     )
@@ -4026,7 +4026,7 @@
   (symbol (lib_id "Device:C_Small") (at 266.7 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1830a45a-7b59-45d1-aa83-305af38d6f43)
-    (property "Reference" "C37" (at 261.62 142.24 0)
+    (property "Reference" "C25" (at 261.62 142.24 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 257.81 144.78 0)
@@ -4043,7 +4043,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C37") (unit 1)
+          (reference "C25") (unit 1)
         )
       )
     )
@@ -4052,7 +4052,7 @@
   (symbol (lib_id "power:GND") (at 170.18 36.83 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 18c4c608-10c3-435e-8636-d913ce784e63)
-    (property "Reference" "#GND039" (at 170.18 43.18 0)
+    (property "Reference" "#GND025" (at 170.18 43.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 170.18 41.91 0)
@@ -4068,7 +4068,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND039") (unit 1)
+          (reference "#GND025") (unit 1)
         )
       )
     )
@@ -4077,7 +4077,7 @@
   (symbol (lib_id "Device:R_US") (at 201.93 158.75 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 18eeeb61-8323-4aa2-b97f-27945ae549f6)
-    (property "Reference" "R30" (at 205.74 157.48 0)
+    (property "Reference" "R12" (at 205.74 157.48 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "100" (at 205.74 160.02 0)
@@ -4094,7 +4094,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R30") (unit 1)
+          (reference "R12") (unit 1)
         )
       )
     )
@@ -4128,7 +4128,7 @@
   (symbol (lib_id "Device:C_Small") (at 246.38 62.23 90) (mirror x) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 1b1b0a15-dc68-415b-9e0b-2077a8f52d69)
-    (property "Reference" "C32" (at 243.84 60.96 90)
+    (property "Reference" "C20" (at 243.84 60.96 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "20pF" (at 250.19 60.96 90)
@@ -4145,7 +4145,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C32") (unit 1)
+          (reference "C20") (unit 1)
         )
       )
     )
@@ -4154,7 +4154,7 @@
   (symbol (lib_id "power:GND") (at 261.62 129.54 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1dc916d8-280b-4179-8d36-7b4a4f9d76ce)
-    (property "Reference" "#GND059" (at 261.62 135.89 0)
+    (property "Reference" "#GND045" (at 261.62 135.89 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 261.62 134.62 0)
@@ -4170,7 +4170,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND059") (unit 1)
+          (reference "#GND045") (unit 1)
         )
       )
     )
@@ -4179,7 +4179,7 @@
   (symbol (lib_id "power:GND") (at 76.2 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1dcde0c9-bf25-492c-b7cf-5845768c60f7)
-    (property "Reference" "#GND018" (at 76.2 109.22 0)
+    (property "Reference" "#GND09" (at 76.2 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 76.2 107.95 0)
@@ -4195,7 +4195,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND018") (unit 1)
+          (reference "#GND09") (unit 1)
         )
       )
     )
@@ -4204,7 +4204,7 @@
   (symbol (lib_id "power:GND") (at 177.8 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1e1dbb1b-7f66-4f52-82c9-863ac2caaa2c)
-    (property "Reference" "#GND040" (at 177.8 137.16 0)
+    (property "Reference" "#GND026" (at 177.8 137.16 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 177.8 135.89 0)
@@ -4220,7 +4220,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND040") (unit 1)
+          (reference "#GND026") (unit 1)
         )
       )
     )
@@ -4229,7 +4229,7 @@
   (symbol (lib_id "power:+5V") (at 189.23 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1f63f591-7ac9-4b69-a72f-fb27ba19a64e)
-    (property "Reference" "#PWR013" (at 189.23 31.75 0)
+    (property "Reference" "#PWR08" (at 189.23 31.75 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 189.23 22.86 0)
@@ -4245,7 +4245,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR013") (unit 1)
+          (reference "#PWR08") (unit 1)
         )
       )
     )
@@ -4254,7 +4254,7 @@
   (symbol (lib_id "power:GND") (at 259.08 72.39 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2177dee6-8c1f-4bd4-9262-435270f5e2ad)
-    (property "Reference" "#GND057" (at 259.08 78.74 0)
+    (property "Reference" "#GND043" (at 259.08 78.74 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 259.08 77.47 0)
@@ -4270,7 +4270,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND057") (unit 1)
+          (reference "#GND043") (unit 1)
         )
       )
     )
@@ -4279,7 +4279,7 @@
   (symbol (lib_id "Device:C_Small") (at 39.37 123.19 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 28448a56-bdbf-4225-8709-cd2420b771d2)
-    (property "Reference" "C7" (at 41.91 121.92 0)
+    (property "Reference" "C2" (at 41.91 121.92 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1 uF" (at 41.91 124.46 0)
@@ -4296,7 +4296,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C7") (unit 1)
+          (reference "C2") (unit 1)
         )
       )
     )
@@ -4305,7 +4305,7 @@
   (symbol (lib_id "Transistor_BJT:PN2222A") (at 245.11 148.59 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 29242ba6-bb10-4666-b2a6-bfe14851d6a7)
-    (property "Reference" "Q7" (at 250.19 148.59 0)
+    (property "Reference" "Q5" (at 250.19 148.59 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PN2222A" (at 250.19 151.13 0)
@@ -4323,7 +4323,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Q7") (unit 1)
+          (reference "Q5") (unit 1)
         )
       )
     )
@@ -4332,7 +4332,7 @@
   (symbol (lib_id "Device:R_US") (at 17.78 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 2ce20ada-604e-4953-8118-1294ff156c94)
-    (property "Reference" "R15" (at 19.05 46.99 0)
+    (property "Reference" "R2" (at 19.05 46.99 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2K" (at 19.05 49.53 0)
@@ -4349,7 +4349,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R15") (unit 1)
+          (reference "R2") (unit 1)
         )
       )
     )
@@ -4358,7 +4358,7 @@
   (symbol (lib_id "Device:R_US") (at 186.69 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 320906ec-4ddb-4d43-a4af-43ae004b3043)
-    (property "Reference" "R28" (at 189.23 125.7299 0)
+    (property "Reference" "R10" (at 189.23 125.7299 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10K" (at 189.23 128.2699 0)
@@ -4375,7 +4375,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R28") (unit 1)
+          (reference "R10") (unit 1)
         )
       )
     )
@@ -4384,7 +4384,7 @@
   (symbol (lib_id "power:GND") (at 212.09 115.57 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 322c6fba-f390-49d5-9d91-037e888ee71d)
-    (property "Reference" "#GND047" (at 212.09 121.92 0)
+    (property "Reference" "#GND033" (at 212.09 121.92 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 212.09 120.65 0)
@@ -4400,7 +4400,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND047") (unit 1)
+          (reference "#GND033") (unit 1)
         )
       )
     )
@@ -4409,7 +4409,7 @@
   (symbol (lib_id "Device:R_US") (at 201.93 140.97 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 326abe76-8d7c-4979-b535-8a54c50f813c)
-    (property "Reference" "R29" (at 198.12 138.43 0)
+    (property "Reference" "R11" (at 198.12 138.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 198.12 140.97 0)
@@ -4426,7 +4426,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R29") (unit 1)
+          (reference "R11") (unit 1)
         )
       )
     )
@@ -4435,7 +4435,7 @@
   (symbol (lib_id "power:GND") (at 266.7 146.05 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 35c45ee7-373b-4fd1-b34c-73e89c954538)
-    (property "Reference" "#GND062" (at 266.7 152.4 0)
+    (property "Reference" "#GND048" (at 266.7 152.4 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 266.7 151.13 0)
@@ -4451,7 +4451,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND062") (unit 1)
+          (reference "#GND048") (unit 1)
         )
       )
     )
@@ -4460,7 +4460,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 172.72 121.92 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 37f08d41-c523-408f-a73d-eda08e6c1caf)
-    (property "Reference" "C21" (at 172.72 125.73 90)
+    (property "Reference" "C9" (at 172.72 125.73 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 172.72 128.27 90)
@@ -4477,7 +4477,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C21") (unit 1)
+          (reference "C9") (unit 1)
         )
       )
     )
@@ -4486,7 +4486,7 @@
   (symbol (lib_id "power:GND") (at 93.98 185.42 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 39326a3e-f59a-4804-a9cb-b89c77d421b9)
-    (property "Reference" "#GND025" (at 93.98 191.77 0)
+    (property "Reference" "#GND016" (at 93.98 191.77 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 93.98 190.5 0)
@@ -4502,7 +4502,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND025") (unit 1)
+          (reference "#GND016") (unit 1)
         )
       )
     )
@@ -4511,7 +4511,7 @@
   (symbol (lib_id "Transistor_BJT:PN2222A") (at 151.13 54.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3967d52e-854e-47e9-9ae8-50fbbf2821e3)
-    (property "Reference" "Q4" (at 156.21 53.3399 0)
+    (property "Reference" "Q2" (at 156.21 53.3399 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PN2222A" (at 156.21 55.8799 0)
@@ -4529,7 +4529,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Q4") (unit 1)
+          (reference "Q2") (unit 1)
         )
       )
     )
@@ -4538,7 +4538,7 @@
   (symbol (lib_id "Device:R_US") (at 125.73 53.34 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 3a261f2f-0f90-4112-8f4b-a58caab34272)
-    (property "Reference" "R23" (at 129.54 52.07 0)
+    (property "Reference" "R5" (at 129.54 52.07 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "10K" (at 129.54 54.61 0)
@@ -4555,7 +4555,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R23") (unit 1)
+          (reference "R5") (unit 1)
         )
       )
     )
@@ -4564,7 +4564,7 @@
   (symbol (lib_id "power:GND") (at 186.69 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3f967056-b41b-4268-b121-e7e02ef2eeb0)
-    (property "Reference" "#GND042" (at 186.69 137.16 0)
+    (property "Reference" "#GND028" (at 186.69 137.16 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 186.69 135.89 0)
@@ -4580,7 +4580,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND042") (unit 1)
+          (reference "#GND028") (unit 1)
         )
       )
     )
@@ -4589,7 +4589,7 @@
   (symbol (lib_id "power:+3.3V") (at 81.28 20.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 41edcf6d-d311-4af6-b06a-3131f59a4a39)
-    (property "Reference" "#PWR08" (at 81.28 24.13 0)
+    (property "Reference" "#PWR03" (at 81.28 24.13 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 81.28 15.24 0)
@@ -4605,7 +4605,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR08") (unit 1)
+          (reference "#PWR03") (unit 1)
         )
       )
     )
@@ -4614,7 +4614,7 @@
   (symbol (lib_id "power:GND") (at 158.75 147.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4225ea46-cbb3-4fe7-9116-a5af3928f79d)
-    (property "Reference" "#GND037" (at 158.75 153.67 0)
+    (property "Reference" "#GND023" (at 158.75 153.67 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 158.75 152.4 0)
@@ -4630,7 +4630,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND037") (unit 1)
+          (reference "#GND023") (unit 1)
         )
       )
     )
@@ -4639,7 +4639,7 @@
   (symbol (lib_id "Device:C_Small") (at 228.6 125.73 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 43d1c5de-1d6d-4e4c-b929-036148705ef2)
-    (property "Reference" "C28" (at 232.41 125.73 0)
+    (property "Reference" "C16" (at 232.41 125.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 231.14 128.27 0)
@@ -4656,7 +4656,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C28") (unit 1)
+          (reference "C16") (unit 1)
         )
       )
     )
@@ -4665,7 +4665,7 @@
   (symbol (lib_id "power:+5V") (at 25.4 119.38 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4b114550-ba89-4fd1-80ba-f44d8aa3788b)
-    (property "Reference" "#PWR06" (at 25.4 123.19 0)
+    (property "Reference" "#PWR01" (at 25.4 123.19 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 25.4 114.3 0)
@@ -4681,7 +4681,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR06") (unit 1)
+          (reference "#PWR01") (unit 1)
         )
       )
     )
@@ -4690,7 +4690,7 @@
   (symbol (lib_id "Device:R_US") (at 214.63 26.67 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 4e3704ef-e08e-4f0e-9e42-41f85f4ed9cb)
-    (property "Reference" "R34" (at 212.09 25.4 0)
+    (property "Reference" "R16" (at 212.09 25.4 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 212.09 27.94 0)
@@ -4707,7 +4707,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R34") (unit 1)
+          (reference "R16") (unit 1)
         )
       )
     )
@@ -4716,7 +4716,7 @@
   (symbol (lib_id "power:GND") (at 83.82 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4edf1b35-c341-4702-8623-85a142fbc701)
-    (property "Reference" "#GND022" (at 83.82 106.68 0)
+    (property "Reference" "#GND013" (at 83.82 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 83.82 105.41 0)
@@ -4732,7 +4732,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND022") (unit 1)
+          (reference "#GND013") (unit 1)
         )
       )
     )
@@ -4741,7 +4741,7 @@
   (symbol (lib_id "power:GND") (at 34.29 181.61 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 517df1b8-300c-47a6-964d-9aeead25e5b4)
-    (property "Reference" "#GND012" (at 34.29 187.96 0)
+    (property "Reference" "#GND03" (at 34.29 187.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 34.29 186.69 0)
@@ -4757,7 +4757,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND012") (unit 1)
+          (reference "#GND03") (unit 1)
         )
       )
     )
@@ -4766,7 +4766,7 @@
   (symbol (lib_id "Device:R_US") (at 177.8 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 574d1e9e-332d-4402-968b-0186d7284836)
-    (property "Reference" "R27" (at 179.07 125.73 0)
+    (property "Reference" "R9" (at 179.07 125.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10K" (at 179.07 128.27 0)
@@ -4783,7 +4783,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R27") (unit 1)
+          (reference "R9") (unit 1)
         )
       )
     )
@@ -4792,7 +4792,7 @@
   (symbol (lib_id "Connector:Raspberry_Pi_2_3") (at 78.74 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5759e360-8397-4939-9ab3-2d8493ee80fb)
-    (property "Reference" "J3" (at 77.47 48.26 0)
+    (property "Reference" "J2" (at 77.47 48.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "Raspberry_Pi_4" (at 71.12 49.53 0)
@@ -4847,7 +4847,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "J3") (unit 1)
+          (reference "J2") (unit 1)
         )
       )
     )
@@ -4856,7 +4856,7 @@
   (symbol (lib_id "Device:C_Small") (at 170.18 34.29 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 577c50ee-15ed-4233-a7df-45d3014d39da)
-    (property "Reference" "C19" (at 172.72 33.0262 0)
+    (property "Reference" "C7" (at 172.72 33.0262 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1 uF" (at 172.72 35.5662 0)
@@ -4873,7 +4873,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C19") (unit 1)
+          (reference "C7") (unit 1)
         )
       )
     )
@@ -4882,7 +4882,7 @@
   (symbol (lib_id "Device:R_US") (at 250.19 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 57b6d3a6-d632-4d50-b5c7-2893c996ee26)
-    (property "Reference" "R43" (at 251.46 26.67 0)
+    (property "Reference" "R25" (at 251.46 26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2K" (at 251.46 29.21 0)
@@ -4899,7 +4899,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R43") (unit 1)
+          (reference "R25") (unit 1)
         )
       )
     )
@@ -4908,7 +4908,7 @@
   (symbol (lib_id "power:GND") (at 214.63 133.35 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5b7c2882-392b-4322-b499-7cf4f44c3e99)
-    (property "Reference" "#GND048" (at 214.63 139.7 0)
+    (property "Reference" "#GND034" (at 214.63 139.7 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 214.63 138.43 0)
@@ -4924,7 +4924,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND048") (unit 1)
+          (reference "#GND034") (unit 1)
         )
       )
     )
@@ -4933,7 +4933,7 @@
   (symbol (lib_id "power:+5V") (at 128.27 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5c0367c2-0e08-4ced-959e-32eb2911315e)
-    (property "Reference" "#PWR09" (at 128.27 134.62 0)
+    (property "Reference" "#PWR06" (at 128.27 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 128.27 125.73 0)
@@ -4949,7 +4949,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR09") (unit 1)
+          (reference "#PWR06") (unit 1)
         )
       )
     )
@@ -4958,7 +4958,7 @@
   (symbol (lib_id "power:+5V") (at 147.32 41.91 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5ecfaba0-3fed-4589-8a3e-ba24705b100d)
-    (property "Reference" "#PWR012" (at 147.32 45.72 0)
+    (property "Reference" "#PWR07" (at 147.32 45.72 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 147.32 36.83 0)
@@ -4974,7 +4974,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR012") (unit 1)
+          (reference "#PWR07") (unit 1)
         )
       )
     )
@@ -4983,7 +4983,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 196.85 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5f051a43-e4ce-4a86-ae77-ccdbac468258)
-    (property "Reference" "C24" (at 191.77 158.75 0)
+    (property "Reference" "C12" (at 191.77 158.75 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 191.77 161.29 0)
@@ -5000,7 +5000,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C24") (unit 1)
+          (reference "C12") (unit 1)
         )
       )
     )
@@ -5009,7 +5009,7 @@
   (symbol (lib_id "Device:R_US") (at 243.84 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5f132b9b-b48e-4c60-8d9f-1bdb7d6c930f)
-    (property "Reference" "R41" (at 245.11 26.67 0)
+    (property "Reference" "R23" (at 245.11 26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2K" (at 245.11 29.21 0)
@@ -5026,7 +5026,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R41") (unit 1)
+          (reference "R23") (unit 1)
         )
       )
     )
@@ -5035,7 +5035,7 @@
   (symbol (lib_id "power:GND") (at 224.79 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f8c9cf9-56bc-4933-a684-8aee7a86236e)
-    (property "Reference" "#GND049" (at 224.79 165.1 0)
+    (property "Reference" "#GND035" (at 224.79 165.1 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 224.79 163.83 0)
@@ -5051,7 +5051,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND049") (unit 1)
+          (reference "#GND035") (unit 1)
         )
       )
     )
@@ -5060,7 +5060,7 @@
   (symbol (lib_id "power:GND") (at 73.66 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5f9812dc-9505-47a5-9bec-38bd1b41447a)
-    (property "Reference" "#GND017" (at 73.66 106.68 0)
+    (property "Reference" "#GND08" (at 73.66 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 73.66 105.41 0)
@@ -5076,7 +5076,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND017") (unit 1)
+          (reference "#GND08") (unit 1)
         )
       )
     )
@@ -5085,7 +5085,7 @@
   (symbol (lib_id "Connector:Conn_01x04_Pin") (at 138.43 119.38 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5fa21699-a732-47b3-9ef8-7c7a7c0be88b)
-    (property "Reference" "J5" (at 138.43 111.76 0)
+    (property "Reference" "J4" (at 138.43 111.76 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "Codec Audio Out" (at 138.43 114.3 0)
@@ -5104,7 +5104,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "J5") (unit 1)
+          (reference "J4") (unit 1)
         )
       )
     )
@@ -5113,7 +5113,7 @@
   (symbol (lib_id "Device:R_US") (at 243.84 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5fea2a81-997c-4f25-9474-11fa57e57216)
-    (property "Reference" "R42" (at 245.11 41.91 0)
+    (property "Reference" "R24" (at 245.11 41.91 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 245.11 44.45 0)
@@ -5130,7 +5130,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R42") (unit 1)
+          (reference "R24") (unit 1)
         )
       )
     )
@@ -5139,7 +5139,7 @@
   (symbol (lib_id "power:GND") (at 80.01 180.34 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 602220be-3e39-4898-a1f5-bafff44b16d8)
-    (property "Reference" "#GND020" (at 80.01 186.69 0)
+    (property "Reference" "#GND011" (at 80.01 186.69 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 80.01 185.42 0)
@@ -5155,7 +5155,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND020") (unit 1)
+          (reference "#GND011") (unit 1)
         )
       )
     )
@@ -5164,7 +5164,7 @@
   (symbol (lib_id "Device:D_Zener") (at 165.1 143.51 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6039d2aa-fc31-455f-9d15-8573574fc826)
-    (property "Reference" "D4" (at 166.37 143.51 90)
+    (property "Reference" "D2" (at 166.37 143.51 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "3.6V" (at 166.37 146.05 90)
@@ -5181,7 +5181,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "D4") (unit 1)
+          (reference "D2") (unit 1)
         )
       )
     )
@@ -5190,7 +5190,7 @@
   (symbol (lib_id "Device:R_US") (at 240.03 143.51 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6351a621-03c3-4770-a70f-0961932d08f5)
-    (property "Reference" "R39" (at 243.84 142.24 0)
+    (property "Reference" "R21" (at 243.84 142.24 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 243.84 144.78 0)
@@ -5207,7 +5207,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R39") (unit 1)
+          (reference "R21") (unit 1)
         )
       )
     )
@@ -5216,7 +5216,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 229.87 140.97 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 66bfc599-38fe-43d1-9785-aba8c4e79f56)
-    (property "Reference" "C29" (at 232.41 138.43 0)
+    (property "Reference" "C17" (at 232.41 138.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "10uF" (at 232.41 143.51 0)
@@ -5233,7 +5233,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C29") (unit 1)
+          (reference "C17") (unit 1)
         )
       )
     )
@@ -5242,7 +5242,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 165.1 116.84 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 681db772-69aa-4bb6-bc7e-178ce871a327)
-    (property "Reference" "C18" (at 165.1 110.49 90)
+    (property "Reference" "C6" (at 165.1 110.49 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 165.1 113.03 90)
@@ -5259,7 +5259,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C18") (unit 1)
+          (reference "C6") (unit 1)
         )
       )
     )
@@ -5268,7 +5268,7 @@
   (symbol (lib_id "Transistor_BJT:PN2222A") (at 138.43 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6a1c108a-5eea-4f1e-9f8a-9822b3afe9f7)
-    (property "Reference" "Q3" (at 143.51 58.4199 0)
+    (property "Reference" "Q1" (at 143.51 58.4199 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PN2222A" (at 143.51 60.9599 0)
@@ -5286,7 +5286,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Q3") (unit 1)
+          (reference "Q1") (unit 1)
         )
       )
     )
@@ -5295,7 +5295,7 @@
   (symbol (lib_id "Transistor_BJT:PN2222A") (at 204.47 149.86 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 6d1f6e2a-6cb2-4ac3-b4af-677d4a3157a0)
-    (property "Reference" "Q5" (at 199.39 149.86 0)
+    (property "Reference" "Q3" (at 199.39 149.86 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PN2222A" (at 199.39 152.4 0)
@@ -5313,7 +5313,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Q5") (unit 1)
+          (reference "Q3") (unit 1)
         )
       )
     )
@@ -5322,7 +5322,7 @@
   (symbol (lib_id "power:GND") (at 264.16 69.85 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6f160824-131b-4d93-9919-276d264b4e5c)
-    (property "Reference" "#GND060" (at 264.16 76.2 0)
+    (property "Reference" "#GND046" (at 264.16 76.2 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 264.16 74.93 0)
@@ -5338,7 +5338,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND060") (unit 1)
+          (reference "#GND046") (unit 1)
         )
       )
     )
@@ -5347,7 +5347,7 @@
   (symbol (lib_id "power:+5V") (at 224.79 115.57 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6f8b584c-6589-40f6-8c00-e8b5c53b7b41)
-    (property "Reference" "#PWR014" (at 224.79 119.38 0)
+    (property "Reference" "#PWR09" (at 224.79 119.38 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 224.79 110.49 0)
@@ -5363,7 +5363,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR014") (unit 1)
+          (reference "#PWR09") (unit 1)
         )
       )
     )
@@ -5372,7 +5372,7 @@
   (symbol (lib_id "Device:Crystal") (at 231.14 58.42 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7745bcb8-1cfb-46c6-a8de-4e04b38bf10b)
-    (property "Reference" "Y3" (at 234.95 57.1499 90)
+    (property "Reference" "Y1" (at 234.95 57.1499 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "16MHz" (at 234.95 59.6899 90)
@@ -5389,7 +5389,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Y3") (unit 1)
+          (reference "Y1") (unit 1)
         )
       )
     )
@@ -5398,7 +5398,7 @@
   (symbol (lib_id "power:GND") (at 201.93 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 77a56c8e-c075-4b27-8525-7c0aba4f9f02)
-    (property "Reference" "#GND045" (at 201.93 168.91 0)
+    (property "Reference" "#GND031" (at 201.93 168.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 201.93 167.64 0)
@@ -5414,7 +5414,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND045") (unit 1)
+          (reference "#GND031") (unit 1)
         )
       )
     )
@@ -5423,7 +5423,7 @@
   (symbol (lib_id "Device:C_Small") (at 264.16 80.01 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 7ae62878-ec84-4c63-b3b1-6536e2059dc1)
-    (property "Reference" "C36" (at 266.7 80.01 0)
+    (property "Reference" "C24" (at 266.7 80.01 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 265.43 82.55 0)
@@ -5440,7 +5440,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C36") (unit 1)
+          (reference "C24") (unit 1)
         )
       )
     )
@@ -5449,7 +5449,7 @@
   (symbol (lib_id "power:GND") (at 86.36 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7ddb77f4-63cd-4e6e-9ccf-821478d583c4)
-    (property "Reference" "#GND023" (at 86.36 109.22 0)
+    (property "Reference" "#GND014" (at 86.36 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 86.36 107.95 0)
@@ -5465,7 +5465,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND023") (unit 1)
+          (reference "#GND014") (unit 1)
         )
       )
     )
@@ -5474,7 +5474,7 @@
   (symbol (lib_id "Device:D_Zener") (at 158.75 143.51 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 80ba7aeb-c4d9-4866-8fc2-dd93960a005e)
-    (property "Reference" "D3" (at 154.94 143.51 90)
+    (property "Reference" "D1" (at 154.94 143.51 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "3.6V" (at 153.67 146.05 90)
@@ -5491,7 +5491,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "D3") (unit 1)
+          (reference "D1") (unit 1)
         )
       )
     )
@@ -5525,7 +5525,7 @@
   (symbol (lib_id "Device:R_US") (at 17.78 38.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 87ee5d43-d0d3-4cc2-a3a0-93a606bd18ea)
-    (property "Reference" "R14" (at 19.05 36.83 0)
+    (property "Reference" "R1" (at 19.05 36.83 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 19.05 39.37 0)
@@ -5542,7 +5542,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R14") (unit 1)
+          (reference "R1") (unit 1)
         )
       )
     )
@@ -5551,7 +5551,7 @@
   (symbol (lib_id "Device:R_US") (at 224.79 119.38 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8a11e4ef-d321-4d57-9883-10607f003ea0)
-    (property "Reference" "R36" (at 227.33 119.38 0)
+    (property "Reference" "R18" (at 227.33 119.38 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "100" (at 227.33 121.92 0)
@@ -5568,7 +5568,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R36") (unit 1)
+          (reference "R18") (unit 1)
         )
       )
     )
@@ -5577,7 +5577,7 @@
   (symbol (lib_id "power:GND") (at 68.58 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8a4f7629-7557-462f-9bba-eab274d50ade)
-    (property "Reference" "#GND015" (at 68.58 106.68 0)
+    (property "Reference" "#GND06" (at 68.58 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 68.58 105.41 0)
@@ -5593,7 +5593,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND015") (unit 1)
+          (reference "#GND06") (unit 1)
         )
       )
     )
@@ -5602,7 +5602,7 @@
   (symbol (lib_id "Device:D_Zener") (at 259.08 81.28 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8c0007bd-0d4d-4ce3-a6ab-386b99fe2dcc)
-    (property "Reference" "D7" (at 255.27 80.01 90)
+    (property "Reference" "D5" (at 255.27 80.01 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "5.2V" (at 254 83.82 90)
@@ -5619,7 +5619,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "D7") (unit 1)
+          (reference "D5") (unit 1)
         )
       )
     )
@@ -5628,7 +5628,7 @@
   (symbol (lib_id "Device:R_US") (at 224.79 143.51 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8ef08604-bd0a-44de-be9e-bf43f31d8512)
-    (property "Reference" "R38" (at 220.98 142.24 0)
+    (property "Reference" "R20" (at 220.98 142.24 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 220.98 144.78 0)
@@ -5645,7 +5645,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R38") (unit 1)
+          (reference "R20") (unit 1)
         )
       )
     )
@@ -5654,7 +5654,7 @@
   (symbol (lib_id "Device:C_Small") (at 238.76 21.59 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 8fb1a942-5ab1-4ff2-b8d9-0d0457bc3113)
-    (property "Reference" "C30" (at 232.41 20.32 0)
+    (property "Reference" "C18" (at 232.41 20.32 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 229.87 22.86 0)
@@ -5671,7 +5671,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C30") (unit 1)
+          (reference "C18") (unit 1)
         )
       )
     )
@@ -5680,7 +5680,7 @@
   (symbol (lib_id "Device:C_Small") (at 224.79 156.21 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9009b091-3b11-4749-b3fc-7f52d4c8ebc6)
-    (property "Reference" "C27" (at 231.14 156.21 0)
+    (property "Reference" "C15" (at 231.14 156.21 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "200pF" (at 232.41 158.75 0)
@@ -5697,7 +5697,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C27") (unit 1)
+          (reference "C15") (unit 1)
         )
       )
     )
@@ -5733,7 +5733,7 @@
   (symbol (lib_id "Device:R_US") (at 256.54 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 905d3587-bef3-4fc2-a311-58a8a61e55c8)
-    (property "Reference" "R45" (at 257.81 26.67 0)
+    (property "Reference" "R27" (at 257.81 26.67 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2K" (at 257.81 29.21 0)
@@ -5750,7 +5750,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R45") (unit 1)
+          (reference "R27") (unit 1)
         )
       )
     )
@@ -5759,7 +5759,7 @@
   (symbol (lib_id "power:GND") (at 228.6 128.27 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 91e00aa2-6478-4cd5-a16a-c3f9a19d5cb7)
-    (property "Reference" "#GND050" (at 228.6 134.62 0)
+    (property "Reference" "#GND036" (at 228.6 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 228.6 133.35 0)
@@ -5775,7 +5775,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND050") (unit 1)
+          (reference "#GND036") (unit 1)
         )
       )
     )
@@ -5784,7 +5784,7 @@
   (symbol (lib_id "power:+5V") (at 74.93 20.32 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 945c779d-dfa8-4afd-b034-ba714a906f6a)
-    (property "Reference" "#PWR07" (at 74.93 24.13 0)
+    (property "Reference" "#PWR02" (at 74.93 24.13 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+5V" (at 74.93 15.24 0)
@@ -5800,7 +5800,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR07") (unit 1)
+          (reference "#PWR02") (unit 1)
         )
       )
     )
@@ -5809,7 +5809,7 @@
   (symbol (lib_id "Device:C_Small") (at 264.16 67.31 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9548487b-185a-4831-80d6-927987d54402)
-    (property "Reference" "C35" (at 266.7 67.31 0)
+    (property "Reference" "C23" (at 266.7 67.31 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 265.43 69.85 0)
@@ -5826,7 +5826,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C35") (unit 1)
+          (reference "C23") (unit 1)
         )
       )
     )
@@ -5835,7 +5835,7 @@
   (symbol (lib_id "Connector_Generic:Conn_02x20_Odd_Even") (at 110.49 157.48 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 973313cc-854d-4322-84c8-f9cc41993fcc)
-    (property "Reference" "J4" (at 111.76 128.27 0)
+    (property "Reference" "J3" (at 111.76 128.27 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "Codec Hat Connector" (at 111.76 130.81 0)
@@ -5890,7 +5890,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "J4") (unit 1)
+          (reference "J3") (unit 1)
         )
       )
     )
@@ -5899,7 +5899,7 @@
   (symbol (lib_id "power:GND") (at 259.08 85.09 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9a444e2b-8676-44e0-958c-f379ffbf8bd3)
-    (property "Reference" "#GND058" (at 259.08 91.44 0)
+    (property "Reference" "#GND044" (at 259.08 91.44 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 259.08 90.17 0)
@@ -5915,7 +5915,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND058") (unit 1)
+          (reference "#GND044") (unit 1)
         )
       )
     )
@@ -5924,7 +5924,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 217.17 149.86 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 9cd986da-885c-4907-bf8b-9877d2ea6ca2)
-    (property "Reference" "C26" (at 217.17 153.67 90)
+    (property "Reference" "C14" (at 217.17 153.67 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 217.17 156.21 90)
@@ -5941,7 +5941,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C26") (unit 1)
+          (reference "C14") (unit 1)
         )
       )
     )
@@ -5950,7 +5950,7 @@
   (symbol (lib_id "power:GND") (at 66.04 30.48 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a0a8a180-1a0f-481f-8f43-5f9df26cf304)
-    (property "Reference" "#GND014" (at 66.04 36.83 0)
+    (property "Reference" "#GND05" (at 66.04 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 66.04 35.56 0)
@@ -5966,7 +5966,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND014") (unit 1)
+          (reference "#GND05") (unit 1)
         )
       )
     )
@@ -5975,7 +5975,7 @@
   (symbol (lib_id "power:GND") (at 264.16 82.55 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a1c90741-9284-47f4-9b62-cb6f52bfc536)
-    (property "Reference" "#GND061" (at 264.16 88.9 0)
+    (property "Reference" "#GND047" (at 264.16 88.9 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 264.16 87.63 0)
@@ -5991,7 +5991,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND061") (unit 1)
+          (reference "#GND047") (unit 1)
         )
       )
     )
@@ -6000,7 +6000,7 @@
   (symbol (lib_id "power:GND") (at 81.28 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a23601a4-ab5c-4c0f-9e98-150f138e94f4)
-    (property "Reference" "#GND021" (at 81.28 109.22 0)
+    (property "Reference" "#GND012" (at 81.28 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 81.28 107.95 0)
@@ -6016,7 +6016,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND021") (unit 1)
+          (reference "#GND012") (unit 1)
         )
       )
     )
@@ -6025,7 +6025,7 @@
   (symbol (lib_id "Device:D_Zener") (at 259.08 68.58 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a484bdc7-e3b7-4270-822c-8a225f261acf)
-    (property "Reference" "D6" (at 255.27 67.31 90)
+    (property "Reference" "D4" (at 255.27 67.31 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "5.2V" (at 254 71.12 90)
@@ -6042,7 +6042,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "D6") (unit 1)
+          (reference "D4") (unit 1)
         )
       )
     )
@@ -6051,7 +6051,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 173.99 139.7 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a5f01d4a-9572-492c-ad2e-5e0e9062fa3b)
-    (property "Reference" "C22" (at 173.99 143.51 90)
+    (property "Reference" "C10" (at 173.99 143.51 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 173.99 146.05 90)
@@ -6068,7 +6068,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C22") (unit 1)
+          (reference "C10") (unit 1)
         )
       )
     )
@@ -6077,7 +6077,7 @@
   (symbol (lib_id "power:GND") (at 140.97 64.77 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a6bbb391-99fb-4d7d-9a08-6b89092bb203)
-    (property "Reference" "#GND031" (at 140.97 71.12 0)
+    (property "Reference" "#GND018" (at 140.97 71.12 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 140.97 69.85 0)
@@ -6093,7 +6093,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND031") (unit 1)
+          (reference "#GND018") (unit 1)
         )
       )
     )
@@ -6102,7 +6102,7 @@
   (symbol (lib_id "Device:R_US") (at 224.79 133.35 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid a832aab1-4281-4a0e-8d92-27acea4ded0a)
-    (property "Reference" "R37" (at 228.6 133.35 0)
+    (property "Reference" "R19" (at 228.6 133.35 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 228.6 135.89 0)
@@ -6119,7 +6119,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R37") (unit 1)
+          (reference "R19") (unit 1)
         )
       )
     )
@@ -6128,7 +6128,7 @@
   (symbol (lib_id "Connector_Generic:Conn_02x20_Odd_Even") (at 50.8 157.48 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a8b0027d-8f13-4bc5-86a2-3971ef05129a)
-    (property "Reference" "J2" (at 52.07 129.54 0)
+    (property "Reference" "J1" (at 52.07 129.54 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "RF Board" (at 52.07 132.08 0)
@@ -6183,7 +6183,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "J2") (unit 1)
+          (reference "J1") (unit 1)
         )
       )
     )
@@ -6192,7 +6192,7 @@
   (symbol (lib_id "MCU_Microchip_ATmega:ATmega328-P") (at 196.85 69.85 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid afcc56c9-e2dc-4c41-99e5-329c48f15439)
-    (property "Reference" "U3" (at 198.12 45.72 0)
+    (property "Reference" "U1" (at 198.12 45.72 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "ATmega328-P" (at 203.2 48.26 0)
@@ -6235,7 +6235,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "U3") (unit 1)
+          (reference "U1") (unit 1)
         )
       )
     )
@@ -6244,7 +6244,7 @@
   (symbol (lib_id "power:GND") (at 153.67 59.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b27346f4-78e4-4b11-b553-acd38196ccb3)
-    (property "Reference" "#GND035" (at 153.67 66.04 0)
+    (property "Reference" "#GND022" (at 153.67 66.04 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 153.67 64.77 0)
@@ -6260,7 +6260,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND035") (unit 1)
+          (reference "#GND022") (unit 1)
         )
       )
     )
@@ -6269,7 +6269,7 @@
   (symbol (lib_id "Device:C_Small") (at 91.44 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b4c7acee-769d-409f-bce0-51a6bdee4a8a)
-    (property "Reference" "C9" (at 87.63 30.48 0)
+    (property "Reference" "C4" (at 87.63 30.48 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1 uF" (at 87.63 34.29 0)
@@ -6286,7 +6286,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C9") (unit 1)
+          (reference "C4") (unit 1)
         )
       )
     )
@@ -6295,7 +6295,7 @@
   (symbol (lib_id "Device:R_US") (at 153.67 45.72 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid b6abacb9-986e-4d18-9152-1190c7078a66)
-    (property "Reference" "R26" (at 154.94 44.45 0)
+    (property "Reference" "R8" (at 154.94 44.45 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10K" (at 154.94 46.99 0)
@@ -6312,7 +6312,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R26") (unit 1)
+          (reference "R8") (unit 1)
         )
       )
     )
@@ -6321,7 +6321,7 @@
   (symbol (lib_id "Device:LED") (at 212.09 110.49 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid bcb5a29d-cf06-43dd-b052-505817fcdf39)
-    (property "Reference" "D5" (at 207.01 111.76 90)
+    (property "Reference" "D3" (at 207.01 111.76 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Value" "AVR Status" (at 200.66 114.3 90)
@@ -6338,7 +6338,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "D5") (unit 1)
+          (reference "D3") (unit 1)
         )
       )
     )
@@ -6347,7 +6347,7 @@
   (symbol (lib_id "Device:C_Small") (at 246.38 54.61 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid be3af40b-e63b-40f2-b7e3-f1cdf4e4f7a1)
-    (property "Reference" "C31" (at 243.84 55.88 90)
+    (property "Reference" "C19" (at 243.84 55.88 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "20pF" (at 250.19 55.88 90)
@@ -6364,7 +6364,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C31") (unit 1)
+          (reference "C19") (unit 1)
         )
       )
     )
@@ -6373,7 +6373,7 @@
   (symbol (lib_id "Device:R_US") (at 140.97 48.26 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c2125551-a562-4477-b95b-376cbc5f452d)
-    (property "Reference" "R25" (at 135.89 46.99 0)
+    (property "Reference" "R7" (at 135.89 46.99 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "10K" (at 135.89 49.53 0)
@@ -6390,7 +6390,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R25") (unit 1)
+          (reference "R7") (unit 1)
         )
       )
     )
@@ -6399,7 +6399,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 170.18 134.62 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c2cada9d-8523-4e01-8dd2-f98cf1d11966)
-    (property "Reference" "C20" (at 166.37 129.54 90)
+    (property "Reference" "C8" (at 166.37 129.54 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "47uF" (at 166.37 132.08 90)
@@ -6416,7 +6416,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C20") (unit 1)
+          (reference "C8") (unit 1)
         )
       )
     )
@@ -6425,7 +6425,7 @@
   (symbol (lib_id "power:GND") (at 236.22 35.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c3ed2ee2-ffd2-4d45-a55c-c59a10c82709)
-    (property "Reference" "#GND052" (at 236.22 41.91 0)
+    (property "Reference" "#GND038" (at 236.22 41.91 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 236.22 40.64 0)
@@ -6441,7 +6441,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND052") (unit 1)
+          (reference "#GND038") (unit 1)
         )
       )
     )
@@ -6450,7 +6450,7 @@
   (symbol (lib_id "Device:R_US") (at 240.03 157.48 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid c70bfef7-ec9a-4b34-b246-580e223afbf9)
-    (property "Reference" "R40" (at 242.57 156.21 0)
+    (property "Reference" "R22" (at 242.57 156.21 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 242.57 158.75 0)
@@ -6467,7 +6467,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R40") (unit 1)
+          (reference "R22") (unit 1)
         )
       )
     )
@@ -6476,7 +6476,7 @@
   (symbol (lib_id "power:GND") (at 257.81 54.61 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c7c2a5fa-cc6e-4632-a486-53d9470d4433)
-    (property "Reference" "#GND056" (at 257.81 60.96 0)
+    (property "Reference" "#GND042" (at 257.81 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 257.81 59.69 0)
@@ -6492,7 +6492,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND056") (unit 1)
+          (reference "#GND042") (unit 1)
         )
       )
     )
@@ -6501,7 +6501,7 @@
   (symbol (lib_id "power:GND") (at 39.37 125.73 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c859106b-1a9f-41d2-85ab-39cae84cb34a)
-    (property "Reference" "#GND013" (at 39.37 132.08 0)
+    (property "Reference" "#GND04" (at 39.37 132.08 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 39.37 130.81 0)
@@ -6517,7 +6517,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND013") (unit 1)
+          (reference "#GND04") (unit 1)
         )
       )
     )
@@ -6526,7 +6526,7 @@
   (symbol (lib_id "power:+3.3V") (at 125.73 49.53 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c944a44e-0940-41d2-9028-d3d0dd19143d)
-    (property "Reference" "#PWR010" (at 125.73 53.34 0)
+    (property "Reference" "#PWR05" (at 125.73 53.34 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 125.73 44.45 0)
@@ -6542,7 +6542,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR010") (unit 1)
+          (reference "#PWR05") (unit 1)
         )
       )
     )
@@ -6551,7 +6551,7 @@
   (symbol (lib_id "power:GND") (at 240.03 161.29 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cda57283-5128-475c-ab6f-2a28505056b0)
-    (property "Reference" "#GND053" (at 240.03 167.64 0)
+    (property "Reference" "#GND039" (at 240.03 167.64 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 240.03 166.37 0)
@@ -6567,7 +6567,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND053") (unit 1)
+          (reference "#GND039") (unit 1)
         )
       )
     )
@@ -6576,7 +6576,7 @@
   (symbol (lib_id "power:GND") (at 247.65 153.67 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d0478664-8592-4bfb-b4cc-cab770186971)
-    (property "Reference" "#GND054" (at 247.65 160.02 0)
+    (property "Reference" "#GND040" (at 247.65 160.02 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 247.65 158.75 0)
@@ -6592,7 +6592,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND054") (unit 1)
+          (reference "#GND040") (unit 1)
         )
       )
     )
@@ -6601,7 +6601,7 @@
   (symbol (lib_id "Device:C_Small") (at 66.04 27.94 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d3c64383-f1db-4e54-bf58-61942c92edf0)
-    (property "Reference" "C8" (at 62.23 30.48 0)
+    (property "Reference" "C3" (at 62.23 30.48 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1 uF" (at 62.23 34.29 0)
@@ -6618,7 +6618,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C8") (unit 1)
+          (reference "C3") (unit 1)
         )
       )
     )
@@ -6627,7 +6627,7 @@
   (symbol (lib_id "power:GND") (at 71.12 102.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d505c19d-8d94-4588-acff-903d211c1e61)
-    (property "Reference" "#GND016" (at 71.12 109.22 0)
+    (property "Reference" "#GND07" (at 71.12 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 71.12 107.95 0)
@@ -6643,7 +6643,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND016") (unit 1)
+          (reference "#GND07") (unit 1)
         )
       )
     )
@@ -6652,7 +6652,7 @@
   (symbol (lib_id "Device:R_US") (at 24.13 38.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d515f431-fa75-44d9-a67d-85c68b44ac1d)
-    (property "Reference" "R16" (at 25.4 36.83 0)
+    (property "Reference" "R3" (at 25.4 36.83 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 25.4 39.37 0)
@@ -6669,7 +6669,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R16") (unit 1)
+          (reference "R3") (unit 1)
         )
       )
     )
@@ -6678,7 +6678,7 @@
   (symbol (lib_id "power:GND") (at 229.87 144.78 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d6a29184-97f1-4ee9-9fa1-2e1a307f30bf)
-    (property "Reference" "#GND051" (at 229.87 151.13 0)
+    (property "Reference" "#GND037" (at 229.87 151.13 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 229.87 149.86 0)
@@ -6694,7 +6694,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND051") (unit 1)
+          (reference "#GND037") (unit 1)
         )
       )
     )
@@ -6703,7 +6703,7 @@
   (symbol (lib_id "Device:R_US") (at 209.55 142.24 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid d954f991-b16d-4cb5-8075-c79cc6a3b478)
-    (property "Reference" "R31" (at 205.74 140.97 0)
+    (property "Reference" "R13" (at 205.74 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "10K" (at 205.74 143.51 0)
@@ -6720,7 +6720,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R31") (unit 1)
+          (reference "R13") (unit 1)
         )
       )
     )
@@ -6729,7 +6729,7 @@
   (symbol (lib_id "power:GND") (at 146.05 125.73 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid dbc7b8af-83a8-4b73-8472-af7f78777622)
-    (property "Reference" "#GND027" (at 146.05 132.08 0)
+    (property "Reference" "#GND019" (at 146.05 132.08 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 146.05 130.81 0)
@@ -6745,7 +6745,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND027") (unit 1)
+          (reference "#GND019") (unit 1)
         )
       )
     )
@@ -6754,7 +6754,7 @@
   (symbol (lib_id "Connector:Conn_01x04_Pin") (at 138.43 137.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid dbfc4689-d7d6-4ac3-9841-40bcb439f731)
-    (property "Reference" "J6" (at 138.43 129.54 0)
+    (property "Reference" "J5" (at 138.43 129.54 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "Codec Audio In" (at 138.43 132.08 0)
@@ -6773,7 +6773,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "J6") (unit 1)
+          (reference "J5") (unit 1)
         )
       )
     )
@@ -6782,7 +6782,7 @@
   (symbol (lib_id "Device:R_US") (at 24.13 50.8 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid dede234b-00e8-41e0-b7aa-99040d804249)
-    (property "Reference" "R17" (at 25.4 49.53 0)
+    (property "Reference" "R4" (at 25.4 49.53 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "2K" (at 25.4 52.07 0)
@@ -6799,7 +6799,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R17") (unit 1)
+          (reference "R4") (unit 1)
         )
       )
     )
@@ -6808,7 +6808,7 @@
   (symbol (lib_id "power:GND") (at 146.05 143.51 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e0e538e4-de0c-466b-bcd9-2b47dd0a9208)
-    (property "Reference" "#GND028" (at 146.05 149.86 0)
+    (property "Reference" "#GND020" (at 146.05 149.86 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 146.05 148.59 0)
@@ -6824,7 +6824,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND028") (unit 1)
+          (reference "#GND020") (unit 1)
         )
       )
     )
@@ -6833,7 +6833,7 @@
   (symbol (lib_id "Transistor_BJT:PN2222A") (at 222.25 22.86 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e3cfd8c0-bd11-4631-907d-71c811213fbc)
-    (property "Reference" "Q6" (at 218.44 17.78 0)
+    (property "Reference" "Q4" (at 218.44 17.78 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "PN2222A" (at 212.09 20.32 0)
@@ -6851,7 +6851,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "Q6") (unit 1)
+          (reference "Q4") (unit 1)
         )
       )
     )
@@ -6860,7 +6860,7 @@
   (symbol (lib_id "power:GND") (at 196.85 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e53de5bf-9b89-45d7-b074-0c7479dddada)
-    (property "Reference" "#GND043" (at 196.85 114.3 0)
+    (property "Reference" "#GND029" (at 196.85 114.3 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 196.85 113.03 0)
@@ -6876,7 +6876,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND043") (unit 1)
+          (reference "#GND029") (unit 1)
         )
       )
     )
@@ -6885,7 +6885,7 @@
   (symbol (lib_id "Device:R_US") (at 256.54 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e56b947a-96dc-4464-878d-bd4e3968484d)
-    (property "Reference" "R46" (at 257.81 41.91 0)
+    (property "Reference" "R28" (at 257.81 41.91 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 257.81 44.45 0)
@@ -6902,7 +6902,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R46") (unit 1)
+          (reference "R28") (unit 1)
         )
       )
     )
@@ -6911,7 +6911,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 25.4 124.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid e698f763-b21a-44b0-89e2-1410a09e0284)
-    (property "Reference" "C6" (at 20.32 123.19 0)
+    (property "Reference" "C1" (at 20.32 123.19 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "470uF" (at 20.32 128.27 0)
@@ -6928,7 +6928,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C6") (unit 1)
+          (reference "C1") (unit 1)
         )
       )
     )
@@ -6937,7 +6937,7 @@
   (symbol (lib_id "Device:C_Polarized_US") (at 214.63 129.54 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ecb33054-56d1-451f-94eb-e970872a0e9a)
-    (property "Reference" "C25" (at 217.17 127 0)
+    (property "Reference" "C13" (at 217.17 127 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "100uF" (at 218.44 133.35 0)
@@ -6954,7 +6954,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C25") (unit 1)
+          (reference "C13") (unit 1)
         )
       )
     )
@@ -6963,7 +6963,7 @@
   (symbol (lib_id "Device:R_US") (at 217.17 31.75 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid edf81191-4070-4b77-8617-569e2109334c)
-    (property "Reference" "R35" (at 220.98 30.48 0)
+    (property "Reference" "R17" (at 220.98 30.48 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "1K" (at 220.98 33.02 0)
@@ -6980,7 +6980,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R35") (unit 1)
+          (reference "R17") (unit 1)
         )
       )
     )
@@ -6989,7 +6989,7 @@
   (symbol (lib_id "Device:R_US") (at 250.19 43.18 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid ef736fc8-7ac3-4dea-b373-abeb5cd4d51a)
-    (property "Reference" "R44" (at 251.46 41.91 0)
+    (property "Reference" "R26" (at 251.46 41.91 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "1K" (at 251.46 44.45 0)
@@ -7006,7 +7006,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R44") (unit 1)
+          (reference "R26") (unit 1)
         )
       )
     )
@@ -7015,7 +7015,7 @@
   (symbol (lib_id "Device:C_Small") (at 147.32 44.45 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f43bf43c-2f07-431f-847c-2680afb87993)
-    (property "Reference" "C15" (at 143.51 46.99 0)
+    (property "Reference" "C5" (at 143.51 46.99 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1 uF" (at 143.51 50.8 0)
@@ -7032,7 +7032,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C15") (unit 1)
+          (reference "C5") (unit 1)
         )
       )
     )
@@ -7041,7 +7041,7 @@
   (symbol (lib_id "Device:R_US") (at 130.81 59.69 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid f683535c-c84a-4848-8d5f-98960c5a886f)
-    (property "Reference" "R24" (at 130.81 57.15 90)
+    (property "Reference" "R6" (at 130.81 57.15 90)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "10K" (at 130.81 62.23 90)
@@ -7058,7 +7058,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "R24") (unit 1)
+          (reference "R6") (unit 1)
         )
       )
     )
@@ -7067,7 +7067,7 @@
   (symbol (lib_id "power:GND") (at 147.32 46.99 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f6ca0db4-2fde-496b-b533-c5c80b18f352)
-    (property "Reference" "#GND033" (at 147.32 53.34 0)
+    (property "Reference" "#GND021" (at 147.32 53.34 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 147.32 52.07 0)
@@ -7083,7 +7083,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND033") (unit 1)
+          (reference "#GND021") (unit 1)
         )
       )
     )
@@ -7092,7 +7092,7 @@
   (symbol (lib_id "power:GND") (at 184.15 156.21 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f78e83d8-6a61-48f4-bf9f-5466fca5971e)
-    (property "Reference" "#GND041" (at 184.15 162.56 0)
+    (property "Reference" "#GND027" (at 184.15 162.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 184.15 161.29 0)
@@ -7108,7 +7108,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND041") (unit 1)
+          (reference "#GND027") (unit 1)
         )
       )
     )
@@ -7117,7 +7117,7 @@
   (symbol (lib_id "power:+3.3V") (at 96.52 130.81 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f8f1634a-1f4e-46c8-99da-f113b140f478)
-    (property "Reference" "#PWR011" (at 96.52 134.62 0)
+    (property "Reference" "#PWR04" (at 96.52 134.62 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3.3V" (at 96.52 125.73 0)
@@ -7133,7 +7133,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#PWR011") (unit 1)
+          (reference "#PWR04") (unit 1)
         )
       )
     )
@@ -7142,7 +7142,7 @@
   (symbol (lib_id "power:GND") (at 25.4 127 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f984057e-f062-4ecc-8fac-4f9c208fc0d2)
-    (property "Reference" "#GND011" (at 25.4 133.35 0)
+    (property "Reference" "#GND02" (at 25.4 133.35 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 25.4 132.08 0)
@@ -7158,7 +7158,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND011") (unit 1)
+          (reference "#GND02") (unit 1)
         )
       )
     )
@@ -7167,7 +7167,7 @@
   (symbol (lib_id "power:GND") (at 91.44 30.48 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fd862031-4b07-4f9f-93f5-a683fe31ac5c)
-    (property "Reference" "#GND024" (at 91.44 36.83 0)
+    (property "Reference" "#GND015" (at 91.44 36.83 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 91.44 35.56 0)
@@ -7183,7 +7183,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND024") (unit 1)
+          (reference "#GND015") (unit 1)
         )
       )
     )
@@ -7192,7 +7192,7 @@
   (symbol (lib_id "Device:C_Small") (at 261.62 127 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid fe1ca01f-778f-4e52-8085-632c6174125d)
-    (property "Reference" "C34" (at 255.27 128.27 0)
+    (property "Reference" "C22" (at 255.27 128.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.01uF" (at 252.73 130.81 0)
@@ -7209,7 +7209,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "C34") (unit 1)
+          (reference "C22") (unit 1)
         )
       )
     )
@@ -7218,7 +7218,7 @@
   (symbol (lib_id "power:GND") (at 78.74 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fe48cd04-1afe-46be-98e1-40be38dc18d8)
-    (property "Reference" "#GND019" (at 78.74 106.68 0)
+    (property "Reference" "#GND010" (at 78.74 106.68 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 78.74 105.41 0)
@@ -7234,7 +7234,7 @@
     (instances
       (project "acorn"
         (path "/bbe2252c-acad-49f6-93c3-633539ee972c/056cf3a3-22b8-47e1-9ce1-31ac043a0717"
-          (reference "#GND019") (unit 1)
+          (reference "#GND010") (unit 1)
         )
       )
     )
