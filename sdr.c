@@ -897,8 +897,8 @@ void set_tx_power_levels(){
 	}
 	//printf("tx_gain_compensation is set to %g for %d watts\n", tx_amp, tx_drive);
 	//we keep the audio card output 'volume' constant'
-	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, CONTROL_PLAYBACK_VOLUME_ALL, 95);
-	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, CONTROL_CAPTURE_VOLUME_ALL, tx_gain);
+	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_OUTPUT, CONTROL_PLAYBACK_VOLUME_ALL, 95);
+	sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_INPUT, CONTROL_CAPTURE_VOLUME_ALL, tx_gain);
 	sprintf(debug_text,"set_tx_power_levels: tx_drive: %dtx_amp:%d tx_gain:%d", tx_drive, tx_amp, tx_gain);
 	debug(debug_text,2);
 }
@@ -925,8 +925,8 @@ void tr_switch(int tx_on){
 
 		in_tx = 1;
 		//mute it all and hang on for a millisecond
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, CONTROL_PLAYBACK_VOLUME_ALL, 0);
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, CONTROL_CAPTURE_VOLUME_ALL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_OUTPUT, CONTROL_PLAYBACK_VOLUME_ALL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_INPUT, CONTROL_CAPTURE_VOLUME_ALL, 0);
 		delay(1);
 
 		//now switch of the signal back
@@ -945,8 +945,8 @@ void tr_switch(int tx_on){
 
 		in_tx = 0;
 		//mute it all and hang on
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, CONTROL_PLAYBACK_VOLUME_ALL, 0);
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, CONTROL_CAPTURE_VOLUME_ALL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_OUTPUT, CONTROL_PLAYBACK_VOLUME_ALL, 0);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_INPUT, CONTROL_CAPTURE_VOLUME_ALL, 0);
 		delay(1);
     fft_reset_m_bins();
 		mute_count = MUTE_MAX;
@@ -959,8 +959,8 @@ void tr_switch(int tx_on){
 		delay(5); 
 
 		//audio codec is back on
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL, CONTROL_PLAYBACK_VOLUME_ALL, rx_vol);
-		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, CONTROL_CAPTURE_VOLUME_ALL, rx_gain);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_OUTPUT, CONTROL_PLAYBACK_VOLUME_ALL, rx_vol);
+		sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_INPUT, CONTROL_CAPTURE_VOLUME_ALL, rx_gain);
 		spectrum_reset();
 		//rx_tx_ramp = 10;
 
@@ -1266,13 +1266,13 @@ int sdr_request(char *request, char *response){
 	else if(!strcmp(command, "r1:gain")){
 		rx_gain = atoi(command_argument);
 		if(!in_tx){
-			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_GAIN, CONTROL_CAPTURE_VOLUME_ALL, rx_gain);
+			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_INPUT, CONTROL_CAPTURE_VOLUME_ALL, rx_gain);
 		}
 	}
 	else if (!strcmp(command, "r1:volume")){
 		rx_vol = atoi(command_argument);
 		if(!in_tx){	
-			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_RX_VOL,CONTROL_PLAYBACK_VOLUME_ALL, rx_vol);
+			sound_mixer(AUDIO_CARD_NAME, AUDIO_CARD_ELEMENT_OUTPUT,CONTROL_PLAYBACK_VOLUME_ALL, rx_vol);
 		}
 	}
 	else if(!strcmp(command, "r1:high")){

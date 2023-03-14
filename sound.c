@@ -284,7 +284,7 @@ void setup_audio_codec(char *audio_card){
   	sound_mixer(audio_card, "Playback Deemphasis",CONTROL_DEFAULT, 0);
 
     debug("setup_audio_codec: Master",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);   
-  	sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL,CONTROL_DEFAULT, 10);
+  	sound_mixer(audio_card, AUDIO_CARD_ELEMENT_OUTPUT,CONTROL_DEFAULT, 10);
 
     debug("setup_audio_codec: Output Mixer HiFi",DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
   	sound_mixer(audio_card, "Output Mixer HiFi",CONTROL_DEFAULT, 1);
@@ -297,14 +297,14 @@ void setup_audio_codec(char *audio_card){
   #if defined(CODEC_IQAUDIO_CODEC_ZERO)	
  
 
-    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_RX_GAIN);
+    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_INPUT);
     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);
-		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_GAIN,CONTROL_CAPTURE_VOLUME_ALL, 0);    
+		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_INPUT,CONTROL_CAPTURE_VOLUME_ALL, 0);    
 
 
-    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_RX_VOL);
+    sprintf(debug_text,"setup_audio_codec: %s",AUDIO_CARD_ELEMENT_OUTPUT);
     debug(debug_text,DEBUG_LEVEL_BASIC_INFORMATIVE);  
-		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_RX_VOL,CONTROL_PLAYBACK_VOLUME_ALL, 10);
+		sound_mixer(audio_card, AUDIO_CARD_ELEMENT_OUTPUT,CONTROL_PLAYBACK_VOLUME_ALL, 10);
 
 
   #endif //CODEC_IQAUDIO_CODEC_ZERO
@@ -464,7 +464,7 @@ int sound_start_play(char *device){
   We have to pass the id of one of those devices to this function.
   The sequence of the alsa functions must be maintained for this to work consistently
 
-  It returns a -1 if the device didn't open. The error message is on stderr.
+
 
   IMPORTANT:
   The sound is playback is carried on in a non-blocking way  
@@ -511,13 +511,13 @@ int sound_start_play(char *device){
 	/* by the hardware, use nearest possible rate.         */ 
 	exact_rate = rate;
 	e = snd_pcm_hw_params_set_rate_near(pcm_play_handle, hwparams, &exact_rate, 0);
-	if ( e< 0) {
+	if (e < 0) {
 		debug("sound_start_play: error setting playback rate",DEBUG_LEVEL_STDERR);
 		return RETURN_ERROR;
 	}
 	if (rate != exact_rate){
 		sprintf(debug_text,"sound_start_play: the playback rate %d changed to %d Hz", rate, exact_rate);
-		debug(debug_text,DEBUG_LEVEL_STDERR);
+		debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	}
 	else {
 		sprintf(debug_text,"sound_start_play: playback sampling rate is set to %d", exact_rate);
@@ -613,7 +613,7 @@ int sound_start_loopback_capture(char *device){
 
 	if (48000 != exact_rate){
 		sprintf(debug_text,"sound_start_loopback_capture: the loopback capture rate set to %d Hz", exact_rate);
-	  debug(debug_text,DEBUG_LEVEL_STDERR);
+	  debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	}
 
 	/* Set number of channels */
@@ -623,7 +623,7 @@ int sound_start_loopback_capture(char *device){
 	}
 
 	sprintf(debug_text,"sound_start_loopback_capture: %d: set the number of loopback capture channels ", __LINE__);
-	debug(debug_text,2);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	/* Set number of periods. Periods used to be called fragments. */ 
 	if ((e = snd_pcm_hw_params_set_periods(loopback_capture_handle, hloop_params, n_periods_per_buffer, 0)) < 0) {
@@ -636,12 +636,12 @@ int sound_start_loopback_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(loopback_capture_handle, hloop_params, &n_frames);
 	if (e < 0) {
-		    debug("sound_start_loopback_capture: error setting loopback capture buffersize",DEBUG_LEVEL_STDERR);
-		    return RETURN_ERROR;
+    debug("sound_start_loopback_capture: error setting loopback capture buffersize",DEBUG_LEVEL_STDERR);
+    return RETURN_ERROR;
 	}
 
 	sprintf(debug_text,"sound_start_loopback_capture: %d: set buffer to %d", __LINE__, n_frames);
-	debug(debug_text,2);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	if (snd_pcm_hw_params(loopback_capture_handle, hloop_params) < 0) {
 		debug("sound_start_loopback_capture: error setting capture HW params",DEBUG_LEVEL_STDERR);
@@ -649,14 +649,14 @@ int sound_start_loopback_capture(char *device){
 	}
 
 	sprintf(debug_text,"sound_start_loopback_capture: %d: set hwparams", __LINE__);
-	debug(debug_text,2);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	/* set some parameters in the driver to handle the latencies */
 	snd_pcm_sw_params_malloc(&sloop_params);
 	if((e = snd_pcm_sw_params_current(loopback_capture_handle, sloop_params)) < 0){
 		sprintf(debug_text,"sound_start_loopback_capture: error getting current loopback capture sw params : %s", snd_strerror(e));
 		debug(debug_text,DEBUG_LEVEL_STDERR);
-		return (-1);
+		return RETURN_ERROR;
 	}
 	
 	if ((e = snd_pcm_sw_params_set_start_threshold(loopback_capture_handle, sloop_params, 15)) < 0){
@@ -664,9 +664,9 @@ int sound_start_loopback_capture(char *device){
 	} 
 	
 	if ((e = snd_pcm_sw_params_set_stop_threshold(loopback_capture_handle, sloop_params, 1)) < 0){
-
 		debug("sound_start_loopback_capture: unable to set stop threshold for loopback  capture",DEBUG_LEVEL_STDERR);
 	}
+
 	return RETURN_NO_ERROR;
 }
 
@@ -732,7 +732,7 @@ int sound_start_capture(char *device){
 
 	if (rate != exact_rate){
 		sprintf(debug_text,"sound_start_capture: the capture rate %d changed to %d Hz", rate, exact_rate);
-	  debug(debug_text,DEBUG_LEVEL_STDERR);
+	  debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 	}
 
 
@@ -755,8 +755,8 @@ int sound_start_capture(char *device){
 	//printf("trying for buffer size of %ld\n", n_frames);
 	e = snd_pcm_hw_params_set_buffer_size_near(pcm_play_handle, hwparams, &n_frames);
 	if (e < 0) {
-		    debug("sound_start_capture: error setting capture buffersize",DEBUG_LEVEL_STDERR);
-		    return RETURN_ERROR;
+    debug("sound_start_capture: error setting capture buffersize",DEBUG_LEVEL_STDERR);
+    return RETURN_ERROR;
 	}
 
 	if (snd_pcm_hw_params(pcm_capture_handle, hwparams) < 0) {
@@ -856,7 +856,7 @@ int sound_start_loopback_play(char *device){
 	}
 
 	sprintf(debug_text,"sound_start_loopback_play: loopback playback buffer size is set to %d", n_frames);
-	debug(debug_text,2);
+	debug(debug_text,DEBUG_LEVEL_BASIC_LESS_INFORMATIVE);
 
 	if (snd_pcm_hw_params(loopback_play_handle, hwparams) < 0) {
 		sprintf(debug_text,"sound_start_loopback_play: error setting loopback playback HW params");
@@ -1075,7 +1075,7 @@ int sound_loop(){
 	      }
 				// Handle an error condition from the snd_pcm_writei function
 				snd_pcm_prepare(loopback_play_handle);
-				// zzzzzzzzzzzzzzz
+
 			}
 			
 			if(pcmreturn >= 0){
@@ -1116,6 +1116,7 @@ int loopback_loop(){
   snd_pcm_prepare(loopback_capture_handle);
 
   debug("loopback_loop: entering while(sound_thread_continue)",DEBUG_LEVEL_CRAZY_VERBOSE);
+  
   while(sound_thread_continue && !shutdown_flag) {
 
 		//restart the pcm capture if there is an error reading the samples
@@ -1162,13 +1163,6 @@ int loopback_loop(){
 void *sound_thread_function(void *ptr){
 
 
-  /*
-
-  We process the sound in a background thread.
-  It will call the user-supplied function sound_process() 
-
-  */
-
 	char *device = (char *)ptr;
 	struct sched_param sch;
 
@@ -1203,6 +1197,7 @@ void *sound_thread_function(void *ptr){
 
 
 void *loopback_thread_function(void *ptr){
+
 	struct sched_param sch;
 
 	//switch to maximum priority
@@ -1231,9 +1226,9 @@ int sound_thread_start(char *device){
 
 	q_init(&qloop, 10240);
  	qloop.stall = 1;
-	pthread_create( &sound_thread, NULL, sound_thread_function, (void*)device);
+	pthread_create(&sound_thread, NULL, sound_thread_function, (void*)device);
 	sleep(1);
-	pthread_create( &loopback_thread, NULL, loopback_thread_function, (void*)device);
+	pthread_create(&loopback_thread, NULL, loopback_thread_function, (void*)device);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1248,12 +1243,13 @@ void sound_thread_stop(){
 
 
 void sound_input(int loop){
+
   if (loop){
     use_virtual_cable = 1;
-	}
-  else{
+	} else {
     use_virtual_cable = 0;
 	}
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1265,7 +1261,7 @@ void sound_input(int loop){
 
 	void sound_process(int32_t *input_i, int32_t *input_q, int32_t *output_i, int32_t *output_q, int n_samples){
 	 
-		for (int i= 0; i < n_samples; i++){
+		for (int i = 0; i < n_samples; i++){
 			output_i[i] = input_i[i];
 			output_q[i] = input_q[i];
 		}	

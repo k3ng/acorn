@@ -88,15 +88,15 @@ for the transmission. The data required is the same!
 #if defined(CODEC_WM8731)
 	#define SOUND_THREAD_START_DEVICE "plughw:0,0"
 	#define AUDIO_CARD_NAME "hw:0"
-	#define AUDIO_CARD_ELEMENT_RX_VOL "Master"
-	#define AUDIO_CARD_ELEMENT_RX_GAIN "Capture"
+	#define AUDIO_CARD_ELEMENT_OUTPUT "Master"
+	#define AUDIO_CARD_ELEMENT_INPUT "Capture"
 #endif
 
 #if defined(CODEC_IQAUDIO_CODEC_ZERO)
   #define SOUND_THREAD_START_DEVICE "sysdefault"
   #define AUDIO_CARD_NAME "sysdefault"
-  #define AUDIO_CARD_ELEMENT_RX_VOL "Headphone"
-  #define AUDIO_CARD_ELEMENT_RX_GAIN "Aux"	
+  #define AUDIO_CARD_ELEMENT_OUTPUT "Headphone"
+  #define AUDIO_CARD_ELEMENT_INPUT "Aux"	
 #endif 
 
 #define MAX_BINS 2048
