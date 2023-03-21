@@ -1,0 +1,60 @@
+#!/bin/bash
+F=$@
+WORKING_DIRECTORY=`pwd`
+NOW=`date +"%Y.%m.%d.%H%M"`
+
+# if you are doing development, put your callsign or name with no spaces in developer.txt
+
+if [ -e ./developer.txt ]; then
+  DEVELOPER=`cat ./developer.txt`
+  echo "#define VERSION_STRING \"$NOW.$DEVELOPER\"" > version.h
+fi
+
+VERSION=`grep VERSION_STRING version.h|awk 'FNR==1{print $3}'|sed -e 's/"//g'`
+
+if [ -e ./release_notes.txt ]; then
+  echo -e "\r\n\r\n"
+	cat ./release_notes.txt
+fi
+
+if [ "$F" = "acorn-server" ]; then
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
+fi
+
+
+if [ "$F" = "acorn-gtk-client" ]; then
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+fi
+
+
+if [ "$F" = "test" ]; then
+  echo "test compiling serial"
+  gcc -g -o serial debug.c serial.c -pthread
+  echo "test compiling avr"
+  gcc -D COMPILING_AVR -g -o avr serial.c debug.c avr.c -pthread  
+  echo "test compiling sound"
+  gcc -g -o sound debug.c sound.c -lasound -pthread
+  echo "test compiling tcpclient"
+  gcc -g -o tcpclient debug.c tcpclient.c -pthread
+  echo "test compiling tcpserver"
+  gcc -g -o tcpserver debug.c tcpserver.c -pthread
+  echo "test compiling vfo"
+  gcc -g -o vfo vfo.c -lm
+
+  F=""
+fi
+
+
+if [[ $F = "" ]]; then
+  F="acorn-server"
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c avr.c serial.c sound.c fft_filter.c vfo.c sdr.c modems.c tcpserver.c $F.c -lwiringPi -lasound -lm -lfftw3 -lfftw3f -pthread 
+
+  F="acorn-gtk-client"
+  echo "compiling $F version $VERSION in $WORKING_DIRECTORY"
+  gcc -D COMPILING_EVERYTHING -g -o $F debug.c k3ng.c ini.c tcpclient.c $F.c -lm -lwiringPi -lfftw3 -lfftw3f -pthread -lncurses `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0`
+fi
+
+
