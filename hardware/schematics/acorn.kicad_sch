@@ -1,0 +1,116 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid bbe2252c-acad-49f6-93c3-633539ee972c)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 147.32 80.01) (size 27.94 15.24) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 056cf3a3-22b8-47e1-9ce1-31ac043a0717)
+    (property "Sheetname" "Control" (at 147.32 79.2984 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "acorn_control.kicad_sch" (at 147.32 95.8346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "2"))
+      )
+    )
+  )
+
+  (sheet (at 92.71 111.76) (size 44.45 20.32) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 057625ab-6bc7-4ff1-9dfc-e3554939841a)
+    (property "Sheetname" "TX - TR" (at 92.71 111.0484 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "TX-TR.kicad_sch" (at 92.71 132.6646 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 64.77 63.5) (size 33.02 15.24) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 095c2b62-20ab-4d0b-8102-266f8032709d)
+    (property "Sheetname" "Modulator - Demodulator" (at 64.77 62.7884 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "acorn_modulator_demodulator.kicad_sch" (at 64.77 79.3246 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "7"))
+      )
+    )
+  )
+
+  (sheet (at 167.64 115.57) (size 39.37 25.4) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 5487907c-c57d-4076-b4db-ca49caaf8a32)
+    (property "Sheetname" "Archive" (at 167.64 114.8584 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "archive.kicad_sch" (at 167.64 141.5546 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "5"))
+      )
+    )
+  )
+
+  (sheet (at 111.76 80.01) (size 27.94 15.24) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 78277956-4a69-4b01-987d-586dff1d5ed7)
+    (property "Sheetname" "RF" (at 111.76 79.2984 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "acorn_rf.kicad_sch" (at 111.76 95.8346 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "3"))
+      )
+    )
+  )
+
+  (sheet (at 210.82 81.28) (size 31.75 19.05) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 798c8148-c1fd-49d3-9df8-0eb6afd8e326)
+    (property "Sheetname" "Oscillator" (at 210.82 80.5684 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "acorn_oscillator.kicad_sch" (at 210.82 100.9146 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "acorn"
+        (path "/bbe2252c-acad-49f6-93c3-633539ee972c" (page "6"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
